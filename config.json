@@ -2,6 +2,7 @@
   "_commentaire": "Fichier de configuration du tournoi — à éditer et pousser sur GitHub pour mettre à jour le site",
 
   "tournoi": {
+    "admin_password": "PePeJ1Ns51",
     "nom": "Coupe du Monde FIFA 2026",
     "debut": "2026-06-11",
     "finale": "2026-07-19",
@@ -152,100 +153,100 @@
     "_commentaire": "6 matchs par groupe. Journée 3 = matchs simultanés (même journee_id). Remplis les dates depuis le calendrier officiel FIFA.",
     "_format_match": { "id": "X_Y", "dom": "CODE", "ext": "CODE", "date": "ISO8601", "journee": "X_J1|X_J2|X_J3" },
     "A": [
-      { "id": "A_1", "dom": "MEX", "ext": "RSA", "date": "2026-06-11T22:00:00-06:00", "journee": "A_J1" },
-      { "id": "A_2", "dom": "KOR", "ext": "CZE", "date": "2026-06-12T19:00:00-06:00", "journee": "A_J1" },
-      { "id": "A_3", "dom": "MEX", "ext": "KOR", "date": null, "journee": "A_J2" },
-      { "id": "A_4", "dom": "RSA", "ext": "CZE", "date": null, "journee": "A_J2" },
-      { "id": "A_5", "dom": "MEX", "ext": "CZE", "date": null, "journee": "A_J3" },
-      { "id": "A_6", "dom": "RSA", "ext": "KOR", "date": null, "journee": "A_J3" }
+      { "id": "A_1", "dom": "MEX", "ext": "RSA", "date": "2026-06-11T15:00:00-00:00", "journee": "A_J1" },
+      { "id": "A_2", "dom": "KOR", "ext": "CZE", "date": "2026-06-12T22:00:00-00:00", "journee": "A_J1" },
+      { "id": "A_3", "dom": "MEX", "ext": "KOR", "date": "2026-06-18T21:00:00-06:00", "journee": "A_J2" },
+      { "id": "A_4", "dom": "RSA", "ext": "CZE", "date": "2026-06-18T12:00:00-04:00", "journee": "A_J2" },
+      { "id": "A_5", "dom": "MEX", "ext": "CZE", "date": "2026-06-24T21:00:00-06:00", "journee": "A_J3" },
+      { "id": "A_6", "dom": "RSA", "ext": "KOR", "date": "2026-06-24T21:00:00-06:00", "journee": "A_J3" }
     ],
     "B": [
-      { "id": "B_1", "dom": "CAN", "ext": "BIH", "date": null, "journee": "B_J1" },
-      { "id": "B_2", "dom": "QAT", "ext": "SUI", "date": null, "journee": "B_J1" },
-      { "id": "B_3", "dom": "CAN", "ext": "QAT", "date": null, "journee": "B_J2" },
-      { "id": "B_4", "dom": "BIH", "ext": "SUI", "date": null, "journee": "B_J2" },
-      { "id": "B_5", "dom": "CAN", "ext": "SUI", "date": null, "journee": "B_J3" },
-      { "id": "B_6", "dom": "BIH", "ext": "QAT", "date": null, "journee": "B_J3" }
+      { "id": "B_1", "dom": "CAN", "ext": "BIH", "date": "2026-06-12T15:00:00-04:00", "journee": "B_J1" },
+      { "id": "B_2", "dom": "QAT", "ext": "SUI", "date": "2026-06-13T15:00:00-07:00", "journee": "B_J1" },
+      { "id": "B_3", "dom": "CAN", "ext": "QAT", "date": "2026-06-18T18:00:00-07:00", "journee": "B_J2" },
+      { "id": "B_4", "dom": "BIH", "ext": "SUI", "date": "2026-06-18T15:00:00-07:00", "journee": "B_J2" },
+      { "id": "B_5", "dom": "CAN", "ext": "SUI", "date": "2026-06-24T15:00:00T07:00", "journee": "B_J3" },
+      { "id": "B_6", "dom": "BIH", "ext": "QAT", "date": "2026-06-24T15:00:00-07:00", "journee": "B_J3" }
     ],
     "C": [
-      { "id": "C_1", "dom": "BRA", "ext": "MAR", "date": null, "journee": "C_J1" },
-      { "id": "C_2", "dom": "HAI", "ext": "SCO", "date": null, "journee": "C_J1" },
-      { "id": "C_3", "dom": "BRA", "ext": "HAI", "date": null, "journee": "C_J2" },
-      { "id": "C_4", "dom": "MAR", "ext": "SCO", "date": null, "journee": "C_J2" },
-      { "id": "C_5", "dom": "BRA", "ext": "SCO", "date": null, "journee": "C_J3" },
-      { "id": "C_6", "dom": "MAR", "ext": "HAI", "date": null, "journee": "C_J3" }
+      { "id": "C_1", "dom": "BRA", "ext": "MAR", "date": "2026-06-13T18:00:00-04:00", "journee": "C_J1" },
+      { "id": "C_2", "dom": "HAI", "ext": "SCO", "date": "2026-06-13T21:00:00-04:00", "journee": "C_J1" },
+      { "id": "C_3", "dom": "BRA", "ext": "HAI", "date": "2026-06-19T20:30:00-04:00 ", "journee": "C_J2" },
+      { "id": "C_4", "dom": "MAR", "ext": "SCO", "date": "2026-06-19T18:00:00-04:00", "journee": "C_J2" },
+      { "id": "C_5", "dom": "BRA", "ext": "SCO", "date": "2026-06-24T18:00:00-04:00", "journee": "C_J3" },
+      { "id": "C_6", "dom": "MAR", "ext": "HAI", "date": "2026-06-24T18:00:00-04:00", "journee": "C_J3" }
     ],
     "D": [
-      { "id": "D_1", "dom": "USA", "ext": "PAR", "date": null, "journee": "D_J1" },
-      { "id": "D_2", "dom": "AUS", "ext": "TUR", "date": null, "journee": "D_J1" },
-      { "id": "D_3", "dom": "USA", "ext": "AUS", "date": null, "journee": "D_J2" },
-      { "id": "D_4", "dom": "PAR", "ext": "TUR", "date": null, "journee": "D_J2" },
-      { "id": "D_5", "dom": "USA", "ext": "TUR", "date": null, "journee": "D_J3" },
-      { "id": "D_6", "dom": "PAR", "ext": "AUS", "date": null, "journee": "D_J3" }
+      { "id": "D_1", "dom": "USA", "ext": "PAR", "date": "2026-06-12T21:00:00-07:00", "journee": "D_J1" },
+      { "id": "D_2", "dom": "AUS", "ext": "TUR", "date": "2026-06-13T00:00:00-07:00", "journee": "D_J1" },
+      { "id": "D_3", "dom": "USA", "ext": "AUS", "date": "2026-06-19T15:00:00-07:00", "journee": "D_J2" },
+      { "id": "D_4", "dom": "PAR", "ext": "TUR", "date": "2026-06-19T23:00:00-07:00", "journee": "D_J2" },
+      { "id": "D_5", "dom": "USA", "ext": "TUR", "date": "2026-06-25T22:00:00-07:00", "journee": "D_J3" },
+      { "id": "D_6", "dom": "PAR", "ext": "AUS", "date": "2026-06-25T22:00:00-07:00", "journee": "D_J3" }
     ],
     "E": [
-      { "id": "E_1", "dom": "GER", "ext": "CUW", "date": null, "journee": "E_J1" },
-      { "id": "E_2", "dom": "CIV", "ext": "ECU", "date": null, "journee": "E_J1" },
-      { "id": "E_3", "dom": "GER", "ext": "CIV", "date": null, "journee": "E_J2" },
-      { "id": "E_4", "dom": "CUW", "ext": "ECU", "date": null, "journee": "E_J2" },
-      { "id": "E_5", "dom": "GER", "ext": "ECU", "date": null, "journee": "E_J3" },
-      { "id": "E_6", "dom": "CUW", "ext": "CIV", "date": null, "journee": "E_J3" }
+      { "id": "E_1", "dom": "GER", "ext": "CUW", "date": "2026-06-14T13:00:00-05:00", "journee": "E_J1" },
+      { "id": "E_2", "dom": "CIV", "ext": "ECU", "date": "2026-06-14T19:00:00-04:00", "journee": "E_J1" },
+      { "id": "E_3", "dom": "GER", "ext": "CIV", "date": "2026-06-20T16:00:00-04:00", "journee": "E_J2" },
+      { "id": "E_4", "dom": "CUW", "ext": "ECU", "date": "2026-06-20T20:00:00-05:00", "journee": "E_J2" },
+      { "id": "E_5", "dom": "GER", "ext": "ECU", "date": "2026-06-25T16:00:00-04:00", "journee": "E_J3" },
+      { "id": "E_6", "dom": "CUW", "ext": "CIV", "date": "2026-06-25T16:00:00-05:00", "journee": "E_J3" }
     ],
     "F": [
-      { "id": "F_1", "dom": "NED", "ext": "JPN", "date": null, "journee": "F_J1" },
-      { "id": "F_2", "dom": "SWE", "ext": "TUN", "date": null, "journee": "F_J1" },
-      { "id": "F_3", "dom": "NED", "ext": "SWE", "date": null, "journee": "F_J2" },
-      { "id": "F_4", "dom": "JPN", "ext": "TUN", "date": null, "journee": "F_J2" },
-      { "id": "F_5", "dom": "NED", "ext": "TUN", "date": null, "journee": "F_J3" },
-      { "id": "F_6", "dom": "JPN", "ext": "SWE", "date": null, "journee": "F_J3" }
+      { "id": "F_1", "dom": "NED", "ext": "JPN", "date": "2026-06-14T16:00:00-05:00", "journee": "F_J1" },
+      { "id": "F_2", "dom": "SWE", "ext": "TUN", "date": "2026-06-14T22:00:00-06:00", "journee": "F_J1" },
+      { "id": "F_3", "dom": "NED", "ext": "SWE", "date": "2026-06-20T13:00:00-05:00", "journee": "F_J2" },
+      { "id": "F_4", "dom": "JPN", "ext": "TUN", "date": "2026-06-20T00:00:00-06:00", "journee": "F_J2" },
+      { "id": "F_5", "dom": "NED", "ext": "TUN", "date": "2026-06-25T19:00:00-05:00", "journee": "F_J3" },
+      { "id": "F_6", "dom": "JPN", "ext": "SWE", "date": "2026-06-25T19:00:00-05:00", "journee": "F_J3" }
     ],
     "G": [
-      { "id": "G_1", "dom": "BEL", "ext": "EGY", "date": null, "journee": "G_J1" },
-      { "id": "G_2", "dom": "IRN", "ext": "NZL", "date": null, "journee": "G_J1" },
-      { "id": "G_3", "dom": "BEL", "ext": "IRN", "date": null, "journee": "G_J2" },
-      { "id": "G_4", "dom": "EGY", "ext": "NZL", "date": null, "journee": "G_J2" },
-      { "id": "G_5", "dom": "BEL", "ext": "NZL", "date": null, "journee": "G_J3" },
-      { "id": "G_6", "dom": "EGY", "ext": "IRN", "date": null, "journee": "G_J3" }
+      { "id": "G_1", "dom": "BEL", "ext": "EGY", "date": "2026-06-15T15:00:00-07:00", "journee": "G_J1" },
+      { "id": "G_2", "dom": "IRN", "ext": "NZL", "date": "2026-06-15T21:00:00-07:00", "journee": "G_J1" },
+      { "id": "G_3", "dom": "BEL", "ext": "IRN", "date": "2026-06-24T15:00:00-07:00", "journee": "G_J2" },
+      { "id": "G_4", "dom": "EGY", "ext": "NZL", "date": "2026-06-21T21:00:00-07:00", "journee": "G_J2" },
+      { "id": "G_5", "dom": "BEL", "ext": "NZL", "date": "2026-06-26T23:00:00-07:00", "journee": "G_J3" },
+      { "id": "G_6", "dom": "EGY", "ext": "IRN", "date": "2026-06-26T23:00:00-07:00", "journee": "G_J3" }
     ],
     "H": [
-      { "id": "H_1", "dom": "ESP", "ext": "CPV", "date": null, "journee": "H_J1" },
-      { "id": "H_2", "dom": "KSA", "ext": "URU", "date": null, "journee": "H_J1" },
-      { "id": "H_3", "dom": "ESP", "ext": "KSA", "date": null, "journee": "H_J2" },
-      { "id": "H_4", "dom": "CPV", "ext": "URU", "date": null, "journee": "H_J2" },
-      { "id": "H_5", "dom": "ESP", "ext": "URU", "date": null, "journee": "H_J3" },
-      { "id": "H_6", "dom": "CPV", "ext": "KSA", "date": null, "journee": "H_J3" }
+      { "id": "H_1", "dom": "ESP", "ext": "CPV", "date": "2026-06-15T12:00:00-04:00", "journee": "H_J1" },
+      { "id": "H_2", "dom": "KSA", "ext": "URU", "date": "2026-06-15T18:00:00-04:00", "journee": "H_J1" },
+      { "id": "H_3", "dom": "ESP", "ext": "KSA", "date": "2026-06-21T12:00:00-04:00", "journee": "H_J2" },
+      { "id": "H_4", "dom": "CPV", "ext": "URU", "date": "2026-06-21T18:00:00-04:00", "journee": "H_J2" },
+      { "id": "H_5", "dom": "ESP", "ext": "URU", "date": "2026-06-26T20:00:00-06:00", "journee": "H_J3" },
+      { "id": "H_6", "dom": "CPV", "ext": "KSA", "date": "2026-06-26T20:00:00-05:00", "journee": "H_J3" }
     ],
     "I": [
-      { "id": "I_1", "dom": "FRA", "ext": "SEN", "date": null, "journee": "I_J1" },
-      { "id": "I_2", "dom": "IRQ", "ext": "NOR", "date": null, "journee": "I_J1" },
-      { "id": "I_3", "dom": "FRA", "ext": "IRQ", "date": null, "journee": "I_J2" },
-      { "id": "I_4", "dom": "SEN", "ext": "NOR", "date": null, "journee": "I_J2" },
-      { "id": "I_5", "dom": "FRA", "ext": "NOR", "date": null, "journee": "I_J3" },
-      { "id": "I_6", "dom": "SEN", "ext": "IRQ", "date": null, "journee": "I_J3" }
+      { "id": "I_1", "dom": "FRA", "ext": "SEN", "date": "2026-06-16T15:00:00-04:00", "journee": "I_J1" },
+      { "id": "I_2", "dom": "IRQ", "ext": "NOR", "date": "2026-06-16T18:00:00-04:00", "journee": "I_J1" },
+      { "id": "I_3", "dom": "FRA", "ext": "IRQ", "date": "2026-06-22T17:00:00-04:00", "journee": "I_J2" },
+      { "id": "I_4", "dom": "SEN", "ext": "NOR", "date": "2026-06-22T20:00:00-04:00", "journee": "I_J2" },
+      { "id": "I_5", "dom": "FRA", "ext": "NOR", "date": "2026-06-26T15:00:00-04:00", "journee": "I_J3" },
+      { "id": "I_6", "dom": "SEN", "ext": "IRQ", "date": "2026-06-26T15:00:00-04:00", "journee": "I_J3" }
     ],
     "J": [
-      { "id": "J_1", "dom": "ARG", "ext": "ALG", "date": null, "journee": "J_J1" },
-      { "id": "J_2", "dom": "AUT", "ext": "JOR", "date": null, "journee": "J_J1" },
-      { "id": "J_3", "dom": "ARG", "ext": "AUT", "date": null, "journee": "J_J2" },
-      { "id": "J_4", "dom": "ALG", "ext": "JOR", "date": null, "journee": "J_J2" },
-      { "id": "J_5", "dom": "ARG", "ext": "JOR", "date": null, "journee": "J_J3" },
-      { "id": "J_6", "dom": "ALG", "ext": "AUT", "date": null, "journee": "J_J3" }
+      { "id": "J_1", "dom": "ARG", "ext": "ALG", "date": "2026-06-16T21:00:00-05:00", "journee": "J_J1" },
+      { "id": "J_2", "dom": "AUT", "ext": "JOR", "date": "2026-06-16T00:00:00-07:00", "journee": "J_J1" },
+      { "id": "J_3", "dom": "ARG", "ext": "AUT", "date": "2026-06-22T13:00:00-05:00", "journee": "J_J2" },
+      { "id": "J_4", "dom": "ALG", "ext": "JOR", "date": "2026-06-22T23:00:00-07:00", "journee": "J_J2" },
+      { "id": "J_5", "dom": "ARG", "ext": "JOR", "date": "2026-06-27T22:00:00-05:00", "journee": "J_J3" },
+      { "id": "J_6", "dom": "ALG", "ext": "AUT", "date": "2026-06-27T22:00:00-05:00", "journee": "J_J3" }
     ],
     "K": [
-      { "id": "K_1", "dom": "POR", "ext": "COD", "date": null, "journee": "K_J1" },
-      { "id": "K_2", "dom": "UZB", "ext": "COL", "date": null, "journee": "K_J1" },
-      { "id": "K_3", "dom": "POR", "ext": "UZB", "date": null, "journee": "K_J2" },
-      { "id": "K_4", "dom": "COD", "ext": "COL", "date": null, "journee": "K_J2" },
-      { "id": "K_5", "dom": "POR", "ext": "COL", "date": null, "journee": "K_J3" },
-      { "id": "K_6", "dom": "COD", "ext": "UZB", "date": null, "journee": "K_J3" }
+      { "id": "K_1", "dom": "POR", "ext": "COD", "date": "2026-06-17T13:00:00-05:00", "journee": "K_J1" },
+      { "id": "K_2", "dom": "UZB", "ext": "COL", "date": "2026-06-17T22:00:00-06:00", "journee": "K_J1" },
+      { "id": "K_3", "dom": "POR", "ext": "UZB", "date": "2026-06-23T13:00:00-05:00", "journee": "K_J2" },
+      { "id": "K_4", "dom": "COD", "ext": "COL", "date": "2026-06-23T22:00:00-06:00", "journee": "K_J2" },
+      { "id": "K_5", "dom": "POR", "ext": "COL", "date": "2026-06-27T19:30:00-04:00", "journee": "K_J3" },
+      { "id": "K_6", "dom": "COD", "ext": "UZB", "date": "2026-06-27T19:30:00-04:00", "journee": "K_J3" }
     ],
     "L": [
-      { "id": "L_1", "dom": "ENG", "ext": "CRO", "date": null, "journee": "L_J1" },
-      { "id": "L_2", "dom": "GHA", "ext": "PAN", "date": null, "journee": "L_J1" },
-      { "id": "L_3", "dom": "ENG", "ext": "GHA", "date": null, "journee": "L_J2" },
-      { "id": "L_4", "dom": "CRO", "ext": "PAN", "date": null, "journee": "L_J2" },
-      { "id": "L_5", "dom": "ENG", "ext": "PAN", "date": null, "journee": "L_J3" },
-      { "id": "L_6", "dom": "CRO", "ext": "GHA", "date": null, "journee": "L_J3" }
+      { "id": "L_1", "dom": "ENG", "ext": "CRO", "date": "2026-06-17T16:00:00-05:00", "journee": "L_J1" },
+      { "id": "L_2", "dom": "GHA", "ext": "PAN", "date": "2026-06-17T19:00:00-04:00", "journee": "L_J1" },
+      { "id": "L_3", "dom": "ENG", "ext": "GHA", "date": "2026-06-23T16:00:00-04:00", "journee": "L_J2" },
+      { "id": "L_4", "dom": "CRO", "ext": "PAN", "date": "2026-06-23T19:00:00-04:00", "journee": "L_J2" },
+      { "id": "L_5", "dom": "ENG", "ext": "PAN", "date": "2026-06-27T17:00:00-04:00", "journee": "L_J3" },
+      { "id": "L_6", "dom": "CRO", "ext": "GHA", "date": "2026-06-27T17:00:00-04:00", "journee": "L_J3" }
     ]
   },
 
