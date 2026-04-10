@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pronostics — Coupe du Monde 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ── Variables ── */
+:root {
+  --bg:       #080c10;
+  --surface:  #0f1520;
+  --card:     #141c28;
+  --border:   #1e2d40;
+  --green:    #00c55a;
+  --green-dim:#00512a;
+  --gold:     #f5b731;
+  --gold-dim: #5c3f00;
+  --red:      #e84545;
+  --blue:     #3b82f6;
+  --text:     #e8edf5;
+  --muted:    #6b7a90;
+  --radius:   10px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,197,90,.12) 0%, transparent 70%);
+}
+
+/* ── Header ── */
+.site-header {
+  text-align:center;
+  padding:2.5rem 1rem 1.5rem;
+  border-bottom:1px solid var(--border);
+}
+.site-header h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2rem,6vw,3.5rem);
+  letter-spacing:.08em;
+  color:var(--gold);
+  line-height:1;
+}
+.site-header p { color:var(--muted); font-size:.9rem; margin-top:.3rem; }
+
+/* ── Progress bar ── */
+.progress-wrap {
+  max-width:760px; margin:1.5rem auto; padding:0 1rem;
+  display:flex; gap:.5rem; align-items:center;
+}
+.progress-step {
+  flex:1; height:4px; border-radius:2px;
+  background:var(--border); transition:background .4s;
+}
+.progress-step.done  { background:var(--green); }
+.progress-step.active{ background:var(--gold); }
+
+.step-label {
+  max-width:760px; margin:.5rem auto 0; padding:0 1rem;
+  font-size:.8rem; color:var(--muted); text-align:center;
+  font-family:'Bebas Neue'; letter-spacing:.1em; font-size:1rem;
+}
+
+/* ── Main container ── */
+.container { max-width:860px; margin:0 auto; padding:1.5rem 1rem 4rem; }
+
+/* ── Wizard steps ── */
+.step { display:none; }
+.step.active { display:block; animation:fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* ── Card ── */
+.card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem;
+  margin-bottom:1rem;
+}
+.card-title {
+  font-family:'Bebas Neue'; font-size:1.4rem; letter-spacing:.1em;
+  color:var(--gold); margin-bottom:1rem;
+  display:flex; align-items:center; gap:.5rem;
+}
+.card-title span { font-family:'DM Sans'; font-size:.75rem; color:var(--muted); font-weight:400; letter-spacing:0; }
+
+/* ── Login ── */
+.login-card {
+  max-width:400px; margin:2rem auto;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:2rem;
+}
+.login-card h2 { font-family:'Bebas Neue'; font-size:1.8rem; color:var(--gold); letter-spacing:.1em; margin-bottom:.3rem; }
+.login-card p  { color:var(--muted); font-size:.85rem; margin-bottom:1.5rem; }
+
+.field { margin-bottom:1rem; }
+.field label { display:block; font-size:.8rem; color:var(--muted); margin-bottom:.4rem; text-transform:uppercase; letter-spacing:.06em; }
+.field input {
+  width:100%; padding:.7rem 1rem;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-family:'DM Sans'; font-size:1rem;
+  transition:border-color .2s;
+}
+.field input:focus { outline:none; border-color:var(--green); }
+
+/* ── Buttons ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
+  padding:.65rem 1.4rem; border-radius:8px; font-family:'DM Sans'; font-weight:600;
+  font-size:.9rem; cursor:pointer; border:none; transition:all .2s;
+}
+.btn-primary { background:var(--green); color:#000; }
+.btn-primary:hover { background:#00e668; }
+.btn-secondary { background:var(--border); color:var(--text); }
+.btn-secondary:hover { background:var(--surface); }
+.btn-gold { background:var(--gold); color:#000; }
+.btn-gold:hover { filter:brightness(1.1); }
+.btn-lg { padding:.8rem 2rem; font-size:1rem; }
+.btn:disabled { opacity:.4; cursor:not-allowed; }
+
+.nav-btns {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:1.5rem; gap:1rem;
+}
+
+/* ── Group tabs ── */
+.group-tabs {
+  display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:1.2rem;
+}
+.group-tab {
+  padding:.35rem .8rem; border-radius:6px; font-family:'Bebas Neue';
+  font-size:1rem; letter-spacing:.08em; cursor:pointer;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--muted); transition:all .2s;
+}
+.group-tab.active  { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+.group-tab.complete{ border-color:var(--green-dim); color:var(--green); }
+
+/* ── Match row ── */
+.match-row {
+  display:grid; grid-template-columns:1fr auto 1fr;
+  align-items:center; gap:.5rem;
+  padding:.75rem 0; border-bottom:1px solid var(--border);
+}
+.match-row:last-child { border-bottom:none; }
+.team-btn {
+  display:flex; align-items:center; gap:.4rem;
+  padding:.45rem .7rem; border-radius:6px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); cursor:pointer;
+  font-family:'DM Sans'; font-size:.85rem; font-weight:500;
+  transition:all .2s; width:100%; justify-content:flex-end;
+}
+.team-btn.home { justify-content:flex-end; flex-direction:row-reverse; }
+.team-btn.away { justify-content:flex-start; }
+.team-btn:hover { border-color:var(--muted); }
+.team-btn.selected { background:var(--green-dim); border-color:var(--green); color:var(--green); font-weight:600; }
+.draw-btn {
+  padding:.45rem .6rem; border-radius:6px; border:1px solid var(--border);
+  background:var(--surface); color:var(--muted); cursor:pointer;
+  font-family:'Bebas Neue'; font-size:.9rem; letter-spacing:.06em;
+  transition:all .2s; white-space:nowrap;
+}
+.draw-btn:hover { border-color:var(--muted); }
+.draw-btn.selected { background:#1e2d40; border-color:var(--blue); color:var(--blue); }
+
+.score-inputs {
+  display:flex; align-items:center; gap:.3rem; justify-content:center;
+  margin-top:.4rem; grid-column:1/-1;
+}
+.score-inputs input {
+  width:42px; text-align:center; padding:.3rem;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:6px; color:var(--text); font-family:'Bebas Neue';
+  font-size:1.1rem; transition:border-color .2s;
+}
+.score-inputs input:focus { outline:none; border-color:var(--gold); }
+.score-sep { color:var(--muted); font-weight:700; }
+
+.match-info { font-size:.7rem; color:var(--muted); grid-column:1/-1; text-align:center; }
+
+/* ── Qualifiés ── */
+.qualifies-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:.8rem;
+}
+.qualifies-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:1rem;
+}
+.qualifies-card h4 {
+  font-family:'Bebas Neue'; font-size:1.1rem; letter-spacing:.1em;
+  color:var(--gold); margin-bottom:.7rem;
+}
+.qualifies-row { display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; }
+.qualifies-row label { font-size:.75rem; color:var(--muted); width:40px; flex-shrink:0; text-transform:uppercase; }
+.qualifies-row select {
+  flex:1; padding:.4rem .7rem;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:6px; color:var(--text); font-family:'DM Sans'; font-size:.85rem;
+  appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7a90' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right .6rem center;
+  padding-right:2rem;
+}
+.qualifies-row select:focus { outline:none; border-color:var(--green); }
+
+/* ── Meilleurs tiers ── */
+.tiers-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem;
+}
+.tiers-item {
+  display:flex; align-items:center; gap:.5rem;
+  padding:.6rem .8rem; border-radius:8px; border:1px solid var(--border);
+  background:var(--surface); cursor:pointer; transition:all .2s;
+}
+.tiers-item input[type=checkbox] { accent-color:var(--green); width:16px; height:16px; flex-shrink:0; }
+.tiers-item label { font-family:'Bebas Neue'; font-size:1rem; letter-spacing:.08em; cursor:pointer; }
+.tiers-item.checked { background:var(--green-dim); border-color:var(--green); }
+.tiers-count { font-size:.8rem; color:var(--muted); margin-bottom:.8rem; }
+.tiers-count span { color:var(--green); font-weight:600; }
+
+/* ── Bracket ── */
+.bracket-section { margin-bottom:1.5rem; }
+.bracket-section h3 {
+  font-family:'Bebas Neue'; font-size:1.1rem; letter-spacing:.1em;
+  color:var(--muted); margin-bottom:.7rem; padding-bottom:.4rem;
+  border-bottom:1px solid var(--border);
+}
+.bracket-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:.6rem;
+}
+.bracket-match {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:.8rem;
+}
+.bracket-match .bm-label { font-size:.7rem; color:var(--muted); margin-bottom:.5rem; text-transform:uppercase; letter-spacing:.05em; }
+.bracket-match select {
+  width:100%; padding:.45rem .7rem;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:6px; color:var(--text); font-family:'DM Sans'; font-size:.85rem;
+  appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7a90' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right .6rem center;
+  padding-right:2rem;
+}
+.bracket-match select:focus { outline:none; border-color:var(--gold); }
+.bracket-teams { font-size:.75rem; color:var(--muted); margin-top:.35rem; }
+
+/* ── Bonus ── */
+.bonus-list { display:flex; flex-direction:column; gap:.8rem; }
+.bonus-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:1rem;
+}
+.bonus-item h4 { font-weight:600; font-size:.95rem; margin-bottom:.2rem; }
+.bonus-item p  { font-size:.8rem; color:var(--muted); margin-bottom:.7rem; }
+.bonus-pts { float:right; font-family:'Bebas Neue'; font-size:1rem; color:var(--gold); letter-spacing:.05em; }
+.bonus-item select, .bonus-item input[type=number] {
+  width:100%; padding:.5rem .8rem;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:6px; color:var(--text); font-family:'DM Sans'; font-size:.9rem;
+}
+.bonus-item select:focus, .bonus-item input[type=number]:focus { outline:none; border-color:var(--gold); }
+
+/* ── Review ── */
+.review-section { margin-bottom:1rem; }
+.review-section h3 { font-family:'Bebas Neue'; font-size:1.1rem; color:var(--gold); letter-spacing:.1em; margin-bottom:.5rem; }
+.review-tag {
+  display:inline-block; padding:.2rem .6rem; border-radius:4px; font-size:.75rem;
+  margin:.15rem; background:var(--surface); border:1px solid var(--border);
+}
+.review-tag.ok  { border-color:var(--green-dim); color:var(--green); }
+.review-tag.nok { border-color:var(--red); color:var(--red); }
+
+/* ── Toast ── */
+.toast {
+  position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(100px);
+  background:var(--card); border:1px solid var(--border); border-radius:10px;
+  padding:.8rem 1.5rem; font-size:.9rem; transition:transform .3s; z-index:999;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.success { border-color:var(--green); color:var(--green); }
+.toast.error   { border-color:var(--red);   color:var(--red);   }
+
+/* ── Alert ── */
+.alert {
+  padding:.8rem 1rem; border-radius:8px; font-size:.85rem; margin-bottom:1rem;
+  background:rgba(248,180,0,.1); border:1px solid var(--gold-dim); color:var(--gold);
+}
+.alert.info { background:rgba(59,130,246,.1); border-color:#1e3a5f; color:#93c5fd; }
+.alert.error { background:rgba(232,69,69,.1); border-color:#4a1a1a; color:var(--red); }
+
+/* ── Locked overlay ── */
+.locked-banner {
+  background:rgba(232,69,69,.1); border:1px solid var(--red);
+  border-radius:10px; padding:1.5rem; text-align:center; margin:2rem auto;
+  max-width:500px;
+}
+.locked-banner h2 { font-family:'Bebas Neue'; font-size:1.8rem; color:var(--red); letter-spacing:.1em; }
+.locked-banner p  { color:var(--muted); margin-top:.5rem; }
+
+/* ── Spinner ── */
+.spinner {
+  width:24px; height:24px; border:2px solid var(--border);
+  border-top-color:var(--green); border-radius:50%;
+  animation:spin .8s linear infinite; margin:auto;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.loading-screen { text-align:center; padding:4rem 1rem; color:var(--muted); }
+.loading-screen .spinner { margin-bottom:1rem; }
+
+@media(max-width:600px) {
+  .tiers-grid { grid-template-columns:repeat(3,1fr); }
+  .qualifies-grid { grid-template-columns:1fr; }
+  .team-btn { font-size:.78rem; padding:.4rem .5rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>⚽ Pronostics CdM 2026</h1>
+  <p>Canada · États-Unis · Mexique · 11 juin – 19 juillet 2026</p>
+</header>
+
+<div class="progress-wrap" id="progressWrap" style="display:none">
+  <div class="progress-step" data-step="1"></div>
+  <div class="progress-step" data-step="2"></div>
+  <div class="progress-step" data-step="3"></div>
+  <div class="progress-step" data-step="4"></div>
+  <div class="progress-step" data-step="5"></div>
+  <div class="progress-step" data-step="6"></div>
+</div>
+<div class="step-label" id="stepLabel" style="display:none"></div>
+
+<div class="container">
+
+  <!-- LOADING -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="spinner"></div>
+    <p>Chargement du tournoi…</p>
+  </div>
+
+  <!-- LOCKED -->
+  <div id="lockedScreen" style="display:none">
+    <div class="locked-banner">
+      <h2>🔒 Pronostics verrouillés</h2>
+      <p>La phase de soumission est terminée. Rendez-vous sur la page de classement pour suivre les scores !</p>
+      <br>
+      <a href="index.html" class="btn btn-secondary">Voir le classement</a>
+    </div>
+  </div>
+
+  <!-- STEP 1 : IDENTIFICATION -->
+  <div id="step1" class="step">
+    <div class="login-card">
+      <h2>Identification</h2>
+      <p>Choisis ton pseudo et un code PIN à 4 chiffres. Si tu reviens modifier tes pronostics avant le verrouillage, utilise le même pseudo et le même PIN.</p>
+      <div class="field">
+        <label>Pseudo</label>
+        <input type="text" id="inputPseudo" placeholder="Ex : LeRoiDuProno" maxlength="30" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Code PIN (4 chiffres)</label>
+        <input type="password" id="inputPin" placeholder="••••" maxlength="4" inputmode="numeric" pattern="[0-9]{4}">
+      </div>
+      <div id="loginError" class="alert error" style="display:none"></div>
+      <button class="btn btn-primary btn-lg" style="width:100%;margin-top:.5rem" onclick="doLogin()">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 : PHASE DE GROUPES -->
+  <div id="step2" class="step">
+    <div class="card">
+      <div class="card-title">Phase de Groupes <span>Résultat (1/N/2) + score exact (bonus)</span></div>
+      <div class="group-tabs" id="groupTabs"></div>
+      <div id="groupContent"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="gotoStep(1)">← Retour</button>
+      <span id="step2Progress" style="font-size:.8rem;color:var(--muted)"></span>
+      <button class="btn btn-primary" onclick="gotoStep(3)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 : QUALIFIÉS -->
+  <div id="step3" class="step">
+    <div class="card">
+      <div class="card-title">Équipes qualifiées <span>1er et 2e de chaque groupe</span></div>
+      <div class="qualifies-grid" id="qualifiesGrid"></div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <div class="card-title">Meilleurs 3es <span>Choisis exactement 8 groupes qui fourniront un 3e qualifié</span></div>
+      <div class="tiers-count">Sélectionnés : <span id="tiersCount">0</span> / 8</div>
+      <div class="tiers-grid" id="tiersGrid"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="gotoStep(2)">← Retour</button>
+      <button class="btn btn-primary" onclick="validateStep3()">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 : BRACKET ÉLIMINATOIRE -->
+  <div id="step4" class="step">
+    <div class="card">
+      <div class="card-title">Bracket éliminatoire <span>Qui gagne chaque match jusqu'à la finale ?</span></div>
+      <div class="alert info" style="margin-bottom:1rem">
+        Les équipes disponibles sont celles que tu as qualifiées aux étapes précédentes.
+        Les vainqueurs d'un tour alimentent automatiquement le tour suivant.
+      </div>
+      <div id="bracketContent"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="gotoStep(3)">← Retour</button>
+      <button class="btn btn-primary" onclick="gotoStep(5)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 : BONUS -->
+  <div id="step5" class="step">
+    <div class="card">
+      <div class="card-title">Questions Bonus <span>Points supplémentaires</span></div>
+      <div class="bonus-list" id="bonusList"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="gotoStep(4)">← Retour</button>
+      <button class="btn btn-primary" onclick="gotoStep(6)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6 : RÉCAPITULATIF + SOUMISSION -->
+  <div id="step6" class="step">
+    <div class="card">
+      <div class="card-title">Récapitulatif</div>
+      <div id="reviewContent"></div>
+      <div class="alert" style="margin-top:1rem">
+        ⚠️ Une fois soumis, tes pronostics ne pourront plus être modifiés jusqu'au prochain verrouillage de journée.
+        Si tu reviens sur cette page avant le verrouillage, tu pourras mettre à jour tes pronostics.
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="gotoStep(5)">← Retour</button>
+      <button class="btn btn-gold btn-lg" onclick="submitAll()" id="submitBtn">✓ Soumettre mes pronostics</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║  CONFIG — remplace par tes vraies clés Supabase          ║
+// ╚══════════════════════════════════════════════════════════╝
+const SUPABASE_URL = 'https://VOTRE_ID.supabase.co';
+const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── État global ──────────────────────────────────────────────
+let CONFIG = null;
+let currentStep = 1;
+let participant = null;  // { id, pseudo }
+let activeGroup = 'A';
+
+// Pronostics state
+const state = {
+  groupes:  {},  // match_id → { resultat:'H'|'N'|'A', score_dom, score_ext }
+  qualifies:{},  // groupe_id → { equipe_1er, equipe_2eme }
+  tiers:    [],  // array of 8 groupe letters
+  bracket:  {},  // slot_id → equipe code
+  bonus:    {},  // question_id → value
+};
+
+// ── Utilitaires ─────────────────────────────────────────────
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+function getTeamByCode(code) {
+  return CONFIG.equipes.find(e=>e.code===code);
+}
+function getTeamLabel(code) {
+  const t = getTeamByCode(code);
+  return t ? `${t.drapeau} ${t.nom}` : code;
+}
+
+// ── Init ─────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('config.json');
+    CONFIG = await res.json();
+
+    // Vérifier verrouillage global
+    if (CONFIG.phase_initiale_verrou?.verrouille) {
+      document.getElementById('loadingScreen').style.display='none';
+      document.getElementById('lockedScreen').style.display='block';
+      return;
+    }
+
+    document.getElementById('loadingScreen').style.display='none';
+    showStep(1);
+  } catch(e) {
+    document.getElementById('loadingScreen').innerHTML =
+      `<div class="alert error">Impossible de charger la configuration du tournoi. (${e.message})</div>`;
+  }
+}
+
+// ── Navigation ───────────────────────────────────────────────
+function showStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(`step${n}`)?.classList.add('active');
+
+  const labels = ['','Identification','Phase de groupes','Qualifiés & 3es','Bracket éliminatoire','Questions bonus','Récapitulatif'];
+  document.getElementById('stepLabel').textContent = `Étape ${n}/6 — ${labels[n]}`;
+
+  const wrap = document.getElementById('progressWrap');
+  const label = document.getElementById('stepLabel');
+  if (n===1) { wrap.style.display='none'; label.style.display='none'; }
+  else { wrap.style.display='flex'; label.style.display='block'; }
+
+  document.querySelectorAll('.progress-step').forEach(el=>{
+    const s = parseInt(el.dataset.step);
+    el.className = 'progress-step' + (s<n?' done':s===n?' active':'');
+  });
+
+  if (n===2) renderGroups();
+  if (n===3) renderQualifies();
+  if (n===4) renderBracket();
+  if (n===5) renderBonus();
+  if (n===6) renderReview();
+}
+
+function gotoStep(n) { showStep(n); window.scrollTo({top:0,behavior:'smooth'}); }
+
+// ── STEP 1 : Login ────────────────────────────────────────────
+async function doLogin() {
+  const pseudo = document.getElementById('inputPseudo').value.trim();
+  const pin    = document.getElementById('inputPin').value.trim();
+  const err    = document.getElementById('loginError');
+  err.style.display='none';
+
+  if (!pseudo) { err.textContent='Choisis un pseudo.'; err.style.display='block'; return; }
+  if (!/^\d{4}$/.test(pin)) { err.textContent='Le PIN doit contenir exactement 4 chiffres.'; err.style.display='block'; return; }
+
+  const pinHash = await sha256(pin);
+
+  // Chercher participant existant
+  const { data: existing } = await sb.from('participants').select('id,pseudo,pin_hash').eq('pseudo',pseudo).single();
+
+  if (existing) {
+    if (existing.pin_hash !== pinHash) {
+      err.textContent='PIN incorrect pour ce pseudo.'; err.style.display='block'; return;
+    }
+    participant = { id: existing.id, pseudo };
+    await loadExistingPronostics();
+  } else {
+    // Créer nouveau participant
+    const { data: created, error } = await sb.from('participants').insert({ pseudo, pin_hash: pinHash }).select('id').single();
+    if (error) { err.textContent='Erreur lors de la création du compte : '+error.message; err.style.display='block'; return; }
+    participant = { id: created.id, pseudo };
+  }
+
+  gotoStep(2);
+}
+
+async function loadExistingPronostics() {
+  // Charger les pronostics existants pour pré-remplir le formulaire
+  const pid = participant.id;
+
+  const [pg, pq, pt, pb, pbo] = await Promise.all([
+    sb.from('pronostics_groupes').select('*').eq('participant_id',pid),
+    sb.from('pronostics_qualifies').select('*').eq('participant_id',pid),
+    sb.from('pronostics_meilleurs_tiers').select('*').eq('participant_id',pid).single(),
+    sb.from('pronostics_bracket').select('*').eq('participant_id',pid),
+    sb.from('pronostics_bonus').select('*').eq('participant_id',pid),
+  ]);
+
+  (pg.data||[]).forEach(r=>{ state.groupes[r.match_id]={ resultat:r.resultat, score_dom:r.score_dom, score_ext:r.score_ext }; });
+  (pq.data||[]).forEach(r=>{ state.qualifies[r.groupe_id]={ equipe_1er:r.equipe_1er, equipe_2eme:r.equipe_2eme }; });
+  if (pt.data) state.tiers = pt.data.groupes || [];
+  (pb.data||[]).forEach(r=>{ state.bracket[r.slot_id]=r.equipe; });
+  (pbo.data||[]).forEach(r=>{ state.bonus[r.question_id]=r.reponse_equipe||r.reponse_entier; });
+}
+
+// ── STEP 2 : Phase de groupes ─────────────────────────────────
+function renderGroups() {
+  const groups = Object.keys(CONFIG.groupes);
+  const tabsEl = document.getElementById('groupTabs');
+  tabsEl.innerHTML = groups.map(g=>`
+    <button class="group-tab ${activeGroup===g?'active':''} ${isGroupComplete(g)?'complete':''}"
+      onclick="switchGroup('${g}')">${g}</button>
+  `).join('');
+  renderGroupContent(activeGroup);
+  updateStep2Progress();
+}
+
+function switchGroup(g) {
+  activeGroup = g;
+  renderGroups();
+}
+
+function isGroupComplete(g) {
+  const matchs = CONFIG.matchs_groupes[g] || [];
+  return matchs.every(m=>state.groupes[m.id]?.resultat);
+}
+
+function renderGroupContent(g) {
+  const matchs = CONFIG.matchs_groupes[g] || [];
+  const el = document.getElementById('groupContent');
+  el.innerHTML = matchs.map(m=>{
+    const st = state.groupes[m.id] || {};
+    const dom = getTeamByCode(m.dom);
+    const ext = getTeamByCode(m.ext);
+    const j = m.journee.split('_')[1];
+    return `
+    <div class="match-row">
+      <div class="match-info">Journée ${j.replace('J','')} · ${m.id}</div>
+      <button class="team-btn home ${st.resultat==='H'?'selected':''}"
+        onclick="setResult('${m.id}','H','${g}')">
+        ${dom?.drapeau||''} ${dom?.nom||m.dom}
+      </button>
+      <button class="draw-btn ${st.resultat==='N'?'selected':''}"
+        onclick="setResult('${m.id}','N','${g}')">NUL</button>
+      <button class="team-btn away ${st.resultat==='A'?'selected':''}"
+        onclick="setResult('${m.id}','A','${g}')">
+        ${ext?.drapeau||''} ${ext?.nom||m.ext}
+      </button>
+      <div class="score-inputs">
+        <input type="number" min="0" max="20" placeholder="-" value="${st.score_dom??''}"
+          onchange="setScore('${m.id}','dom',this.value)" id="score_${m.id}_dom">
+        <span class="score-sep">–</span>
+        <input type="number" min="0" max="20" placeholder="-" value="${st.score_ext??''}"
+          onchange="setScore('${m.id}','ext',this.value)" id="score_${m.id}_ext">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setResult(matchId, res, groupe) {
+  if (!state.groupes[matchId]) state.groupes[matchId] = {};
+  state.groupes[matchId].resultat = res;
+  renderGroupContent(groupe);
+  // Mettre à jour l'onglet du groupe
+  document.querySelectorAll('.group-tab').forEach(el=>{
+    const g2 = el.textContent.trim();
+    if (isGroupComplete(g2)) el.classList.add('complete');
+  });
+  updateStep2Progress();
+}
+
+function setScore(matchId, side, val) {
+  if (!state.groupes[matchId]) state.groupes[matchId] = {};
+  state.groupes[matchId]['score_'+side] = val===''?null:parseInt(val);
+}
+
+function updateStep2Progress() {
+  const total = Object.values(CONFIG.matchs_groupes).flat().length;
+  const done  = Object.values(CONFIG.matchs_groupes).flat().filter(m=>state.groupes[m.id]?.resultat).length;
+  document.getElementById('step2Progress').textContent = `${done} / ${total} matchs remplis`;
+}
+
+// ── STEP 3 : Qualifiés ────────────────────────────────────────
+function renderQualifies() {
+  const groups = Object.keys(CONFIG.groupes);
+
+  // Qualifiés grid
+  document.getElementById('qualifiesGrid').innerHTML = groups.map(g=>{
+    const equipes = CONFIG.groupes[g].equipes.map(c=>getTeamByCode(c));
+    const sel = state.qualifies[g]||{};
+    const opts = equipes.map(e=>`<option value="${e.code}" ${sel.equipe_1er===e.code?'selected':''}>${e.drapeau} ${e.nom}</option>`).join('');
+    const opts2= equipes.map(e=>`<option value="${e.code}" ${sel.equipe_2eme===e.code?'selected':''}>${e.drapeau} ${e.nom}</option>`).join('');
+    return `
+    <div class="qualifies-card">
+      <h4>Groupe ${g}</h4>
+      <div class="qualifies-row">
+        <label>🥇 1er</label>
+        <select onchange="setQualifie('${g}','equipe_1er',this.value)">
+          <option value="">— Choisir —</option>${opts}
+        </select>
+      </div>
+      <div class="qualifies-row">
+        <label>🥈 2e</label>
+        <select onchange="setQualifie('${g}','equipe_2eme',this.value)">
+          <option value="">— Choisir —</option>${opts2}
+        </select>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Meilleurs tiers
+  document.getElementById('tiersGrid').innerHTML = groups.map(g=>{
+    const checked = state.tiers.includes(g);
+    return `
+    <div class="tiers-item ${checked?'checked':''}" onclick="toggleTiers('${g}')">
+      <input type="checkbox" id="tiers_${g}" ${checked?'checked':''}>
+      <label for="tiers_${g}">Groupe ${g}</label>
+    </div>`;
+  }).join('');
+  updateTiersCount();
+}
+
+function setQualifie(g, field, val) {
+  if (!state.qualifies[g]) state.qualifies[g]={};
+  state.qualifies[g][field] = val;
+}
+
+function toggleTiers(g) {
+  const idx = state.tiers.indexOf(g);
+  if (idx>=0) state.tiers.splice(idx,1);
+  else if (state.tiers.length<8) state.tiers.push(g);
+  else { toast('Tu peux sélectionner au maximum 8 groupes.','error'); return; }
+  renderQualifies();
+}
+
+function updateTiersCount() {
+  document.getElementById('tiersCount').textContent = state.tiers.length;
+}
+
+function validateStep3() {
+  const groups = Object.keys(CONFIG.groupes);
+  for (const g of groups) {
+    const q = state.qualifies[g]||{};
+    if (!q.equipe_1er || !q.equipe_2eme) { toast(`Choisis le 1er et le 2e du groupe ${g}`,'error'); return; }
+    if (q.equipe_1er===q.equipe_2eme) { toast(`Le 1er et le 2e du groupe ${g} doivent être différents`,'error'); return; }
+  }
+  if (state.tiers.length!==8) { toast('Sélectionne exactement 8 meilleurs 3es','error'); return; }
+  gotoStep(4);
+}
+
+// ── STEP 4 : Bracket ─────────────────────────────────────────
+// Calcule les équipes qui alimentent un slot donné
+function getTeamsForSlot(slotId) {
+  // Construire la liste des 32 qualifiés pronostiqués
+  const q32 = buildQualified32();
+  const all  = [...q32]; // codes
+
+  // Pour R32, on connaît les sources depuis config
+  // Pour R16+, les équipes disponibles = vainqueurs précédents pronostiqués
+  const tour = slotId.split('_')[0];
+  if (tour==='R32') {
+    const match = CONFIG.bracket_eliminatoire.R32.find(m=>m.id===slotId);
+    if (!match) return all;
+    const dom = resolveSource(match.dom_source, q32);
+    const ext = resolveSource(match.ext_source, q32);
+    return [dom, ext].filter(Boolean);
+  }
+  // Pour les autres tours, proposer toutes les équipes qualifiées encore disponibles
+  return all;
+}
+
+function buildQualified32() {
+  const q32 = [];
+  const groups = Object.keys(CONFIG.groupes);
+  for (const g of groups) {
+    const q = state.qualifies[g]||{};
+    if (q.equipe_1er) q32.push({code:q.equipe_1er, source:`1${g}`});
+    if (q.equipe_2eme) q32.push({code:q.equipe_2eme, source:`2${g}`});
+  }
+  for (const g of state.tiers) {
+    // 3e qualifié fictif — on prend la 3e équipe du groupe
+    const equipes = CONFIG.groupes[g]?.equipes||[];
+    const already = [state.qualifies[g]?.equipe_1er, state.qualifies[g]?.equipe_2eme];
+    const tiers = equipes.find(e=>!already.includes(e));
+    if (tiers) q32.push({code:tiers, source:`T3_${g}`});
+  }
+  return q32;
+}
+
+function resolveSource(src, q32) {
+  if (!src) return null;
+  // src = "1A","2B","T3_C" etc.
+  const found = q32.find(q=>q.source===src);
+  return found ? getTeamByCode(found.code) : null;
+}
+
+function renderBracket() {
+  const rounds = ['R32','R16','QF','SF'];
+  const labels = { R32:'32e de finale', R16:'16e de finale (huitièmes)', QF:'Quarts de finale', SF:'Demi-finales' };
+  const q32 = buildQualified32();
+  const allCodes = q32.map(q=>q.code);
+
+  let html = '';
+  for (const round of rounds) {
+    const matchs = CONFIG.bracket_eliminatoire[round]||[];
+    html += `<div class="bracket-section"><h3>${labels[round]}</h3><div class="bracket-grid">`;
+    html += matchs.map((m,i)=>{
+      const teamsForSlot = round==='R32' ? getBothTeamsR32(m, q32) : allCodes;
+      const opts = teamsForSlot.map(code=>{
+        const t = getTeamByCode(code);
+        return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.drapeau+' '+t.nom:code}</option>`;
+      }).join('');
+      const srcLabel = `${m.dom_source} vs ${m.ext_source}`;
+      return `
+      <div class="bracket-match">
+        <div class="bm-label">${round}_${i+1} · Vainqueur de ce match</div>
+        <select onchange="setBracket('${m.id}',this.value)">
+          <option value="">— Choisir le vainqueur —</option>${opts}
+        </select>
+        <div class="bracket-teams">${srcLabel}</div>
+      </div>`;
+    }).join('');
+    html += '</div></div>';
+  }
+
+  // P3 et Finale
+  html += `<div class="bracket-section"><h3>Match pour la 3e place</h3><div class="bracket-grid">`;
+  html += renderSimpleBracketSlot(CONFIG.bracket_eliminatoire.P3[0], allCodes);
+  html += `</div></div>`;
+
+  html += `<div class="bracket-section"><h3>🏆 Finale</h3><div class="bracket-grid">`;
+  html += renderSimpleBracketSlot(CONFIG.bracket_eliminatoire.F[0], allCodes);
+  html += `</div></div>`;
+
+  document.getElementById('bracketContent').innerHTML = html;
+}
+
+function getBothTeamsR32(match, q32) {
+  const dom = resolveSource(match.dom_source, q32);
+  const ext = resolveSource(match.ext_source, q32);
+  const res = [];
+  if (dom) res.push(dom.code);
+  if (ext) res.push(ext.code);
+  if (res.length===0) return q32.map(q=>q.code); // fallback
+  return res;
+}
+
+function renderSimpleBracketSlot(m, allCodes) {
+  const opts = allCodes.map(code=>{
+    const t = getTeamByCode(code);
+    return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.drapeau+' '+t.nom:code}</option>`;
+  }).join('');
+  return `
+  <div class="bracket-match">
+    <div class="bm-label">Vainqueur</div>
+    <select onchange="setBracket('${m.id}',this.value)">
+      <option value="">— Choisir —</option>${opts}
+    </select>
+    <div class="bracket-teams">${m.dom_source} vs ${m.ext_source}</div>
+  </div>`;
+}
+
+function setBracket(slotId, val) {
+  state.bracket[slotId] = val;
+}
+
+// ── STEP 5 : Bonus ────────────────────────────────────────────
+function renderBonus() {
+  const allTeams = CONFIG.equipes;
+  const qs = (CONFIG.questions_bonus||[]).filter(q=>q.active);
+  document.getElementById('bonusList').innerHTML = qs.map(q=>{
+    let input = '';
+    if (q.type==='equipe') {
+      const opts = allTeams.map(t=>`<option value="${t.code}" ${state.bonus[q.id]===t.code?'selected':''}>${t.drapeau} ${t.nom}</option>`).join('');
+      input = `<select onchange="setBonus('${q.id}','equipe',this.value)"><option value="">— Choisir une équipe —</option>${opts}</select>`;
+    } else if (q.type==='entier') {
+      input = `<input type="number" min="0" max="100" value="${state.bonus[q.id]??''}" placeholder="Entrer un nombre" onchange="setBonus('${q.id}','entier',this.value)">`;
+    } else if (q.type==='joueur') {
+      input = `<input type="text" value="${state.bonus[q.id]??''}" placeholder="Nom du joueur" oninput="setBonus('${q.id}','joueur',this.value)" style="padding:.5rem .8rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans';font-size:.9rem;width:100%">`;
+    }
+    return `
+    <div class="bonus-item">
+      <div class="bonus-pts">${q.points} pts</div>
+      <h4>${q.texte}</h4>
+      <p>${q.description}</p>
+      ${input}
+    </div>`;
+  }).join('');
+}
+
+function setBonus(qId, type, val) {
+  state.bonus[qId] = val===''?null:val;
+}
+
+// ── STEP 6 : Récapitulatif ────────────────────────────────────
+function renderReview() {
+  const total = Object.values(CONFIG.matchs_groupes).flat().length;
+  const done  = Object.values(CONFIG.matchs_groupes).flat().filter(m=>state.groupes[m.id]?.resultat).length;
+  const groups = Object.keys(CONFIG.groupes);
+  const qualOk = groups.every(g=>state.qualifies[g]?.equipe_1er && state.qualifies[g]?.equipe_2eme);
+  const tiersOk = state.tiers.length===8;
+  const brSlots = [...(CONFIG.bracket_eliminatoire.R32||[]),...(CONFIG.bracket_eliminatoire.R16||[]),
+                   ...(CONFIG.bracket_eliminatoire.QF||[]),...(CONFIG.bracket_eliminatoire.SF||[]),
+                   ...(CONFIG.bracket_eliminatoire.P3||[]),...(CONFIG.bracket_eliminatoire.F||[])];
+  const brDone  = brSlots.filter(m=>state.bracket[m.id]).length;
+
+  document.getElementById('reviewContent').innerHTML = `
+    <div class="review-section">
+      <h3>Phase de groupes</h3>
+      <span class="review-tag ${done===total?'ok':'nok'}">${done}/${total} matchs pronostiqués</span>
+    </div>
+    <div class="review-section">
+      <h3>Qualifiés</h3>
+      <span class="review-tag ${qualOk?'ok':'nok'}">${qualOk?'12/12 groupes remplis':'Incomplet'}</span>
+      <span class="review-tag ${tiersOk?'ok':'nok'}">${state.tiers.length}/8 meilleurs 3es</span>
+    </div>
+    <div class="review-section">
+      <h3>Bracket éliminatoire</h3>
+      <span class="review-tag ${brDone===brSlots.length?'ok':'nok'}">${brDone}/${brSlots.length} slots remplis</span>
+    </div>
+    <div class="review-section">
+      <h3>Questions bonus</h3>
+      <span class="review-tag ok">${Object.values(state.bonus).filter(v=>v!=null).length} / ${(CONFIG.questions_bonus||[]).filter(q=>q.active).length} répondues</span>
+    </div>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:1rem">
+      Participant : <strong style="color:var(--text)">${participant?.pseudo}</strong>
+    </p>`;
+}
+
+// ── SOUMISSION ────────────────────────────────────────────────
+async function submitAll() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '⏳ Enregistrement…';
+
+  try {
+    const pid = participant.id;
+
+    // 1. Pronostics groupes (upsert)
+    const pgRows = Object.entries(state.groupes)
+      .filter(([,v])=>v.resultat)
+      .map(([match_id,v])=>({ participant_id:pid, match_id, resultat:v.resultat, score_dom:v.score_dom??null, score_ext:v.score_ext??null }));
+    if (pgRows.length) {
+      const { error } = await sb.from('pronostics_groupes').upsert(pgRows, { onConflict:'participant_id,match_id' });
+      if (error) throw error;
+    }
+
+    // 2. Qualifiés (upsert)
+    const pqRows = Object.entries(state.qualifies)
+      .filter(([,v])=>v.equipe_1er&&v.equipe_2eme)
+      .map(([groupe_id,v])=>({ participant_id:pid, groupe_id, equipe_1er:v.equipe_1er, equipe_2eme:v.equipe_2eme }));
+    if (pqRows.length) {
+      const { error } = await sb.from('pronostics_qualifies').upsert(pqRows, { onConflict:'participant_id,groupe_id' });
+      if (error) throw error;
+    }
+
+    // 3. Meilleurs tiers (upsert)
+    if (state.tiers.length===8) {
+      const { error } = await sb.from('pronostics_meilleurs_tiers').upsert(
+        { participant_id:pid, groupes:state.tiers },
+        { onConflict:'participant_id' }
+      );
+      if (error) throw error;
+    }
+
+    // 4. Bracket (upsert)
+    const pbRows = Object.entries(state.bracket)
+      .filter(([,v])=>v)
+      .map(([slot_id,equipe])=>({ participant_id:pid, slot_id, equipe }));
+    if (pbRows.length) {
+      const { error } = await sb.from('pronostics_bracket').upsert(pbRows, { onConflict:'participant_id,slot_id' });
+      if (error) throw error;
+    }
+
+    // 5. Bonus (upsert)
+    const pboRows = Object.entries(state.bonus)
+      .filter(([,v])=>v!=null)
+      .map(([question_id,v])=>{
+        const q = (CONFIG.questions_bonus||[]).find(q=>q.id===question_id);
+        const row = { participant_id:pid, question_id };
+        if (q?.type==='entier') row.reponse_entier = parseInt(v);
+        else row.reponse_equipe = String(v);
+        return row;
+      });
+    if (pboRows.length) {
+      const { error } = await sb.from('pronostics_bonus').upsert(pboRows, { onConflict:'participant_id,question_id' });
+      if (error) throw error;
+    }
+
+    toast('✅ Pronostics enregistrés avec succès !','success');
+    btn.textContent = '✓ Pronostics enregistrés';
+    btn.style.background='var(--green-dim)';
+    btn.style.color='var(--green)';
+    btn.style.border='1px solid var(--green)';
+
+    // Redirection vers le classement après 2s
+    setTimeout(()=>{ window.location.href='index.html'; }, 2500);
+
+  } catch(e) {
+    toast('Erreur : '+e.message,'error');
+    btn.disabled=false; btn.textContent='✓ Soumettre mes pronostics';
+  }
+}
+
+// ── Démarrage ─────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

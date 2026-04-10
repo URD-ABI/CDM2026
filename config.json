@@ -1,0 +1,362 @@
+{
+  "_commentaire": "Fichier de configuration du tournoi — à éditer et pousser sur GitHub pour mettre à jour le site",
+
+  "tournoi": {
+    "nom": "Coupe du Monde FIFA 2026",
+    "debut": "2026-06-11",
+    "finale": "2026-07-19",
+    "format": "48 équipes • 12 groupes de 4 • 32e de finale → Finale"
+  },
+
+  "points": {
+    "_commentaire": "Modifie ces valeurs pour changer le barème",
+    "resultat_correct": 3,
+    "score_exact_bonus": 2,
+    "qualifie_1er": 3,
+    "qualifie_2eme": 3,
+    "meilleur_tiers_correct": 2,
+    "bracket": {
+      "R32_correct": 2,
+      "R16_correct": 4,
+      "QF_correct": 6,
+      "SF_correct": 8,
+      "P3_correct": 4,
+      "F_correct": 12
+    },
+    "elim_resultat_correct": 3,
+    "elim_score_exact_bonus": 2
+  },
+
+  "questions_bonus": [
+    {
+      "id": "b1",
+      "texte": "Meilleure attaque de la phase de groupes",
+      "description": "Quelle équipe marquera le plus de buts lors de la phase de groupes ?",
+      "type": "equipe",
+      "points": 3,
+      "active": true
+    },
+    {
+      "id": "b2",
+      "texte": "Nombre d'équipes invaincues à l'issue de la phase de groupes",
+      "description": "Combien d'équipes termineront la phase de groupes sans défaite (3 victoires ou moins de 3 matchs sans défaite) ?",
+      "type": "entier",
+      "points": 3,
+      "active": true
+    },
+    {
+      "id": "b3",
+      "texte": "Meilleure défense de la phase de groupes",
+      "description": "Quelle équipe encaissera le moins de buts lors de la phase de groupes ?",
+      "type": "equipe",
+      "points": 3,
+      "active": true
+    },
+    {
+      "id": "b4",
+      "texte": "Vainqueur du Ballon d'Or du tournoi (meilleur joueur)",
+      "description": "Quel sera le meilleur joueur du tournoi ?",
+      "type": "joueur",
+      "points": 5,
+      "active": true
+    },
+    {
+      "id": "b5",
+      "texte": "Nombre total de buts marqués en phase de groupes",
+      "description": "Combien de buts au total seront marqués lors des 36 matchs de la phase de groupes ?",
+      "type": "entier",
+      "points": 4,
+      "active": true
+    }
+  ],
+
+  "equipes": [
+    { "code": "MEX", "nom": "Mexique",              "groupe": "A", "drapeau": "🇲🇽" },
+    { "code": "RSA", "nom": "Afrique du Sud",        "groupe": "A", "drapeau": "🇿🇦" },
+    { "code": "KOR", "nom": "République de Corée",   "groupe": "A", "drapeau": "🇰🇷" },
+    { "code": "CZE", "nom": "République tchèque",    "groupe": "A", "drapeau": "🇨🇿" },
+
+    { "code": "CAN", "nom": "Canada",                "groupe": "B", "drapeau": "🇨🇦" },
+    { "code": "BIH", "nom": "Bosnie-Herzégovine",    "groupe": "B", "drapeau": "🇧🇦" },
+    { "code": "QAT", "nom": "Qatar",                 "groupe": "B", "drapeau": "🇶🇦" },
+    { "code": "SUI", "nom": "Suisse",                "groupe": "B", "drapeau": "🇨🇭" },
+
+    { "code": "BRA", "nom": "Brésil",                "groupe": "C", "drapeau": "🇧🇷" },
+    { "code": "MAR", "nom": "Maroc",                 "groupe": "C", "drapeau": "🇲🇦" },
+    { "code": "HAI", "nom": "Haïti",                 "groupe": "C", "drapeau": "🇭🇹" },
+    { "code": "SCO", "nom": "Écosse",                "groupe": "C", "drapeau": "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+
+    { "code": "USA", "nom": "États-Unis",            "groupe": "D", "drapeau": "🇺🇸" },
+    { "code": "PAR", "nom": "Paraguay",              "groupe": "D", "drapeau": "🇵🇾" },
+    { "code": "AUS", "nom": "Australie",             "groupe": "D", "drapeau": "🇦🇺" },
+    { "code": "TUR", "nom": "Turquie",               "groupe": "D", "drapeau": "🇹🇷" },
+
+    { "code": "GER", "nom": "Allemagne",             "groupe": "E", "drapeau": "🇩🇪" },
+    { "code": "CUW", "nom": "Curaçao",               "groupe": "E", "drapeau": "🇨🇼" },
+    { "code": "CIV", "nom": "Côte d'Ivoire",         "groupe": "E", "drapeau": "🇨🇮" },
+    { "code": "ECU", "nom": "Équateur",              "groupe": "E", "drapeau": "🇪🇨" },
+
+    { "code": "NED", "nom": "Pays-Bas",              "groupe": "F", "drapeau": "🇳🇱" },
+    { "code": "JPN", "nom": "Japon",                 "groupe": "F", "drapeau": "🇯🇵" },
+    { "code": "SWE", "nom": "Suède",                 "groupe": "F", "drapeau": "🇸🇪" },
+    { "code": "TUN", "nom": "Tunisie",               "groupe": "F", "drapeau": "🇹🇳" },
+
+    { "code": "BEL", "nom": "Belgique",              "groupe": "G", "drapeau": "🇧🇪" },
+    { "code": "EGY", "nom": "Égypte",                "groupe": "G", "drapeau": "🇪🇬" },
+    { "code": "IRN", "nom": "RI Iran",               "groupe": "G", "drapeau": "🇮🇷" },
+    { "code": "NZL", "nom": "Nouvelle-Zélande",      "groupe": "G", "drapeau": "🇳🇿" },
+
+    { "code": "ESP", "nom": "Espagne",               "groupe": "H", "drapeau": "🇪🇸" },
+    { "code": "CPV", "nom": "Cap-Vert",              "groupe": "H", "drapeau": "🇨🇻" },
+    { "code": "KSA", "nom": "Arabie saoudite",       "groupe": "H", "drapeau": "🇸🇦" },
+    { "code": "URU", "nom": "Uruguay",               "groupe": "H", "drapeau": "🇺🇾" },
+
+    { "code": "FRA", "nom": "France",                "groupe": "I", "drapeau": "🇫🇷" },
+    { "code": "SEN", "nom": "Sénégal",               "groupe": "I", "drapeau": "🇸🇳" },
+    { "code": "IRQ", "nom": "Irak",                  "groupe": "I", "drapeau": "🇮🇶" },
+    { "code": "NOR", "nom": "Norvège",               "groupe": "I", "drapeau": "🇳🇴" },
+
+    { "code": "ARG", "nom": "Argentine",             "groupe": "J", "drapeau": "🇦🇷" },
+    { "code": "ALG", "nom": "Algérie",               "groupe": "J", "drapeau": "🇩🇿" },
+    { "code": "AUT", "nom": "Autriche",              "groupe": "J", "drapeau": "🇦🇹" },
+    { "code": "JOR", "nom": "Jordanie",              "groupe": "J", "drapeau": "🇯🇴" },
+
+    { "code": "POR", "nom": "Portugal",              "groupe": "K", "drapeau": "🇵🇹" },
+    { "code": "COD", "nom": "RD Congo",              "groupe": "K", "drapeau": "🇨🇩" },
+    { "code": "UZB", "nom": "Ouzbékistan",           "groupe": "K", "drapeau": "🇺🇿" },
+    { "code": "COL", "nom": "Colombie",              "groupe": "K", "drapeau": "🇨🇴" },
+
+    { "code": "ENG", "nom": "Angleterre",            "groupe": "L", "drapeau": "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+    { "code": "CRO", "nom": "Croatie",               "groupe": "L", "drapeau": "🇭🇷" },
+    { "code": "GHA", "nom": "Ghana",                 "groupe": "L", "drapeau": "🇬🇭" },
+    { "code": "PAN", "nom": "Panama",                "groupe": "L", "drapeau": "🇵🇦" }
+  ],
+
+  "groupes": {
+    "_commentaire": "pos1 à pos4 : ordre des équipes dans le groupe (têtes de série en pos1)",
+    "A": { "equipes": ["MEX", "RSA", "KOR", "CZE"] },
+    "B": { "equipes": ["CAN", "BIH", "QAT", "SUI"] },
+    "C": { "equipes": ["BRA", "MAR", "HAI", "SCO"] },
+    "D": { "equipes": ["USA", "PAR", "AUS", "TUR"] },
+    "E": { "equipes": ["GER", "CUW", "CIV", "ECU"] },
+    "F": { "equipes": ["NED", "JPN", "SWE", "TUN"] },
+    "G": { "equipes": ["BEL", "EGY", "IRN", "NZL"] },
+    "H": { "equipes": ["ESP", "CPV", "KSA", "URU"] },
+    "I": { "equipes": ["FRA", "SEN", "IRQ", "NOR"] },
+    "J": { "equipes": ["ARG", "ALG", "AUT", "JOR"] },
+    "K": { "equipes": ["POR", "COD", "UZB", "COL"] },
+    "L": { "equipes": ["ENG", "CRO", "GHA", "PAN"] }
+  },
+
+  "matchs_groupes": {
+    "_commentaire": "6 matchs par groupe. Journée 3 = matchs simultanés (même journee_id). Remplis les dates depuis le calendrier officiel FIFA.",
+    "_format_match": { "id": "X_Y", "dom": "CODE", "ext": "CODE", "date": "ISO8601", "journee": "X_J1|X_J2|X_J3" },
+    "A": [
+      { "id": "A_1", "dom": "MEX", "ext": "RSA", "date": "2026-06-11T22:00:00-06:00", "journee": "A_J1" },
+      { "id": "A_2", "dom": "KOR", "ext": "CZE", "date": "2026-06-12T19:00:00-06:00", "journee": "A_J1" },
+      { "id": "A_3", "dom": "MEX", "ext": "KOR", "date": null, "journee": "A_J2" },
+      { "id": "A_4", "dom": "RSA", "ext": "CZE", "date": null, "journee": "A_J2" },
+      { "id": "A_5", "dom": "MEX", "ext": "CZE", "date": null, "journee": "A_J3" },
+      { "id": "A_6", "dom": "RSA", "ext": "KOR", "date": null, "journee": "A_J3" }
+    ],
+    "B": [
+      { "id": "B_1", "dom": "CAN", "ext": "BIH", "date": null, "journee": "B_J1" },
+      { "id": "B_2", "dom": "QAT", "ext": "SUI", "date": null, "journee": "B_J1" },
+      { "id": "B_3", "dom": "CAN", "ext": "QAT", "date": null, "journee": "B_J2" },
+      { "id": "B_4", "dom": "BIH", "ext": "SUI", "date": null, "journee": "B_J2" },
+      { "id": "B_5", "dom": "CAN", "ext": "SUI", "date": null, "journee": "B_J3" },
+      { "id": "B_6", "dom": "BIH", "ext": "QAT", "date": null, "journee": "B_J3" }
+    ],
+    "C": [
+      { "id": "C_1", "dom": "BRA", "ext": "MAR", "date": null, "journee": "C_J1" },
+      { "id": "C_2", "dom": "HAI", "ext": "SCO", "date": null, "journee": "C_J1" },
+      { "id": "C_3", "dom": "BRA", "ext": "HAI", "date": null, "journee": "C_J2" },
+      { "id": "C_4", "dom": "MAR", "ext": "SCO", "date": null, "journee": "C_J2" },
+      { "id": "C_5", "dom": "BRA", "ext": "SCO", "date": null, "journee": "C_J3" },
+      { "id": "C_6", "dom": "MAR", "ext": "HAI", "date": null, "journee": "C_J3" }
+    ],
+    "D": [
+      { "id": "D_1", "dom": "USA", "ext": "PAR", "date": null, "journee": "D_J1" },
+      { "id": "D_2", "dom": "AUS", "ext": "TUR", "date": null, "journee": "D_J1" },
+      { "id": "D_3", "dom": "USA", "ext": "AUS", "date": null, "journee": "D_J2" },
+      { "id": "D_4", "dom": "PAR", "ext": "TUR", "date": null, "journee": "D_J2" },
+      { "id": "D_5", "dom": "USA", "ext": "TUR", "date": null, "journee": "D_J3" },
+      { "id": "D_6", "dom": "PAR", "ext": "AUS", "date": null, "journee": "D_J3" }
+    ],
+    "E": [
+      { "id": "E_1", "dom": "GER", "ext": "CUW", "date": null, "journee": "E_J1" },
+      { "id": "E_2", "dom": "CIV", "ext": "ECU", "date": null, "journee": "E_J1" },
+      { "id": "E_3", "dom": "GER", "ext": "CIV", "date": null, "journee": "E_J2" },
+      { "id": "E_4", "dom": "CUW", "ext": "ECU", "date": null, "journee": "E_J2" },
+      { "id": "E_5", "dom": "GER", "ext": "ECU", "date": null, "journee": "E_J3" },
+      { "id": "E_6", "dom": "CUW", "ext": "CIV", "date": null, "journee": "E_J3" }
+    ],
+    "F": [
+      { "id": "F_1", "dom": "NED", "ext": "JPN", "date": null, "journee": "F_J1" },
+      { "id": "F_2", "dom": "SWE", "ext": "TUN", "date": null, "journee": "F_J1" },
+      { "id": "F_3", "dom": "NED", "ext": "SWE", "date": null, "journee": "F_J2" },
+      { "id": "F_4", "dom": "JPN", "ext": "TUN", "date": null, "journee": "F_J2" },
+      { "id": "F_5", "dom": "NED", "ext": "TUN", "date": null, "journee": "F_J3" },
+      { "id": "F_6", "dom": "JPN", "ext": "SWE", "date": null, "journee": "F_J3" }
+    ],
+    "G": [
+      { "id": "G_1", "dom": "BEL", "ext": "EGY", "date": null, "journee": "G_J1" },
+      { "id": "G_2", "dom": "IRN", "ext": "NZL", "date": null, "journee": "G_J1" },
+      { "id": "G_3", "dom": "BEL", "ext": "IRN", "date": null, "journee": "G_J2" },
+      { "id": "G_4", "dom": "EGY", "ext": "NZL", "date": null, "journee": "G_J2" },
+      { "id": "G_5", "dom": "BEL", "ext": "NZL", "date": null, "journee": "G_J3" },
+      { "id": "G_6", "dom": "EGY", "ext": "IRN", "date": null, "journee": "G_J3" }
+    ],
+    "H": [
+      { "id": "H_1", "dom": "ESP", "ext": "CPV", "date": null, "journee": "H_J1" },
+      { "id": "H_2", "dom": "KSA", "ext": "URU", "date": null, "journee": "H_J1" },
+      { "id": "H_3", "dom": "ESP", "ext": "KSA", "date": null, "journee": "H_J2" },
+      { "id": "H_4", "dom": "CPV", "ext": "URU", "date": null, "journee": "H_J2" },
+      { "id": "H_5", "dom": "ESP", "ext": "URU", "date": null, "journee": "H_J3" },
+      { "id": "H_6", "dom": "CPV", "ext": "KSA", "date": null, "journee": "H_J3" }
+    ],
+    "I": [
+      { "id": "I_1", "dom": "FRA", "ext": "SEN", "date": null, "journee": "I_J1" },
+      { "id": "I_2", "dom": "IRQ", "ext": "NOR", "date": null, "journee": "I_J1" },
+      { "id": "I_3", "dom": "FRA", "ext": "IRQ", "date": null, "journee": "I_J2" },
+      { "id": "I_4", "dom": "SEN", "ext": "NOR", "date": null, "journee": "I_J2" },
+      { "id": "I_5", "dom": "FRA", "ext": "NOR", "date": null, "journee": "I_J3" },
+      { "id": "I_6", "dom": "SEN", "ext": "IRQ", "date": null, "journee": "I_J3" }
+    ],
+    "J": [
+      { "id": "J_1", "dom": "ARG", "ext": "ALG", "date": null, "journee": "J_J1" },
+      { "id": "J_2", "dom": "AUT", "ext": "JOR", "date": null, "journee": "J_J1" },
+      { "id": "J_3", "dom": "ARG", "ext": "AUT", "date": null, "journee": "J_J2" },
+      { "id": "J_4", "dom": "ALG", "ext": "JOR", "date": null, "journee": "J_J2" },
+      { "id": "J_5", "dom": "ARG", "ext": "JOR", "date": null, "journee": "J_J3" },
+      { "id": "J_6", "dom": "ALG", "ext": "AUT", "date": null, "journee": "J_J3" }
+    ],
+    "K": [
+      { "id": "K_1", "dom": "POR", "ext": "COD", "date": null, "journee": "K_J1" },
+      { "id": "K_2", "dom": "UZB", "ext": "COL", "date": null, "journee": "K_J1" },
+      { "id": "K_3", "dom": "POR", "ext": "UZB", "date": null, "journee": "K_J2" },
+      { "id": "K_4", "dom": "COD", "ext": "COL", "date": null, "journee": "K_J2" },
+      { "id": "K_5", "dom": "POR", "ext": "COL", "date": null, "journee": "K_J3" },
+      { "id": "K_6", "dom": "COD", "ext": "UZB", "date": null, "journee": "K_J3" }
+    ],
+    "L": [
+      { "id": "L_1", "dom": "ENG", "ext": "CRO", "date": null, "journee": "L_J1" },
+      { "id": "L_2", "dom": "GHA", "ext": "PAN", "date": null, "journee": "L_J1" },
+      { "id": "L_3", "dom": "ENG", "ext": "GHA", "date": null, "journee": "L_J2" },
+      { "id": "L_4", "dom": "CRO", "ext": "PAN", "date": null, "journee": "L_J2" },
+      { "id": "L_5", "dom": "ENG", "ext": "PAN", "date": null, "journee": "L_J3" },
+      { "id": "L_6", "dom": "CRO", "ext": "GHA", "date": null, "journee": "L_J3" }
+    ]
+  },
+
+  "bracket_eliminatoire": {
+    "_commentaire": "Structure de l'arbre éliminatoire. dom_source et ext_source indiquent quelle position de groupe alimente chaque match. 'T3_X' = meilleur 3e du groupe X. À compléter selon le tableau officiel FIFA une fois les groupes joués.",
+    "R32": [
+      { "id": "R32_1",  "dom_source": "1A", "ext_source": "T3_BCDE", "date": null, "journee": "R32_J1" },
+      { "id": "R32_2",  "dom_source": "1C", "ext_source": "T3_ABFG", "date": null, "journee": "R32_J1" },
+      { "id": "R32_3",  "dom_source": "1B", "ext_source": "T3_AHIJ", "date": null, "journee": "R32_J2" },
+      { "id": "R32_4",  "dom_source": "1D", "ext_source": "T3_CKLM", "date": null, "journee": "R32_J2" },
+      { "id": "R32_5",  "dom_source": "2A", "ext_source": "2C",      "date": null, "journee": "R32_J3" },
+      { "id": "R32_6",  "dom_source": "2B", "ext_source": "2D",      "date": null, "journee": "R32_J3" },
+      { "id": "R32_7",  "dom_source": "1E", "ext_source": "T3_FGHL", "date": null, "journee": "R32_J4" },
+      { "id": "R32_8",  "dom_source": "1G", "ext_source": "T3_IJKL", "date": null, "journee": "R32_J4" },
+      { "id": "R32_9",  "dom_source": "1F", "ext_source": "T3_ABCD", "date": null, "journee": "R32_J5" },
+      { "id": "R32_10", "dom_source": "1H", "ext_source": "T3_EFKL", "date": null, "journee": "R32_J5" },
+      { "id": "R32_11", "dom_source": "2E", "ext_source": "2G",      "date": null, "journee": "R32_J6" },
+      { "id": "R32_12", "dom_source": "2F", "ext_source": "2H",      "date": null, "journee": "R32_J6" },
+      { "id": "R32_13", "dom_source": "1I", "ext_source": "T3_GHKL", "date": null, "journee": "R32_J7" },
+      { "id": "R32_14", "dom_source": "1K", "ext_source": "T3_ABIJ", "date": null, "journee": "R32_J7" },
+      { "id": "R32_15", "dom_source": "2I", "ext_source": "2K",      "date": null, "journee": "R32_J8" },
+      { "id": "R32_16", "dom_source": "2J", "ext_source": "2L",      "date": null, "journee": "R32_J8" }
+    ],
+    "R16": [
+      { "id": "R16_1", "dom_source": "W_R32_1",  "ext_source": "W_R32_2",  "date": null, "journee": "R16_J1" },
+      { "id": "R16_2", "dom_source": "W_R32_3",  "ext_source": "W_R32_4",  "date": null, "journee": "R16_J1" },
+      { "id": "R16_3", "dom_source": "W_R32_5",  "ext_source": "W_R32_6",  "date": null, "journee": "R16_J2" },
+      { "id": "R16_4", "dom_source": "W_R32_7",  "ext_source": "W_R32_8",  "date": null, "journee": "R16_J2" },
+      { "id": "R16_5", "dom_source": "W_R32_9",  "ext_source": "W_R32_10", "date": null, "journee": "R16_J3" },
+      { "id": "R16_6", "dom_source": "W_R32_11", "ext_source": "W_R32_12", "date": null, "journee": "R16_J3" },
+      { "id": "R16_7", "dom_source": "W_R32_13", "ext_source": "W_R32_14", "date": null, "journee": "R16_J4" },
+      { "id": "R16_8", "dom_source": "W_R32_15", "ext_source": "W_R32_16", "date": null, "journee": "R16_J4" }
+    ],
+    "QF": [
+      { "id": "QF_1", "dom_source": "W_R16_1", "ext_source": "W_R16_2", "date": null, "journee": "QF_J1" },
+      { "id": "QF_2", "dom_source": "W_R16_3", "ext_source": "W_R16_4", "date": null, "journee": "QF_J1" },
+      { "id": "QF_3", "dom_source": "W_R16_5", "ext_source": "W_R16_6", "date": null, "journee": "QF_J2" },
+      { "id": "QF_4", "dom_source": "W_R16_7", "ext_source": "W_R16_8", "date": null, "journee": "QF_J2" }
+    ],
+    "SF": [
+      { "id": "SF_1", "dom_source": "W_QF_1", "ext_source": "W_QF_2", "date": null, "journee": "SF_J1" },
+      { "id": "SF_2", "dom_source": "W_QF_3", "ext_source": "W_QF_4", "date": null, "journee": "SF_J1" }
+    ],
+    "P3": [
+      { "id": "P3",   "dom_source": "L_SF_1", "ext_source": "L_SF_2", "date": "2026-07-18", "journee": "P3_J1" }
+    ],
+    "F": [
+      { "id": "F",    "dom_source": "W_SF_1", "ext_source": "W_SF_2", "date": "2026-07-19", "journee": "F_J1" }
+    ]
+  },
+
+  "journees": {
+    "_commentaire": "Chaque journée peut être verrouillée indépendamment. Mets 'verrouille' à true pour bloquer les pronostics. La liste des match_ids correspondants est automatiquement déduite.",
+    "A_J1": { "verrouille": false, "date_verrou": "2026-06-11T21:30:00-06:00" },
+    "A_J2": { "verrouille": false, "date_verrou": null },
+    "A_J3": { "verrouille": false, "date_verrou": null },
+    "B_J1": { "verrouille": false, "date_verrou": null },
+    "B_J2": { "verrouille": false, "date_verrou": null },
+    "B_J3": { "verrouille": false, "date_verrou": null },
+    "C_J1": { "verrouille": false, "date_verrou": null },
+    "C_J2": { "verrouille": false, "date_verrou": null },
+    "C_J3": { "verrouille": false, "date_verrou": null },
+    "D_J1": { "verrouille": false, "date_verrou": null },
+    "D_J2": { "verrouille": false, "date_verrou": null },
+    "D_J3": { "verrouille": false, "date_verrou": null },
+    "E_J1": { "verrouille": false, "date_verrou": null },
+    "E_J2": { "verrouille": false, "date_verrou": null },
+    "E_J3": { "verrouille": false, "date_verrou": null },
+    "F_J1": { "verrouille": false, "date_verrou": null },
+    "F_J2": { "verrouille": false, "date_verrou": null },
+    "F_J3": { "verrouille": false, "date_verrou": null },
+    "G_J1": { "verrouille": false, "date_verrou": null },
+    "G_J2": { "verrouille": false, "date_verrou": null },
+    "G_J3": { "verrouille": false, "date_verrou": null },
+    "H_J1": { "verrouille": false, "date_verrou": null },
+    "H_J2": { "verrouille": false, "date_verrou": null },
+    "H_J3": { "verrouille": false, "date_verrou": null },
+    "I_J1": { "verrouille": false, "date_verrou": null },
+    "I_J2": { "verrouille": false, "date_verrou": null },
+    "I_J3": { "verrouille": false, "date_verrou": null },
+    "J_J1": { "verrouille": false, "date_verrou": null },
+    "J_J2": { "verrouille": false, "date_verrou": null },
+    "J_J3": { "verrouille": false, "date_verrou": null },
+    "K_J1": { "verrouille": false, "date_verrou": null },
+    "K_J2": { "verrouille": false, "date_verrou": null },
+    "K_J3": { "verrouille": false, "date_verrou": null },
+    "L_J1": { "verrouille": false, "date_verrou": null },
+    "L_J2": { "verrouille": false, "date_verrou": null },
+    "L_J3": { "verrouille": false, "date_verrou": null },
+    "R32_J1": { "verrouille": false, "date_verrou": null },
+    "R32_J2": { "verrouille": false, "date_verrou": null },
+    "R32_J3": { "verrouille": false, "date_verrou": null },
+    "R32_J4": { "verrouille": false, "date_verrou": null },
+    "R32_J5": { "verrouille": false, "date_verrou": null },
+    "R32_J6": { "verrouille": false, "date_verrou": null },
+    "R32_J7": { "verrouille": false, "date_verrou": null },
+    "R32_J8": { "verrouille": false, "date_verrou": null },
+    "R16_J1": { "verrouille": false, "date_verrou": null },
+    "R16_J2": { "verrouille": false, "date_verrou": null },
+    "R16_J3": { "verrouille": false, "date_verrou": null },
+    "R16_J4": { "verrouille": false, "date_verrou": null },
+    "QF_J1":  { "verrouille": false, "date_verrou": null },
+    "QF_J2":  { "verrouille": false, "date_verrou": null },
+    "SF_J1":  { "verrouille": false, "date_verrou": null },
+    "P3_J1":  { "verrouille": false, "date_verrou": null },
+    "F_J1":   { "verrouille": false, "date_verrou": null }
+  },
+
+  "phase_initiale_verrou": {
+    "_commentaire": "Verrouillage global de la soumission initiale (pronostics groupes + bracket). Mettre à true avant le coup d'envoi du 1er match.",
+    "verrouille": false,
+    "date_verrou": "2026-06-11T21:30:00-06:00"
+  }
+}
