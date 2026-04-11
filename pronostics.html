@@ -186,44 +186,51 @@ body {
 
 .match-info { font-size:.7rem; color:var(--muted); grid-column:1/-1; text-align:center; }
 
-/* ── Qualifiés ── */
-.qualifies-grid {
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:.8rem;
+/* ── Classements groupes ── */
+.standings-tabs {
+  display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:1rem;
 }
-.qualifies-card {
+.standings-tab {
+  padding:.3rem .75rem; border-radius:6px; font-family:'Bebas Neue';
+  font-size:.95rem; letter-spacing:.08em; cursor:pointer;
   background:var(--surface); border:1px solid var(--border);
-  border-radius:8px; padding:1rem;
+  color:var(--muted); transition:all .2s;
 }
-.qualifies-card h4 {
+.standings-tab.active { background:var(--gold-dim); border-color:var(--gold); color:var(--gold); }
+.standings-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.standings-table th {
+  font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;
+  padding:.4rem .5rem; border-bottom:1px solid var(--border); text-align:right;
+}
+.standings-table th:first-child { text-align:left; }
+.standings-table td { padding:.5rem; border-bottom:1px solid rgba(255,255,255,.04); text-align:right; }
+.standings-table td:first-child { text-align:left; }
+.standings-table tr:last-child td { border-bottom:none; }
+.standing-rank { font-family:'Bebas Neue'; font-size:1rem; color:var(--muted); width:20px; display:inline-block; }
+.standing-rank.q1,.standing-rank.q2 { color:var(--green); }
+.standing-rank.q3 { color:var(--blue); }
+.standing-team { display:flex; align-items:center; gap:.4rem; }
+.standing-pts { font-family:'Bebas Neue'; font-size:1rem; color:var(--gold); }
+.q-badge {
+  font-size:.65rem; padding:.1rem .35rem; border-radius:3px;
+  font-weight:700; margin-left:.3rem; vertical-align:middle;
+}
+.q-badge.q1,.q-badge.q2 { background:var(--green-dim); color:var(--green); }
+.q-badge.q3 { background:rgba(59,130,246,.15); color:var(--blue); }
+.tiers-summary {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:1rem; margin-top:1rem;
+}
+.tiers-summary h4 {
   font-family:'Bebas Neue'; font-size:1.1rem; letter-spacing:.1em;
-  color:var(--gold); margin-bottom:.7rem;
+  color:var(--blue); margin-bottom:.6rem;
 }
-.qualifies-row { display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; }
-.qualifies-row label { font-size:.75rem; color:var(--muted); width:40px; flex-shrink:0; text-transform:uppercase; }
-.qualifies-row select {
-  flex:1; padding:.4rem .7rem;
-  background:var(--card); border:1px solid var(--border);
-  border-radius:6px; color:var(--text); font-family:'DM Sans'; font-size:.85rem;
-  appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7a90' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right .6rem center;
-  padding-right:2rem;
+.tiers-list { display:flex; flex-wrap:wrap; gap:.4rem; }
+.tiers-chip {
+  padding:.3rem .7rem; border-radius:6px; font-size:.82rem; font-weight:600;
+  background:rgba(59,130,246,.12); border:1px solid rgba(59,130,246,.3); color:#93c5fd;
 }
-.qualifies-row select:focus { outline:none; border-color:var(--green); }
-
-/* ── Meilleurs tiers ── */
-.tiers-grid {
-  display:grid; grid-template-columns:repeat(4,1fr); gap:.6rem;
-}
-.tiers-item {
-  display:flex; align-items:center; gap:.5rem;
-  padding:.6rem .8rem; border-radius:8px; border:1px solid var(--border);
-  background:var(--surface); cursor:pointer; transition:all .2s;
-}
-.tiers-item input[type=checkbox] { accent-color:var(--green); width:16px; height:16px; flex-shrink:0; }
-.tiers-item label { font-family:'Bebas Neue'; font-size:1rem; letter-spacing:.08em; cursor:pointer; }
-.tiers-item.checked { background:var(--green-dim); border-color:var(--green); }
-.tiers-count { font-size:.8rem; color:var(--muted); margin-bottom:.8rem; }
-.tiers-count span { color:var(--green); font-weight:600; }
+.tiers-chip.empty { background:var(--border); border-color:transparent; color:var(--muted); font-weight:400; }
 
 /* ── Bracket ── */
 .bracket-section { margin-bottom:1.5rem; }
@@ -390,16 +397,20 @@ body {
     </div>
   </div>
 
-  <!-- STEP 3 : QUALIFIÉS -->
+  <!-- STEP 3 : CLASSEMENTS & QUALIFIÉS (automatique) -->
   <div id="step3" class="step">
     <div class="card">
-      <div class="card-title">Équipes qualifiées <span>1er et 2e de chaque groupe</span></div>
-      <div class="qualifies-grid" id="qualifiesGrid"></div>
-    </div>
-    <div class="card" style="margin-top:1rem">
-      <div class="card-title">Meilleurs 3es <span>Choisis exactement 8 groupes qui fourniront un 3e qualifié</span></div>
-      <div class="tiers-count">Sélectionnés : <span id="tiersCount">0</span> / 8</div>
-      <div class="tiers-grid" id="tiersGrid"></div>
+      <div class="card-title">Classements <span>Calculés depuis tes pronostics de matchs</span></div>
+      <div class="alert" style="margin-bottom:1rem;background:rgba(59,130,246,.1);border:1px solid #1e3a5f;color:#93c5fd">
+        Les qualifiés sont déduits automatiquement de tes résultats pronostiqués.
+        Reviens à l'étape précédente pour modifier tes pronostics.
+      </div>
+      <div class="standings-tabs" id="standingsTabs"></div>
+      <div id="standingsContent"></div>
+      <div class="tiers-summary">
+        <h4>🔵 8 Meilleurs 3es qualifiés</h4>
+        <div class="tiers-list" id="tiersList"></div>
+      </div>
     </div>
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="gotoStep(2)">← Retour</button>
@@ -411,7 +422,7 @@ body {
   <div id="step4" class="step">
     <div class="card">
       <div class="card-title">Bracket éliminatoire <span>Qui gagne chaque match jusqu'à la finale ?</span></div>
-      <div class="alert info" style="margin-bottom:1rem">
+      <div class="alert" style="margin-bottom:1rem;background:rgba(59,130,246,.1);border:1px solid #1e3a5f;color:#93c5fd">
         Les équipes disponibles sont celles que tu as qualifiées aux étapes précédentes.
         Les vainqueurs d'un tour alimentent automatiquement le tour suivant.
       </div>
@@ -678,71 +689,218 @@ function updateStep2Progress() {
   document.getElementById('step2Progress').textContent = `${done} / ${total} matchs remplis`;
 }
 
-// ── STEP 3 : Qualifiés ────────────────────────────────────────
+// ── STEP 3 : Classements automatiques ────────────────────────
+let activeStandingsGroup = 'A';
+
+// Calcule le classement d'un groupe depuis les pronostics de l'utilisateur
+function computeGroupStandings(g) {
+  const matchs = (CONFIG.matchs_groupes[g] || []).filter(m => !m._commentaire);
+  const teams = {};
+  CONFIG.groupes[g].equipes.forEach(code => {
+    teams[code] = { pts:0, j:0, g:0, n:0, p:0, bp:0, bc:0, bd:0 };
+  });
+
+  matchs.forEach(m => {
+    const p = state.groupes[m.id];
+    if (!p || !p.resultat) return;
+    const dom = m.dom, ext = m.ext;
+    const sd = p.score_dom ?? 0, se = p.score_ext ?? 0;
+
+    teams[dom].j++; teams[ext].j++;
+    teams[dom].bp += sd; teams[dom].bc += se; teams[dom].bd += (sd - se);
+    teams[ext].bp += se; teams[ext].bc += sd; teams[ext].bd += (se - sd);
+
+    if (p.resultat === 'H') {
+      teams[dom].pts += 3; teams[dom].g++;
+      teams[ext].p++;
+    } else if (p.resultat === 'A') {
+      teams[ext].pts += 3; teams[ext].g++;
+      teams[dom].p++;
+    } else {
+      teams[dom].pts += 1; teams[dom].n++;
+      teams[ext].pts += 1; teams[ext].n++;
+    }
+  });
+
+  // Trier : pts → bd → bp → résultat direct entre les deux équipes à égalité
+  const sorted = Object.entries(teams).sort((a, b) => {
+    const [cA, sA] = a, [cB, sB] = b;
+    if (sB.pts !== sA.pts) return sB.pts - sA.pts;
+    if (sB.bd  !== sA.bd)  return sB.bd  - sA.bd;
+    if (sB.bp  !== sA.bp)  return sB.bp  - sA.bp;
+    // Résultat direct
+    const directMatch = matchs.find(m =>
+      (m.dom === cA && m.ext === cB) || (m.dom === cB && m.ext === cA)
+    );
+    if (directMatch) {
+      const dp = state.groupes[directMatch.id];
+      if (dp?.resultat) {
+        const aWins = (directMatch.dom === cA && dp.resultat === 'H') ||
+                      (directMatch.ext === cA && dp.resultat === 'A');
+        if (aWins) return -1;
+        if (dp.resultat !== 'N') return 1;
+      }
+    }
+    return 0;
+  });
+
+  return sorted.map(([code, stats]) => ({ code, ...stats }));
+}
+
+// Calcule tous les classements et met à jour state.qualifies + state.tiers
+function computeAllQualifies() {
+  const groups = Object.keys(CONFIG.groupes).filter(g => !g.startsWith('_'));
+  const allThirds = [];
+
+  groups.forEach(g => {
+    const ranked = computeGroupStandings(g);
+    if (ranked.length >= 2) {
+      state.qualifies[g] = {
+        equipe_1er:  ranked[0]?.code || '',
+        equipe_2eme: ranked[1]?.code || '',
+      };
+    }
+    if (ranked.length >= 3 && ranked[2]) {
+      allThirds.push({ groupe: g, ...ranked[2] });
+    }
+  });
+
+  // Trier les 3es : pts → bd → bp → ordre alphabétique du groupe
+  allThirds.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.bd  !== a.bd)  return b.bd  - a.bd;
+    if (b.bp  !== a.bp)  return b.bp  - a.bp;
+    return a.groupe.localeCompare(b.groupe);
+  });
+
+  state.tiers = allThirds.slice(0, 8).map(t => t.groupe);
+  return { groups, allThirds };
+}
+
 function renderQualifies() {
-  const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
+  const groups = Object.keys(CONFIG.groupes).filter(g => !g.startsWith('_'));
+  computeAllQualifies();
 
-  // Qualifiés grid
-  document.getElementById('qualifiesGrid').innerHTML = groups.map(g=>{
-    const equipes = CONFIG.groupes[g].equipes.map(c=>getTeamByCode(c));
-    const sel = state.qualifies[g]||{};
-    const opts = equipes.map(e=>`<option value="${e.code}" ${sel.equipe_1er===e.code?'selected':''}>${e.drapeau} ${e.nom}</option>`).join('');
-    const opts2= equipes.map(e=>`<option value="${e.code}" ${sel.equipe_2eme===e.code?'selected':''}>${e.drapeau} ${e.nom}</option>`).join('');
-    return `
-    <div class="qualifies-card">
-      <h4>Groupe ${g}</h4>
-      <div class="qualifies-row">
-        <label>🥇 1er</label>
-        <select onchange="setQualifie('${g}','equipe_1er',this.value)">
-          <option value="">— Choisir —</option>${opts}
-        </select>
-      </div>
-      <div class="qualifies-row">
-        <label>🥈 2e</label>
-        <select onchange="setQualifie('${g}','equipe_2eme',this.value)">
-          <option value="">— Choisir —</option>${opts2}
-        </select>
-      </div>
-    </div>`;
-  }).join('');
+  // Tabs
+  document.getElementById('standingsTabs').innerHTML = groups.map(g => `
+    <button class="standings-tab ${activeStandingsGroup === g ? 'active' : ''}"
+      onclick="switchStandingsGroup('${g}')">${g}</button>
+  `).join('');
 
-  // Meilleurs tiers
-  document.getElementById('tiersGrid').innerHTML = groups.map(g=>{
-    const checked = state.tiers.includes(g);
-    return `
-    <div class="tiers-item ${checked?'checked':''}" onclick="toggleTiers('${g}')">
-      <input type="checkbox" id="tiers_${g}" ${checked?'checked':''}>
-      <label for="tiers_${g}">Groupe ${g}</label>
-    </div>`;
-  }).join('');
-  updateTiersCount();
+  renderStandingsForGroup(activeStandingsGroup);
+  renderTiersSummary();
 }
 
-function setQualifie(g, field, val) {
-  if (!state.qualifies[g]) state.qualifies[g]={};
-  state.qualifies[g][field] = val;
-}
-
-function toggleTiers(g) {
-  const idx = state.tiers.indexOf(g);
-  if (idx>=0) state.tiers.splice(idx,1);
-  else if (state.tiers.length<8) state.tiers.push(g);
-  else { toast('Tu peux sélectionner au maximum 8 groupes.','error'); return; }
+function switchStandingsGroup(g) {
+  activeStandingsGroup = g;
   renderQualifies();
 }
 
-function updateTiersCount() {
-  document.getElementById('tiersCount').textContent = state.tiers.length;
+function renderStandingsForGroup(g) {
+  const ranked = computeGroupStandings(g);
+  const matchs = (CONFIG.matchs_groupes[g] || []).filter(m => !m._commentaire);
+  const totalMatchs = matchs.length;
+  const playedMatchs = matchs.filter(m => state.groupes[m.id]?.resultat).length;
+
+  // Trouver le meilleur 3e parmi tous les groupes pour colorer
+  computeAllQualifies(); // recalc pour avoir state.tiers à jour
+  const isBest3rd = (rank, groupe) => rank === 2 && state.tiers.includes(groupe);
+
+  let html = '';
+  if (playedMatchs === 0) {
+    html = `<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">
+      Remplis les matchs du groupe ${g} à l'étape précédente pour voir le classement.
+    </div>`;
+  } else {
+    html = `
+    <table class="standings-table">
+      <thead><tr>
+        <th colspan="2">Équipe</th>
+        <th title="Matchs joués">J</th>
+        <th title="Victoires">V</th>
+        <th title="Nuls">N</th>
+        <th title="Défaites">D</th>
+        <th title="Buts pour">BP</th>
+        <th title="Buts contre">BC</th>
+        <th title="Différence de buts">+/-</th>
+        <th title="Points">Pts</th>
+      </tr></thead>
+      <tbody>
+        ${ranked.map((t, i) => {
+          const team = getTeamByCode(t.code);
+          const rankClass = i === 0 ? 'q1' : i === 1 ? 'q2' : (isBest3rd(i, g) ? 'q3' : '');
+          const badge = i === 0 ? '<span class="q-badge q1">Q</span>'
+                      : i === 1 ? '<span class="q-badge q2">Q</span>'
+                      : isBest3rd(i, g) ? '<span class="q-badge q3">3e</span>'
+                      : '';
+          return `<tr>
+            <td style="width:24px"><span class="standing-rank ${rankClass}">${i+1}</span></td>
+            <td>
+              <div class="standing-team">
+                ${team?.drapeau || ''} <span>${team?.nom || t.code}</span>${badge}
+              </div>
+            </td>
+            <td>${t.j}</td>
+            <td>${t.g}</td>
+            <td>${t.n}</td>
+            <td>${t.p}</td>
+            <td>${t.bp}</td>
+            <td>${t.bc}</td>
+            <td style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${t.bd>0?'+':''}${t.bd}</td>
+            <td><span class="standing-pts">${t.pts}</span></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:.5rem">${playedMatchs}/${totalMatchs} matchs pronostiqués</div>`;
+  }
+
+  document.getElementById('standingsContent').innerHTML = html;
+}
+
+function renderTiersSummary() {
+  const groups = Object.keys(CONFIG.groupes).filter(g => !g.startsWith('_'));
+  const allThirds = [];
+
+  groups.forEach(g => {
+    const ranked = computeGroupStandings(g);
+    if (ranked[2]) allThirds.push({ groupe: g, ...ranked[2] });
+  });
+
+  allThirds.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.bd  !== a.bd)  return b.bd  - a.bd;
+    if (b.bp  !== a.bp)  return b.bp  - a.bp;
+    return a.groupe.localeCompare(b.groupe);
+  });
+
+  const best8 = allThirds.slice(0, 8);
+  const slots = Array.from({length: 8}, (_, i) => best8[i] || null);
+
+  document.getElementById('tiersList').innerHTML = slots.map((t, i) => {
+    if (!t) return `<span class="tiers-chip empty">— ${i+1}e</span>`;
+    const team = getTeamByCode(t.code);
+    return `<span class="tiers-chip" title="Groupe ${t.groupe} · ${t.pts}pts ${t.bd>0?'+':''}${t.bd}">
+      ${team?.drapeau || ''} ${team?.nom || t.code} <span style="opacity:.6;font-size:.75rem">(${t.groupe})</span>
+    </span>`;
+  }).join('');
 }
 
 function validateStep3() {
-  const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
-  for (const g of groups) {
-    const q = state.qualifies[g]||{};
-    if (!q.equipe_1er || !q.equipe_2eme) { toast(`Choisis le 1er et le 2e du groupe ${g}`,'error'); return; }
-    if (q.equipe_1er===q.equipe_2eme) { toast(`Le 1er et le 2e du groupe ${g} doivent être différents`,'error'); return; }
+  // Les qualifiés sont automatiques — vérifier qu'assez de matchs sont remplis
+  const groups = Object.keys(CONFIG.groupes).filter(g => !g.startsWith('_'));
+  const incomplete = groups.filter(g => {
+    const q = state.qualifies[g] || {};
+    return !q.equipe_1er || !q.equipe_2eme;
+  });
+  if (incomplete.length > 0) {
+    toast(`Groupes incomplets : ${incomplete.join(', ')} — remplis au moins 2 matchs par groupe`, 'error');
+    return;
   }
-  if (state.tiers.length!==8) { toast('Sélectionne exactement 8 meilleurs 3es','error'); return; }
+  if (state.tiers.length !== 8) {
+    toast('Pronostique plus de matchs pour déterminer les 8 meilleurs 3es', 'error');
+    return;
+  }
   gotoStep(4);
 }
 
