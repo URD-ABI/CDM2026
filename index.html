@@ -250,7 +250,7 @@ body {
   color:var(--gold); margin-bottom:1rem; padding-bottom:.6rem;
   border-bottom:1px solid var(--border);
 }
-.part-sections { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
+.part-sections { display:block; }
 .part-section h4 {
   font-family:'Bebas Neue'; font-size:.95rem; letter-spacing:.1em;
   color:var(--muted); margin-bottom:.5rem; text-transform:uppercase;
@@ -775,6 +775,23 @@ function renderPronosticsList() {
   }).join('');
 }
 
+
+// ── Traduit les codes source du bracket en labels lisibles ──
+function translateSource(src) {
+  if (!src) return '?';
+  if (/^1[A-L]$/.test(src)) return `1er Grp ${src[1]}`;
+  if (/^2[A-L]$/.test(src)) return `2e Grp ${src[1]}`;
+  if (/^T3_/.test(src)) {
+    const grps = src.replace('T3_','').split('').join('/');
+    return `Meilleur 3e (${grps})`;
+  }
+  if (/^W_S16_/.test(src)) return `Vainq. S16 ${src.replace('W_S16_','')}`;
+  if (/^W_S8_/.test(src))  return `Vainq. S8 ${src.replace('W_S8_','')}`;
+  if (/^W_QF_/.test(src))  return `Vainq. QF ${src.replace('W_QF_','')}`;
+  if (/^W_SF_/.test(src))  return `Vainq. SF ${src.replace('W_SF_','')}`;
+  if (/^L_SF_/.test(src))  return `Perdant SF ${src.replace('L_SF_','')}`;
+  return src;
+}
 async function selectParticipant(pid, pseudo) {
   activePart = pid;
   renderPronosticsList();
@@ -784,6 +801,7 @@ async function selectParticipant(pid, pseudo) {
   const titleEl   = document.getElementById('partDetailTitle');
   detailEl.style.display = 'block';
   titleEl.textContent = pseudo;
+  sectionsEl.style.display='block';
   sectionsEl.innerHTML = '<div class="spinner" style="margin:1.5rem auto"></div>';
   detailEl.scrollIntoView({behavior:'smooth', block:'nearest'});
 
@@ -844,7 +862,7 @@ async function selectParticipant(pid, pseudo) {
   let html = '';
 
   // — Cartes de groupes avec pronostics du participant —
-  html += `<div style="margin-bottom:.6rem;font-family:'Bebas Neue';font-size:1rem;letter-spacing:.1em;color:var(--muted)">Phase de groupes</div>`;
+  html += `<div style="grid-column:1/-1;margin-bottom:.6rem;font-family:'Bebas Neue';font-size:1rem;letter-spacing:.1em;color:var(--muted)">Phase de groupes</div>`;
   html += `<div class="groupes-grid" style="margin-bottom:1.5rem">`;
   groups.forEach(g => {
     const matchs   = CONFIG.matchs_groupes[g];
@@ -894,15 +912,17 @@ async function selectParticipant(pid, pseudo) {
     }).join('');
 
     // Classement calculé depuis les pronostics révélés
+    const anyMatchPlayed = matchs.some(m=>reels_map[m.id]?.joue && pronos_g[m.id]);
     const standingRows = standing.map((t,i)=>{
       const team = CONFIG.equipes.find(e=>e.code===t.code);
-      const rankClass = i<2?'top':(i===2&&best8.has(g)?'third':'');
-      const badge = i<2?'<span class="gs-q q12">Q</span>':(i===2&&best8.has(g)?'<span class="gs-q q3">3e</span>':'');
+      const showBadge = anyMatchPlayed;
+      const rankClass = showBadge&&i<2?'top':(showBadge&&i===2&&best8.has(g)?'third':'');
+      const badge = showBadge&&i<2?'<span class="gs-q q12">Q</span>':(showBadge&&i===2&&best8.has(g)?'<span class="gs-q q3">3e</span>':'');
       return `<div class="gs-row">
         <div class="gs-rank ${rankClass}">${i+1}</div>
         <div class="gs-team">${team?.drapeau||''} ${team?.nom||t.code} ${badge}</div>
-        <div class="gs-diff" style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${t.bd>0?'+':''}${t.bd}</div>
-        <div class="gs-pts">${t.pts}</div>
+        <div class="gs-diff" style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${anyMatchPlayed?((t.bd>0?'+':'')+t.bd):'–'}</div>
+        <div class="gs-pts">${anyMatchPlayed?t.pts:'–'}</div>
       </div>`;
     }).join('');
 
@@ -918,7 +938,7 @@ async function selectParticipant(pid, pseudo) {
   html += `</div>`;
 
   // — Bracket éliminatoire (cartes style matchs) —
-  html += `<div style="margin-bottom:.6rem;font-family:'Bebas Neue';font-size:1rem;letter-spacing:.1em;color:var(--muted)">Bracket éliminatoire</div>`;
+  html += `<div style="grid-column:1/-1;margin-bottom:.6rem;font-family:'Bebas Neue';font-size:1rem;letter-spacing:.1em;color:var(--muted)">Bracket éliminatoire</div>`;
   html += `<div class="matchs-grid" style="margin-bottom:1.5rem">`;
   const brTours  = ['seizièmes','huitièmes','QF','SF','P3','F'];
   const brLabels = {seizièmes:'Seizième',huitièmes:'Huitième',QF:'Quart',SF:'Demie',P3:'3e place',F:'Finale'};
@@ -931,15 +951,17 @@ async function selectParticipant(pid, pseudo) {
 
       // Masqué tant que le match n'est pas joué
       if (!r?.joue) {
-        let statusClass='', badgeHtml='', scoreHtml=`<div class="score pending">vs</div>`;
+        let badgeHtml='', scoreHtml=`<div class="score pending">vs</div>`;
         if(r?.verrouille){ badgeHtml=`<div class="live-badge">VERROUILLÉ</div>`; }
-        html += `<div class="match-card ${statusClass}" style="opacity:.6">
+        const dSrc = translateSource(m.dom_source);
+        const eSrc = translateSource(m.ext_source);
+        html += `<div class="match-card" style="opacity:.6">
           ${badgeHtml}
           <div class="group-label">${lbl}</div>
           <div class="teams">
-            <div class="team">${m.dom_source||'?'}</div>
+            <div class="team" style="font-size:.78rem;color:var(--muted)">${dSrc}</div>
             ${scoreHtml}
-            <div class="team right">${m.ext_source||'?'}</div>
+            <div class="team right" style="font-size:.78rem;color:var(--muted)">${eSrc}</div>
           </div>
         </div>`;
         return;
@@ -973,7 +995,7 @@ async function selectParticipant(pid, pseudo) {
   // — Questions bonus —
   const activeBonus = (CONFIG.questions_bonus||[]).filter(q=>q.active);
   if (activeBonus.length) {
-    html += `<div style="margin-bottom:.6rem;font-family:'Bebas Neue';font-size:1rem;letter-spacing:.1em;color:var(--muted)">Questions bonus</div>`;
+    html += `<div style="grid-column:1/-1;margin-bottom:.6rem;font-family:'Bebas Neue';font-size:1rem;letter-spacing:.1em;color:var(--muted)">Questions bonus</div>`;
     html += `<div class="groupes-grid">`;
     activeBonus.forEach(q=>{
       const b   = pronos_bo[q.id];
