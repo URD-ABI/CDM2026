@@ -196,11 +196,85 @@ body {
 /* ── Alertes ── */
 .empty-state { text-align:center; color:var(--muted); padding:3rem 1rem; font-size:.9rem; }
 
+/* ── Groupes avec classement ── */
+.groupes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1rem; }
+.groupe-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.groupe-card-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.7rem 1rem; background:var(--surface); border-bottom:1px solid var(--border);
+}
+.groupe-card-title { font-family:'Bebas Neue'; font-size:1.1rem; letter-spacing:.1em; color:var(--gold); }
+.groupe-card-played { font-size:.72rem; color:var(--muted); }
+.groupe-matches { border-bottom:1px solid var(--border); }
+.groupe-match-row {
+  display:flex; align-items:center; gap:.4rem; padding:.45rem .8rem;
+  border-bottom:1px solid rgba(255,255,255,.04); font-size:.82rem;
+}
+.groupe-match-row:last-child { border-bottom:none; }
+.gm-team { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gm-team.right { text-align:right; }
+.gm-score {
+  font-family:'Bebas Neue'; font-size:1rem; color:var(--gold);
+  min-width:40px; text-align:center; flex-shrink:0;
+}
+.gm-score.pending { color:var(--muted); font-size:.8rem; }
+.groupe-standings { padding:.5rem .8rem; }
+.gs-row {
+  display:flex; align-items:center; gap:.5rem; padding:.3rem 0;
+  border-bottom:1px solid rgba(255,255,255,.03); font-size:.8rem;
+}
+.gs-row:last-child { border-bottom:none; }
+.gs-rank { font-family:'Bebas Neue'; font-size:.9rem; color:var(--muted); width:16px; flex-shrink:0; }
+.gs-rank.top { color:var(--green); }
+.gs-rank.third { color:var(--blue); }
+.gs-team { flex:1; display:flex; align-items:center; gap:.3rem; }
+.gs-pts { font-family:'Bebas Neue'; font-size:.95rem; color:var(--gold); }
+.gs-diff { font-size:.72rem; color:var(--muted); min-width:28px; text-align:right; }
+.gs-q { font-size:.6rem; padding:.1rem .3rem; border-radius:3px; font-weight:700; flex-shrink:0; }
+.gs-q.q12 { background:var(--green-dim); color:var(--green); }
+.gs-q.q3  { background:rgba(59,130,246,.15); color:var(--blue); }
+
+/* ── Tab Pronostics participants ── */
+.part-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:.6rem; margin-bottom:1.5rem; }
+.part-card {
+  background:var(--card); border:1px solid var(--border); border-radius:8px;
+  padding:.8rem 1rem; cursor:pointer; transition:all .2s; text-align:center;
+}
+.part-card:hover { border-color:var(--muted); background:var(--surface); }
+.part-card.active { border-color:var(--gold); background:rgba(245,183,49,.06); }
+.part-card-pseudo { font-weight:600; font-size:.95rem; }
+.part-card-pts { font-family:'Bebas Neue'; font-size:1.2rem; color:var(--gold); }
+.part-detail { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem; }
+.part-detail-title {
+  font-family:'Bebas Neue'; font-size:1.3rem; letter-spacing:.08em;
+  color:var(--gold); margin-bottom:1rem; padding-bottom:.6rem;
+  border-bottom:1px solid var(--border);
+}
+.part-sections { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
+.part-section h4 {
+  font-family:'Bebas Neue'; font-size:.95rem; letter-spacing:.1em;
+  color:var(--muted); margin-bottom:.5rem; text-transform:uppercase;
+}
+.part-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.35rem 0; border-bottom:1px solid rgba(255,255,255,.04);
+  font-size:.82rem; gap:.5rem;
+}
+.part-row:last-child { border-bottom:none; }
+.part-row-label { color:var(--muted); flex:1; }
+.part-row-val { font-weight:600; }
+.part-row-val.ok  { color:var(--green); }
+.part-row-val.nok { color:var(--red); }
+.part-row-val.hidden { color:var(--muted); font-style:italic; font-weight:400; }
+.part-pts { font-family:'Bebas Neue'; font-size:.9rem; color:var(--gold); min-width:24px; text-align:right; }
+
 /* ── Responsive ── */
 @media(max-width:600px) {
   .header-actions { position:static; transform:none; flex-direction:row; justify-content:center; margin-top:.8rem; }
   .sub-scores { display:none; }
   .classement-table th.hide-mobile, .classement-row td.hide-mobile { display:none; }
+  .groupes-grid { grid-template-columns:1fr; }
+  .part-list { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
 }
 </style>
 </head>
@@ -218,6 +292,7 @@ body {
 <div class="nav-tabs">
   <button class="nav-tab active" onclick="switchTab('classement',this)">🏆 Classement</button>
   <button class="nav-tab" onclick="switchTab('matchs',this)">⚽ Matchs</button>
+  <button class="nav-tab" onclick="switchTab('pronostics',this)">👁 Pronostics</button>
 </div>
 
 <div class="container">
@@ -260,7 +335,27 @@ body {
     </div>
     <div id="matchsContent" style="display:none">
       <div class="phase-filter" id="phaseFilter"></div>
-      <div id="matchsGrid" class="matchs-grid"></div>
+      <div id="matchsGrid"></div>
+    </div>
+  </div>
+
+  <!-- TAB : PRONOSTICS PARTICIPANTS -->
+  <div class="tab-content" id="tab-pronostics">
+    <div id="pronosticsLoading" class="loading-screen">
+      <div class="spinner"></div>
+      <p>Chargement…</p>
+    </div>
+    <div id="pronosticsContent" style="display:none">
+      <div class="part-list" id="partList"></div>
+      <div id="partDetail" style="display:none">
+        <div class="part-detail">
+          <div class="part-detail-title" id="partDetailTitle"></div>
+          <div class="part-sections" id="partSections"></div>
+        </div>
+      </div>
+      <div id="partEmpty" class="empty-state" style="display:none">
+        Aucun participant inscrit pour l'instant.
+      </div>
     </div>
   </div>
 
@@ -287,7 +382,7 @@ let activePhase     = 'all';
 async function init() {
   try {
     CONFIG = await (await fetch('config.json')).json();
-    await Promise.all([ loadClassement(), loadMatchs() ]);
+    await Promise.all([ loadClassement(), loadMatchs(), loadPronostics() ]);
     setupRealtime();
     document.getElementById('lastUpdate').textContent = 'Mis à jour : ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   } catch(e) {
@@ -301,6 +396,7 @@ function switchTab(id, el) {
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
+  if (id==='pronostics') renderPronosticsList();
 }
 
 // ── Classement ────────────────────────────────────────
@@ -410,7 +506,7 @@ async function loadParticipantDetail(pid, pseudo, el) {
 
   // — Phase de groupes —
   html += `<div class="detail-section"><h4>Phase de Groupes</h4>`;
-  Object.entries(CONFIG.matchs_groupes).forEach(([g, matchs])=>{
+  Object.entries(CONFIG.matchs_groupes).filter(([g])=>!g.startsWith('_')).forEach(([g, matchs])=>{
     matchs.forEach(m=>{
       const p   = pronos_g[m.id];
       const r   = reels_map[m.id];
@@ -447,7 +543,7 @@ async function loadParticipantDetail(pid, pseudo, el) {
 
   // — Qualifiés —
   html += `<div class="detail-section"><h4>Qualifiés & 3es</h4>`;
-  Object.keys(CONFIG.groupes).forEach(g=>{
+  Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_')).forEach(g=>{
     const q = pronos_q[g];
     if (!q) { html += `<div class="detail-match"><span class="match-teams">Groupe ${g}</span><span class="match-prono pending">—</span></div>`; return; }
     const t1 = CONFIG.equipes.find(e=>e.code===q.equipe_1er);
@@ -530,62 +626,303 @@ function renderMatchs(phase, btnEl) {
   btnEl?.classList.add('active');
 
   const reels = Object.fromEntries(allMatchsReels.map(m=>[m.match_id,m]));
+  const grid = document.getElementById('matchsGrid');
 
-  // Construire la liste des matchs à afficher
-  let matchsList = [];
-
-  if (phase==='all'||phase==='groupes') {
-    Object.entries(CONFIG.matchs_groupes)
-      .filter(([g])=>!g.startsWith('_'))
-      .forEach(([g,ms])=>{
-        ms.forEach(m=>matchsList.push({...m, phase:'groupes', groupe:g}));
+  // Phase de groupes → vue avec classement par groupe
+  if (phase==='all' || phase==='groupes') {
+    const groups = Object.keys(CONFIG.matchs_groupes).filter(g=>!g.startsWith('_'));
+    // Calculer classements réels depuis matchs_reels
+    const standings = {};
+    groups.forEach(g => {
+      const matchs = CONFIG.matchs_groupes[g];
+      const teams = {};
+      CONFIG.groupes[g].equipes.forEach(c=>{ teams[c]={pts:0,j:0,bd:0,bp:0}; });
+      matchs.forEach(m=>{
+        const r=reels[m.id]; if(!r?.joue) return;
+        const {score_dom:sd,score_ext:se,equipe_dom:ed,equipe_ext:ee}=r;
+        teams[ed].j++; teams[ee].j++;
+        teams[ed].bp+=sd; teams[ed].bd+=(sd-se);
+        teams[ee].bp+=se; teams[ee].bd+=(se-sd);
+        if(sd>se){teams[ed].pts+=3;}else if(sd<se){teams[ee].pts+=3;}else{teams[ed].pts+=1;teams[ee].pts+=1;}
       });
+      standings[g]=Object.entries(teams)
+        .sort((a,b)=>b[1].pts-a[1].pts||b[1].bd-a[1].bd||b[1].bp-a[1].bp)
+        .map(([code,s])=>({code,...s}));
+    });
+
+    // Meilleurs 3es réels
+    const real3rds = groups
+      .filter(g=>standings[g]?.[2])
+      .map(g=>({g, ...standings[g][2]}))
+      .sort((a,b)=>b.pts-a.pts||b.bd-a.bd||b.bp-a.bp);
+    const best8groups = new Set(real3rds.slice(0,8).map(t=>t.g));
+
+    if (phase==='all') {
+      // En vue "Tous", afficher groupes en premier puis le reste
+      let html = `<div class="groupes-grid" style="margin-bottom:1.2rem">` + groups.map(g => renderGroupCard(g, CONFIG.matchs_groupes[g], reels, standings[g], best8groups)).join('') + `</div>`;
+      // Ajouter les élim en dessous
+      const eliminatoires = ['seizièmes','huitièmes','QF','SF','P3','F'];
+      const elimMatchs = [];
+      eliminatoires.forEach(tour=>(CONFIG.bracket_eliminatoire[tour]||[]).forEach(m=>elimMatchs.push({...m,phase:tour})));
+      if (elimMatchs.length) {
+        html += `<div style="font-family:'Bebas Neue';font-size:1.1rem;letter-spacing:.1em;color:var(--muted);margin-bottom:.8rem">Phase éliminatoire</div>`;
+        html += `<div class="matchs-grid">` + elimMatchs.map(m=>renderElimCard(m,reels)).join('') + `</div>`;
+      }
+      grid.innerHTML = html;
+    } else {
+      grid.innerHTML = `<div class="groupes-grid">` + groups.map(g => renderGroupCard(g, CONFIG.matchs_groupes[g], reels, standings[g], best8groups)).join('') + `</div>`;
+    }
+    return;
   }
+
+  // Phase éliminatoire → vue en cartes simples
   const eliminatoires = ['seizièmes','huitièmes','QF','SF','P3','F'];
+  let matchsList = [];
   eliminatoires.forEach(tour=>{
-    if (phase==='all'||phase===tour||(phase==='final'&&(tour==='P3'||tour==='F'))) {
-      (CONFIG.bracket_eliminatoire[tour]||[]).forEach(m=>matchsList.push({...m, phase:tour}));
+    if (phase===tour||(phase==='final'&&(tour==='P3'||tour==='F'))) {
+      (CONFIG.bracket_eliminatoire[tour]||[]).forEach(m=>matchsList.push({...m,phase:tour}));
     }
   });
-
-  const grid = document.getElementById('matchsGrid');
   if (!matchsList.length) { grid.innerHTML='<div class="empty-state">Aucun match pour cette phase.</div>'; return; }
+  grid.innerHTML = `<div class="matchs-grid">` + matchsList.map(m=>renderElimCard(m,reels)).join('') + `</div>`;
+}
 
-  grid.innerHTML = matchsList.map(m=>{
-    const r     = reels[m.id];
-    const dom   = CONFIG.equipes.find(e=>e.code===m.dom||e.code===m.dom_source?.replace('1','').replace('2',''));
-    const ext   = CONFIG.equipes.find(e=>e.code===m.ext||e.code===m.ext_source?.replace('1','').replace('2',''));
-    const domLabel = dom ? `${dom.drapeau} ${dom.nom}` : (r?.equipe_dom ? getTeamLabel(r.equipe_dom) : m.dom_source||m.dom||'?');
-    const extLabel = ext ? `${ext.drapeau} ${ext.nom}` : (r?.equipe_ext ? getTeamLabel(r.equipe_ext) : m.ext_source||m.ext||'?');
-    const groupLabel = m.groupe ? `Groupe ${m.groupe}` : m.phase;
-
-    let scoreHtml='', statusClass='', badgeHtml='';
-    if (r?.joue) {
-      scoreHtml=`<div class="score">${r.score_dom} – ${r.score_ext}</div>`;
-      statusClass='played';
-    } else if (r?.verrouille) {
-      scoreHtml=`<div class="score pending">vs</div>`;
-      badgeHtml=`<div class="live-badge">VERROUILLÉ</div>`;
-    } else {
-      scoreHtml=`<div class="score pending">vs</div>`;
-    }
-
-    return `
-    <div class="match-card ${statusClass}">
-      ${badgeHtml}
-      <div class="group-label">${groupLabel} · ${m.id}</div>
-      <div class="teams">
-        <div class="team">${domLabel}</div>
-        ${scoreHtml}
-        <div class="team right">${extLabel}</div>
-      </div>
+function renderGroupCard(g, matchs, reels, standing, best8groups) {
+  const played = matchs.filter(m=>reels[m.id]?.joue).length;
+  const matchRows = matchs.map(m=>{
+    const r=reels[m.id];
+    const dom=CONFIG.equipes.find(e=>e.code===m.dom);
+    const ext=CONFIG.equipes.find(e=>e.code===m.ext);
+    let scoreHtml;
+    if(r?.joue) scoreHtml=`<div class="gm-score">${r.score_dom}–${r.score_ext}</div>`;
+    else if(r?.verrouille) scoreHtml=`<div class="gm-score pending">🔒</div>`;
+    else scoreHtml=`<div class="gm-score pending">vs</div>`;
+    return `<div class="groupe-match-row">
+      <div class="gm-team">${dom?.drapeau||''} ${dom?.nom||m.dom}</div>
+      ${scoreHtml}
+      <div class="gm-team right">${ext?.nom||m.ext} ${ext?.drapeau||''}</div>
     </div>`;
   }).join('');
+
+  const standingRows = (standing||[]).map((t,i)=>{
+    const team=CONFIG.equipes.find(e=>e.code===t.code);
+    const rankClass = i<2?'top': (i===2&&best8groups.has(g)?'third':'');
+    const badge = i<2 ? '<span class="gs-q q12">Q</span>' : (i===2&&best8groups.has(g)?'<span class="gs-q q3">3e</span>':'');
+    return `<div class="gs-row">
+      <div class="gs-rank ${rankClass}">${i+1}</div>
+      <div class="gs-team">${team?.drapeau||''} ${team?.nom||t.code} ${badge}</div>
+      <div class="gs-diff" style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${t.bd>0?'+':''}${t.bd}</div>
+      <div class="gs-pts">${t.pts}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="groupe-card">
+    <div class="groupe-card-header">
+      <span class="groupe-card-title">Groupe ${g}</span>
+      <span class="groupe-card-played">${played}/3 joués</span>
+    </div>
+    <div class="groupe-matches">${matchRows}</div>
+    <div class="groupe-standings">${standingRows||'<div style="color:var(--muted);font-size:.78rem;padding:.3rem 0">Aucun match joué</div>'}</div>
+  </div>`;
+}
+
+function renderElimCard(m, reels) {
+  const r=reels[m.id];
+  const domLabel = r?.equipe_dom ? getTeamLabel(r.equipe_dom) : (m.dom_source||'?');
+  const extLabel = r?.equipe_ext ? getTeamLabel(r.equipe_ext) : (m.ext_source||'?');
+  let scoreHtml='', statusClass='', badgeHtml='';
+  if(r?.joue){ scoreHtml=`<div class="score">${r.score_dom} – ${r.score_ext}</div>`; statusClass='played'; }
+  else if(r?.verrouille){ scoreHtml=`<div class="score pending">vs</div>`; badgeHtml=`<div class="live-badge">VERROUILLÉ</div>`; }
+  else { scoreHtml=`<div class="score pending">vs</div>`; }
+  return `<div class="match-card ${statusClass}">
+    ${badgeHtml}
+    <div class="group-label">${m.phase||m.id} · ${m.id}</div>
+    <div class="teams">
+      <div class="team">${domLabel}</div>${scoreHtml}<div class="team right">${extLabel}</div>
+    </div>
+  </div>`;
 }
 
 function getTeamLabel(code) {
   const t = CONFIG.equipes.find(e=>e.code===code);
   return t ? `${t.drapeau} ${t.nom}` : code;
+}
+
+// ── Onglet Pronostics participants ────────────────────
+let allPronos = {};       // pid → { groupes, qualifies, tiers, bracket, bonus }
+let allPart_pronostics = [];
+let activePart = null;
+
+async function loadPronostics() {
+  const { data:parts } = await sb.from('participants').select('id,pseudo');
+  allPart_pronostics = parts || [];
+  document.getElementById('pronosticsLoading').style.display='none';
+  document.getElementById('pronosticsContent').style.display='block';
+  if (!allPart_pronostics.length) {
+    document.getElementById('partEmpty').style.display='block';
+  }
+}
+
+function renderPronosticsList() {
+  const scoresMap = Object.fromEntries(allScores.map(s=>[s.participant_id,s]));
+  document.getElementById('partList').innerHTML = allPart_pronostics.map(p=>{
+    const s = scoresMap[p.id];
+    const isActive = activePart===p.id;
+    return `<div class="part-card ${isActive?'active':''}" onclick="selectParticipant('${p.id}','${p.pseudo}')">
+      <div class="part-card-pseudo">${p.pseudo}</div>
+      ${s ? `<div class="part-card-pts">${s.total||0} pts</div>` : '<div class="part-card-pts" style="color:var(--muted)">—</div>'}
+    </div>`;
+  }).join('');
+}
+
+async function selectParticipant(pid, pseudo) {
+  activePart = pid;
+  renderPronosticsList();
+  const detailEl = document.getElementById('partDetail');
+  const sectionsEl = document.getElementById('partSections');
+  const titleEl = document.getElementById('partDetailTitle');
+  detailEl.style.display='block';
+  titleEl.textContent = pseudo;
+  sectionsEl.innerHTML = '<div class="spinner" style="margin:1rem auto"></div>';
+  detailEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  // Charger les pronostics
+  const [pg, pq, pt, pb, pbo] = await Promise.all([
+    sb.from('pronostics_groupes').select('*').eq('participant_id',pid),
+    sb.from('pronostics_qualifies').select('*').eq('participant_id',pid),
+    sb.from('pronostics_meilleurs_tiers').select('*').eq('participant_id',pid).single(),
+    sb.from('pronostics_bracket').select('*').eq('participant_id',pid),
+    sb.from('pronostics_bonus').select('*').eq('participant_id',pid),
+  ]);
+
+  const pronos_g  = Object.fromEntries((pg.data||[]).map(r=>[r.match_id,r]));
+  const pronos_q  = Object.fromEntries((pq.data||[]).map(r=>[r.groupe_id,r]));
+  const tiers     = pt.data?.groupes || [];
+  const pronos_b  = Object.fromEntries((pb.data||[]).map(r=>[r.slot_id,r]));
+  const pronos_bo = Object.fromEntries((pbo.data||[]).map(r=>[r.question_id,r]));
+  const reels_map = Object.fromEntries(allMatchsReels.map(m=>[m.match_id,m]));
+  const pts_conf  = CONFIG.points;
+
+  let html = '';
+
+  // ── Matchs de groupes ──
+  html += `<div class="part-section"><h4>Matchs de groupes</h4>`;
+  Object.entries(CONFIG.matchs_groupes)
+    .filter(([g])=>!g.startsWith('_'))
+    .forEach(([g,matchs])=>{
+      matchs.forEach(m=>{
+        const r   = reels_map[m.id];
+        const p   = pronos_g[m.id];
+        const dom = CONFIG.equipes.find(e=>e.code===m.dom);
+        const ext = CONFIG.equipes.find(e=>e.code===m.ext);
+        const teams = `${dom?.drapeau||''} ${dom?.nom||m.dom} – ${ext?.drapeau||''} ${ext?.nom||m.ext}`;
+
+        // Visible seulement si le match est joué
+        if (!r?.joue) {
+          html += `<div class="part-row">
+            <span class="part-row-label">${teams}</span>
+            <span class="part-row-val hidden">Non révélé</span>
+          </div>`;
+          return;
+        }
+
+        if (!p) {
+          html += `<div class="part-row">
+            <span class="part-row-label">${teams}</span>
+            <span class="part-row-val hidden">Non pronostiqué</span>
+          </div>`;
+          return;
+        }
+
+        const real_res = r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
+        const ok = p.resultat===real_res;
+        const scoreLabel = p.score_dom!=null&&p.score_ext!=null ? ` ${p.score_dom}-${p.score_ext}` : '';
+        const resLabel = {H:dom?.nom||m.dom, N:'Nul', A:ext?.nom||m.ext}[p.resultat]||'?';
+        let pts=0;
+        if(ok){ pts+=pts_conf.resultat_correct; if(p.score_dom===r.score_dom&&p.score_ext===r.score_ext) pts+=pts_conf.score_exact_bonus; }
+
+        html += `<div class="part-row">
+          <span class="part-row-label">${teams}</span>
+          <span class="part-row-val ${ok?'ok':'nok'}">${resLabel}${scoreLabel}</span>
+          <span class="part-pts">+${pts}</span>
+        </div>`;
+      });
+    });
+  html += `</div>`;
+
+  // ── Qualifiés & 3es ──
+  html += `<div class="part-section"><h4>Qualifiés & Meilleurs 3es</h4>`;
+  const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
+  groups.forEach(g=>{
+    const q = pronos_q[g];
+    if (!q) { html+=`<div class="part-row"><span class="part-row-label">Groupe ${g}</span><span class="part-row-val hidden">—</span></div>`; return; }
+    const t1=CONFIG.equipes.find(e=>e.code===q.equipe_1er);
+    const t2=CONFIG.equipes.find(e=>e.code===q.equipe_2eme);
+    html += `<div class="part-row">
+      <span class="part-row-label">Groupe ${g}</span>
+      <span class="part-row-val pending" style="color:var(--muted)">${t1?.drapeau||''} ${t1?.nom||q.equipe_1er} &amp; ${t2?.drapeau||''} ${t2?.nom||q.equipe_2eme}</span>
+    </div>`;
+  });
+  html += `<div class="part-row">
+    <span class="part-row-label" style="color:var(--text)">Meilleurs 3es</span>
+    <span class="part-row-val" style="color:var(--blue)">${tiers.length ? tiers.join(', ') : '—'}</span>
+  </div>`;
+  html += `</div>`;
+
+  // ── Bracket ──
+  html += `<div class="part-section"><h4>Bracket éliminatoire</h4>`;
+  const brTours = ['seizièmes','huitièmes','QF','SF','P3','F'];
+  const brLabels = {seizièmes:'S16',huitièmes:'S8',QF:'QF',SF:'SF',P3:'P3',F:'Finale'};
+  brTours.forEach(tour=>{
+    (CONFIG.bracket_eliminatoire[tour]||[]).forEach((m,i)=>{
+      const b  = pronos_b[m.id];
+      const r  = reels_map[m.id];
+      const ms = CONFIG.bracket_eliminatoire[tour]||[];
+      const label = `${brLabels[tour]}${ms.length>1?' '+(i+1):''}`;
+
+      if (!r?.joue) {
+        html += `<div class="part-row">
+          <span class="part-row-label">${label}</span>
+          <span class="part-row-val hidden">${b ? '✓ soumis' : 'Non pronostiqué'}</span>
+        </div>`;
+        return;
+      }
+      if (!b) { html+=`<div class="part-row"><span class="part-row-label">${label}</span><span class="part-row-val hidden">—</span></div>`; return; }
+      const t    = CONFIG.equipes.find(e=>e.code===b.equipe);
+      const winner = r.score_dom>r.score_ext ? r.equipe_dom : r.equipe_ext;
+      const ok   = b.equipe===winner;
+      const tourKey = {'seizièmes':'S16','huitièmes':'S8','QF':'QF','SF':'SF','P3':'P3','F':'F'}[tour];
+      const tourPts = pts_conf.bracket[tourKey+'_correct'] || 0;
+      html += `<div class="part-row">
+        <span class="part-row-label">${label}</span>
+        <span class="part-row-val ${ok?'ok':'nok'}">${t?.drapeau||''} ${t?.nom||b.equipe}</span>
+        ${ok?`<span class="part-pts">+${tourPts}</span>`:''}
+      </div>`;
+    });
+  });
+  html += `</div>`;
+
+  // ── Bonus ──
+  const activeBonus = (CONFIG.questions_bonus||[]).filter(q=>q.active);
+  if (activeBonus.length) {
+    html += `<div class="part-section"><h4>Questions bonus</h4>`;
+    activeBonus.forEach(q=>{
+      const b = pronos_bo[q.id];
+      const val = b ? (b.reponse_equipe || b.reponse_entier || '?') : '—';
+      const team = b?.reponse_equipe ? CONFIG.equipes.find(e=>e.code===b.reponse_equipe) : null;
+      const displayVal = team ? `${team.drapeau} ${team.nom}` : String(val);
+      const hasAnswer = q.reponse_correcte!=null;
+      const ok = hasAnswer && String(q.reponse_correcte)===(b?.reponse_equipe||String(b?.reponse_entier||''));
+      html += `<div class="part-row">
+        <span class="part-row-label">${q.texte}</span>
+        <span class="part-row-val ${hasAnswer?(ok?'ok':'nok'):'pending'}" style="${!hasAnswer?'color:var(--muted)':''}">${displayVal}</span>
+        ${hasAnswer&&ok?`<span class="part-pts">+${q.points}</span>`:''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  sectionsEl.innerHTML = html;
 }
 
 // ── Realtime ──────────────────────────────────────────
