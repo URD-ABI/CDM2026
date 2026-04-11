@@ -460,8 +460,8 @@ body {
 // ╔══════════════════════════════════════════════════════════╗
 // ║  CONFIG — remplace par tes vraies clés Supabase          ║
 // ╚══════════════════════════════════════════════════════════╝
-const SUPABASE_URL = 'https://kbrzsgzztrpavcgcnsuy.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_V2_o3AoOSkOzP3PhlQWbVw_ucW2C6S1';
+const SUPABASE_URL = 'https://VOTRE_ID.supabase.co';
+const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON';
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -602,7 +602,7 @@ async function loadExistingPronostics() {
 
 // ── STEP 2 : Phase de groupes ─────────────────────────────────
 function renderGroups() {
-  const groups = Object.keys(CONFIG.groupes);
+  const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
   const tabsEl = document.getElementById('groupTabs');
   tabsEl.innerHTML = groups.map(g=>`
     <button class="group-tab ${activeGroup===g?'active':''} ${isGroupComplete(g)?'complete':''}"
@@ -618,12 +618,12 @@ function switchGroup(g) {
 }
 
 function isGroupComplete(g) {
-  const matchs = CONFIG.matchs_groupes[g] || [];
+  const matchs = (CONFIG.matchs_groupes[g] || []).filter(m=>!m._commentaire);
   return matchs.every(m=>state.groupes[m.id]?.resultat);
 }
 
 function renderGroupContent(g) {
-  const matchs = CONFIG.matchs_groupes[g] || [];
+  const matchs = (CONFIG.matchs_groupes[g] || []).filter(m=>!m._commentaire);
   const el = document.getElementById('groupContent');
   el.innerHTML = matchs.map(m=>{
     const st = state.groupes[m.id] || {};
@@ -672,14 +672,15 @@ function setScore(matchId, side, val) {
 }
 
 function updateStep2Progress() {
-  const total = Object.values(CONFIG.matchs_groupes).flat().length;
-  const done  = Object.values(CONFIG.matchs_groupes).flat().filter(m=>state.groupes[m.id]?.resultat).length;
+  const allMatchs = Object.entries(CONFIG.matchs_groupes).filter(([g])=>!g.startsWith('_')).flatMap(([,ms])=>ms);
+  const total = allMatchs.length;
+  const done  = allMatchs.filter(m=>state.groupes[m.id]?.resultat).length;
   document.getElementById('step2Progress').textContent = `${done} / ${total} matchs remplis`;
 }
 
 // ── STEP 3 : Qualifiés ────────────────────────────────────────
 function renderQualifies() {
-  const groups = Object.keys(CONFIG.groupes);
+  const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
 
   // Qualifiés grid
   document.getElementById('qualifiesGrid').innerHTML = groups.map(g=>{
@@ -735,7 +736,7 @@ function updateTiersCount() {
 }
 
 function validateStep3() {
-  const groups = Object.keys(CONFIG.groupes);
+  const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
   for (const g of groups) {
     const q = state.qualifies[g]||{};
     if (!q.equipe_1er || !q.equipe_2eme) { toast(`Choisis le 1er et le 2e du groupe ${g}`,'error'); return; }
@@ -755,8 +756,8 @@ function getTeamsForSlot(slotId) {
   // Pour R32, on connaît les sources depuis config
   // Pour R16+, les équipes disponibles = vainqueurs précédents pronostiqués
   const tour = slotId.split('_')[0];
-  if (tour==='R32') {
-    const match = CONFIG.bracket_eliminatoire.R32.find(m=>m.id===slotId);
+  if (tour==='S16') {
+    const match = CONFIG.bracket_eliminatoire.seizièmes.find(m=>m.id===slotId);
     if (!match) return all;
     const dom = resolveSource(match.dom_source, q32);
     const ext = resolveSource(match.ext_source, q32);
@@ -768,7 +769,7 @@ function getTeamsForSlot(slotId) {
 
 function buildQualified32() {
   const q32 = [];
-  const groups = Object.keys(CONFIG.groupes);
+  const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
   for (const g of groups) {
     const q = state.qualifies[g]||{};
     if (q.equipe_1er) q32.push({code:q.equipe_1er, source:`1${g}`});
@@ -792,8 +793,8 @@ function resolveSource(src, q32) {
 }
 
 function renderBracket() {
-  const rounds = ['R32','R16','QF','SF'];
-  const labels = { R32:'32e de finale', R16:'16e de finale (huitièmes)', QF:'Quarts de finale', SF:'Demi-finales' };
+  const rounds = ['seizièmes','huitièmes','QF','SF'];
+  const labels = { seizièmes:'Seizièmes de finale', huitièmes:'Huitièmes de finale', QF:'Quarts de finale', SF:'Demi-finales' };
   const q32 = buildQualified32();
   const allCodes = q32.map(q=>q.code);
 
@@ -802,7 +803,7 @@ function renderBracket() {
     const matchs = CONFIG.bracket_eliminatoire[round]||[];
     html += `<div class="bracket-section"><h3>${labels[round]}</h3><div class="bracket-grid">`;
     html += matchs.map((m,i)=>{
-      const teamsForSlot = round==='R32' ? getBothTeamsR32(m, q32) : allCodes;
+      const teamsForSlot = round==='seizièmes' ? getBothTeamsR32(m, q32) : allCodes;
       const opts = teamsForSlot.map(code=>{
         const t = getTeamByCode(code);
         return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.drapeau+' '+t.nom:code}</option>`;
@@ -824,11 +825,9 @@ function renderBracket() {
   html += `<div class="bracket-section"><h3>Match pour la 3e place</h3><div class="bracket-grid">`;
   html += renderSimpleBracketSlot(CONFIG.bracket_eliminatoire.P3[0], allCodes);
   html += `</div></div>`;
-
   html += `<div class="bracket-section"><h3>🏆 Finale</h3><div class="bracket-grid">`;
   html += renderSimpleBracketSlot(CONFIG.bracket_eliminatoire.F[0], allCodes);
   html += `</div></div>`;
-
   document.getElementById('bracketContent').innerHTML = html;
 }
 
@@ -896,7 +895,7 @@ function renderReview() {
   const groups = Object.keys(CONFIG.groupes);
   const qualOk = groups.every(g=>state.qualifies[g]?.equipe_1er && state.qualifies[g]?.equipe_2eme);
   const tiersOk = state.tiers.length===8;
-  const brSlots = [...(CONFIG.bracket_eliminatoire.R32||[]),...(CONFIG.bracket_eliminatoire.R16||[]),
+  const brSlots = [...(CONFIG.bracket_eliminatoire.seizièmes||[]),...(CONFIG.bracket_eliminatoire.huitièmes||[]),
                    ...(CONFIG.bracket_eliminatoire.QF||[]),...(CONFIG.bracket_eliminatoire.SF||[]),
                    ...(CONFIG.bracket_eliminatoire.P3||[]),...(CONFIG.bracket_eliminatoire.F||[])];
   const brDone  = brSlots.filter(m=>state.bracket[m.id]).length;

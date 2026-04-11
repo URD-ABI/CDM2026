@@ -270,8 +270,8 @@ body {
 // ╔══════════════════════════════════════════════════════╗
 // ║  CONFIG — remplace par tes vraies clés Supabase      ║
 // ╚══════════════════════════════════════════════════════╝
-const SUPABASE_URL     = 'https://kbrzsgzztrpavcgcnsuy.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_V2_o3AoOSkOzP3PhlQWbVw_ucW2C6S1';
+const SUPABASE_URL     = 'https://VOTRE_ID.supabase.co';
+const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON';
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -462,8 +462,8 @@ async function loadParticipantDetail(pid, pseudo, el) {
 
   // — Bracket —
   html += `<div class="detail-section"><h4>Bracket Éliminatoire</h4>`;
-  const brTours = ['R32','R16','QF','SF','P3','F'];
-  const brLabels = {R32:'32e',R16:'16e',QF:'QF',SF:'SF',P3:'3e place',F:'Finale'};
+  const brTours = ['seizièmes','huitièmes','QF','SF','P3','F'];
+  const brLabels = {seizièmes:'Seizième',huitièmes:'Huitième',QF:'QF',SF:'SF',P3:'3e place',F:'Finale'};
   brTours.forEach(tour=>{
     const matchs = CONFIG.bracket_eliminatoire[tour]||[];
     matchs.forEach((m,i)=>{
@@ -511,13 +511,13 @@ async function loadMatchs() {
 
 function buildPhaseFilter() {
   const phases = [
-    { id:'all', label:'Tous' },
-    { id:'groupes', label:'Groupes' },
-    { id:'R32', label:'32e de finale' },
-    { id:'R16', label:'16e de finale' },
-    { id:'QF', label:'Quarts' },
-    { id:'SF', label:'Demies' },
-    { id:'final', label:'Finale & 3e' },
+    { id:'all',      label:'Tous' },
+    { id:'groupes',  label:'Groupes' },
+    { id:'seizièmes',label:'Seizièmes' },
+    { id:'huitièmes',label:'Huitièmes' },
+    { id:'QF',       label:'Quarts' },
+    { id:'SF',       label:'Demies' },
+    { id:'final',    label:'Finale & 3e' },
   ];
   document.getElementById('phaseFilter').innerHTML = phases.map(p=>
     `<button class="phase-btn ${activePhase===p.id?'active':''}" onclick="renderMatchs('${p.id}',this)">${p.label}</button>`
@@ -535,11 +535,13 @@ function renderMatchs(phase, btnEl) {
   let matchsList = [];
 
   if (phase==='all'||phase==='groupes') {
-    Object.entries(CONFIG.matchs_groupes).forEach(([g,ms])=>{
-      ms.forEach(m=>matchsList.push({...m, phase:'groupes', groupe:g}));
-    });
+    Object.entries(CONFIG.matchs_groupes)
+      .filter(([g])=>!g.startsWith('_'))
+      .forEach(([g,ms])=>{
+        ms.forEach(m=>matchsList.push({...m, phase:'groupes', groupe:g}));
+      });
   }
-  const eliminatoires = ['R32','R16','QF','SF','P3','F'];
+  const eliminatoires = ['seizièmes','huitièmes','QF','SF','P3','F'];
   eliminatoires.forEach(tour=>{
     if (phase==='all'||phase===tour||(phase==='final'&&(tour==='P3'||tour==='F'))) {
       (CONFIG.bracket_eliminatoire[tour]||[]).forEach(m=>matchsList.push({...m, phase:tour}));

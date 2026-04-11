@@ -264,11 +264,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 // ╔══════════════════════════════════════════════════════╗
 // ║  CONFIG                                              ║
 // ╚══════════════════════════════════════════════════════╝
-const SUPABASE_URL      = 'https://kbrzsgzztrpavcgcnsuy.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_V2_o3AoOSkOzP3PhlQWbVw_ucW2C6S1';
+const SUPABASE_URL      = 'https://VOTRE_ID.supabase.co';
+const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON';
 // Mot de passe admin : à définir dans config.json → "admin_password": "monmotdepasse"
 // ou changez la valeur ci-dessous directement
-const ADMIN_PASSWORD_FALLBACK = 'PePeJ1Ns51';
+const ADMIN_PASSWORD_FALLBACK = 'admin2026';
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -334,12 +334,12 @@ async function loadMatchsReels() {
 // ── Scores tab ───────────────────────────────────────
 function renderScorePhaseFilter() {
   const phases = [
-    {id:'groupes',label:'Groupes'},
-    {id:'R32',label:'32e'},
-    {id:'R16',label:'16e'},
-    {id:'QF',label:'Quarts'},
-    {id:'SF',label:'Demies'},
-    {id:'final',label:'P3 + Finale'},
+    {id:'groupes',   label:'Groupes'},
+    {id:'seizièmes', label:'Seizièmes'},
+    {id:'huitièmes', label:'Huitièmes'},
+    {id:'QF',        label:'Quarts'},
+    {id:'SF',        label:'Demies'},
+    {id:'final',     label:'P3 + Finale'},
   ];
   document.getElementById('scorePhaseFilter').innerHTML = phases.map(p=>
     `<button class="phase-btn ${activePhase===p.id?'active':''}" onclick="renderScores('${p.id}',this)">${p.label}</button>`
@@ -354,9 +354,11 @@ function renderScores(phase, btnEl) {
   // Collecter les matchs pour cette phase
   let matchsList = [];
   if (phase==='groupes') {
-    Object.entries(CONFIG.matchs_groupes).forEach(([g,ms])=>{
-      ms.forEach(m=>matchsList.push({...m,phase:'groupes',groupe:g}));
-    });
+    Object.entries(CONFIG.matchs_groupes)
+      .filter(([g])=>!g.startsWith('_'))
+      .forEach(([g,ms])=>{
+        ms.forEach(m=>matchsList.push({...m,phase:'groupes',groupe:g}));
+      });
   } else {
     const tours = phase==='final' ? ['P3','F'] : [phase];
     tours.forEach(tour=>{
@@ -622,16 +624,20 @@ async function runEngine() {
 
       // ─ Points matchs de groupes ─
       const pronos_g = pgMap[pid]||{};
-      Object.values(CONFIG.matchs_groupes).flat().forEach(m=>{
-        const r = reelsMap[m.id];
-        const p = pronos_g[m.id];
-        if (!r?.joue || !p) return;
-        const real_res = r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
-        if (p.resultat===real_res) {
-          pts_g += pts.resultat_correct;
-          if (p.score_dom===r.score_dom && p.score_ext===r.score_ext) pts_g += pts.score_exact_bonus;
-        }
-      });
+      Object.entries(CONFIG.matchs_groupes)
+        .filter(([g])=>!g.startsWith('_'))
+        .forEach(([,matchs])=>{
+          matchs.forEach(m=>{
+            const r = reelsMap[m.id];
+            const p = pronos_g[m.id];
+            if (!r?.joue || !p) return;
+            const real_res = r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
+            if (p.resultat===real_res) {
+              pts_g += pts.resultat_correct;
+              if (p.score_dom===r.score_dom && p.score_ext===r.score_ext) pts_g += pts.score_exact_bonus;
+            }
+          });
+        });
 
       // ─ Points qualifiés ─
       const pronos_q = pqMap[pid]||{};
@@ -653,9 +659,12 @@ async function runEngine() {
       // ─ Points bracket ─
       const pronos_br = pbMap[pid]||{};
       const brTours = {
-        R32: pts.bracket.R32_correct, R16:pts.bracket.R16_correct,
-        QF:  pts.bracket.QF_correct,  SF: pts.bracket.SF_correct,
-        P3:  pts.bracket.P3_correct,  F:  pts.bracket.F_correct,
+        seizièmes: pts.bracket.S16_correct,
+        huitièmes: pts.bracket.S8_correct,
+        QF:  pts.bracket.QF_correct,
+        SF:  pts.bracket.SF_correct,
+        P3:  pts.bracket.P3_correct,
+        F:   pts.bracket.F_correct,
       };
       Object.entries(brTours).forEach(([tour,tourPts])=>{
         (CONFIG.bracket_eliminatoire[tour]||[]).forEach(m=>{
@@ -669,7 +678,7 @@ async function runEngine() {
 
       // ─ Points matchs éliminatoires réels ─
       const pronos_e = peMap[pid]||{};
-      [...Object.values(CONFIG.bracket_eliminatoire)].flat().forEach(m=>{
+      Object.values(CONFIG.bracket_eliminatoire).flat().forEach(m=>{
         const r = reelsMap[m.id];
         const p = pronos_e[m.id];
         if (!r?.joue || !p) return;
@@ -718,7 +727,9 @@ async function runEngine() {
 // Calcule les vrais qualifiés depuis les matchs réels
 function computeRealQualifies(reelsMap) {
   const result={};
-  Object.entries(CONFIG.matchs_groupes).forEach(([g,matchs])=>{
+  Object.entries(CONFIG.matchs_groupes)
+    .filter(([g])=>!g.startsWith('_'))
+    .forEach(([g,matchs])=>{
     // Vérifier si tous les matchs du groupe sont joués
     const done = matchs.every(m=>reelsMap[m.id]?.joue);
     if (!done) return;
