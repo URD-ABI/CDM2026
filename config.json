@@ -69,289 +69,337 @@
       "code": "MEX",
       "nom": "Mexique",
       "groupe": "A",
-      "drapeau": "🇲🇽"
+      "drapeau": "🇲🇽",
+      "iso2": "mx"
     },
     {
       "code": "RSA",
       "nom": "Afrique du Sud",
       "groupe": "A",
-      "drapeau": "🇿🇦"
+      "drapeau": "🇿🇦",
+      "iso2": "za"
     },
     {
       "code": "KOR",
       "nom": "République de Corée",
       "groupe": "A",
-      "drapeau": "🇰🇷"
+      "drapeau": "🇰🇷",
+      "iso2": "kr"
     },
     {
       "code": "CZE",
       "nom": "République tchèque",
       "groupe": "A",
-      "drapeau": "🇨🇿"
+      "drapeau": "🇨🇿",
+      "iso2": "cz"
     },
     {
       "code": "CAN",
       "nom": "Canada",
       "groupe": "B",
-      "drapeau": "🇨🇦"
+      "drapeau": "🇨🇦",
+      "iso2": "ca"
     },
     {
       "code": "BIH",
       "nom": "Bosnie-Herzégovine",
       "groupe": "B",
-      "drapeau": "🇧🇦"
+      "drapeau": "🇧🇦",
+      "iso2": "ba"
     },
     {
       "code": "QAT",
       "nom": "Qatar",
       "groupe": "B",
-      "drapeau": "🇶🇦"
+      "drapeau": "🇶🇦",
+      "iso2": "qa"
     },
     {
       "code": "SUI",
       "nom": "Suisse",
       "groupe": "B",
-      "drapeau": "🇨🇭"
+      "drapeau": "🇨🇭",
+      "iso2": "ch"
     },
     {
       "code": "BRA",
       "nom": "Brésil",
       "groupe": "C",
-      "drapeau": "🇧🇷"
+      "drapeau": "🇧🇷",
+      "iso2": "br"
     },
     {
       "code": "MAR",
       "nom": "Maroc",
       "groupe": "C",
-      "drapeau": "🇲🇦"
+      "drapeau": "🇲🇦",
+      "iso2": "ma"
     },
     {
       "code": "HAI",
       "nom": "Haïti",
       "groupe": "C",
-      "drapeau": "🇭🇹"
+      "drapeau": "🇭🇹",
+      "iso2": "ht"
     },
     {
       "code": "SCO",
       "nom": "Écosse",
       "groupe": "C",
-      "drapeau": "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
+      "drapeau": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+      "iso2": "gb-sct"
     },
     {
       "code": "USA",
       "nom": "États-Unis",
       "groupe": "D",
-      "drapeau": "🇺🇸"
+      "drapeau": "🇺🇸",
+      "iso2": "us"
     },
     {
       "code": "PAR",
       "nom": "Paraguay",
       "groupe": "D",
-      "drapeau": "🇵🇾"
+      "drapeau": "🇵🇾",
+      "iso2": "py"
     },
     {
       "code": "AUS",
       "nom": "Australie",
       "groupe": "D",
-      "drapeau": "🇦🇺"
+      "drapeau": "🇦🇺",
+      "iso2": "au"
     },
     {
       "code": "TUR",
       "nom": "Turquie",
       "groupe": "D",
-      "drapeau": "🇹🇷"
+      "drapeau": "🇹🇷",
+      "iso2": "tr"
     },
     {
       "code": "GER",
       "nom": "Allemagne",
       "groupe": "E",
-      "drapeau": "🇩🇪"
+      "drapeau": "🇩🇪",
+      "iso2": "de"
     },
     {
       "code": "CUW",
       "nom": "Curaçao",
       "groupe": "E",
-      "drapeau": "🇨🇼"
+      "drapeau": "🇨🇼",
+      "iso2": "cw"
     },
     {
       "code": "CIV",
       "nom": "Côte d'Ivoire",
       "groupe": "E",
-      "drapeau": "🇨🇮"
+      "drapeau": "🇨🇮",
+      "iso2": "ci"
     },
     {
       "code": "ECU",
       "nom": "Équateur",
       "groupe": "E",
-      "drapeau": "🇪🇨"
+      "drapeau": "🇪🇨",
+      "iso2": "ec"
     },
     {
       "code": "NED",
       "nom": "Pays-Bas",
       "groupe": "F",
-      "drapeau": "🇳🇱"
+      "drapeau": "🇳🇱",
+      "iso2": "nl"
     },
     {
       "code": "JPN",
       "nom": "Japon",
       "groupe": "F",
-      "drapeau": "🇯🇵"
+      "drapeau": "🇯🇵",
+      "iso2": "jp"
     },
     {
       "code": "SWE",
       "nom": "Suède",
       "groupe": "F",
-      "drapeau": "🇸🇪"
+      "drapeau": "🇸🇪",
+      "iso2": "se"
     },
     {
       "code": "TUN",
       "nom": "Tunisie",
       "groupe": "F",
-      "drapeau": "🇹🇳"
+      "drapeau": "🇹🇳",
+      "iso2": "tn"
     },
     {
       "code": "BEL",
       "nom": "Belgique",
       "groupe": "G",
-      "drapeau": "🇧🇪"
+      "drapeau": "🇧🇪",
+      "iso2": "be"
     },
     {
       "code": "EGY",
       "nom": "Égypte",
       "groupe": "G",
-      "drapeau": "🇪🇬"
+      "drapeau": "🇪🇬",
+      "iso2": "eg"
     },
     {
       "code": "IRN",
       "nom": "RI Iran",
       "groupe": "G",
-      "drapeau": "🇮🇷"
+      "drapeau": "🇮🇷",
+      "iso2": "ir"
     },
     {
       "code": "NZL",
       "nom": "Nouvelle-Zélande",
       "groupe": "G",
-      "drapeau": "🇳🇿"
+      "drapeau": "🇳🇿",
+      "iso2": "nz"
     },
     {
       "code": "ESP",
       "nom": "Espagne",
       "groupe": "H",
-      "drapeau": "🇪🇸"
+      "drapeau": "🇪🇸",
+      "iso2": "es"
     },
     {
       "code": "CPV",
       "nom": "Cap-Vert",
       "groupe": "H",
-      "drapeau": "🇨🇻"
+      "drapeau": "🇨🇻",
+      "iso2": "cv"
     },
     {
       "code": "KSA",
       "nom": "Arabie saoudite",
       "groupe": "H",
-      "drapeau": "🇸🇦"
+      "drapeau": "🇸🇦",
+      "iso2": "sa"
     },
     {
       "code": "URU",
       "nom": "Uruguay",
       "groupe": "H",
-      "drapeau": "🇺🇾"
+      "drapeau": "🇺🇾",
+      "iso2": "uy"
     },
     {
       "code": "FRA",
       "nom": "France",
       "groupe": "I",
-      "drapeau": "🇫🇷"
+      "drapeau": "🇫🇷",
+      "iso2": "fr"
     },
     {
       "code": "SEN",
       "nom": "Sénégal",
       "groupe": "I",
-      "drapeau": "🇸🇳"
+      "drapeau": "🇸🇳",
+      "iso2": "sn"
     },
     {
       "code": "IRQ",
       "nom": "Irak",
       "groupe": "I",
-      "drapeau": "🇮🇶"
+      "drapeau": "🇮🇶",
+      "iso2": "iq"
     },
     {
       "code": "NOR",
       "nom": "Norvège",
       "groupe": "I",
-      "drapeau": "🇳🇴"
+      "drapeau": "🇳🇴",
+      "iso2": "no"
     },
     {
       "code": "ARG",
       "nom": "Argentine",
       "groupe": "J",
-      "drapeau": "🇦🇷"
+      "drapeau": "🇦🇷",
+      "iso2": "ar"
     },
     {
       "code": "ALG",
       "nom": "Algérie",
       "groupe": "J",
-      "drapeau": "🇩🇿"
+      "drapeau": "🇩🇿",
+      "iso2": "dz"
     },
     {
       "code": "AUT",
       "nom": "Autriche",
       "groupe": "J",
-      "drapeau": "🇦🇹"
+      "drapeau": "🇦🇹",
+      "iso2": "at"
     },
     {
       "code": "JOR",
       "nom": "Jordanie",
       "groupe": "J",
-      "drapeau": "🇯🇴"
+      "drapeau": "🇯🇴",
+      "iso2": "jo"
     },
     {
       "code": "POR",
       "nom": "Portugal",
       "groupe": "K",
-      "drapeau": "🇵🇹"
+      "drapeau": "🇵🇹",
+      "iso2": "pt"
     },
     {
       "code": "COD",
       "nom": "RD Congo",
       "groupe": "K",
-      "drapeau": "🇨🇩"
+      "drapeau": "🇨🇩",
+      "iso2": "cd"
     },
     {
       "code": "UZB",
       "nom": "Ouzbékistan",
       "groupe": "K",
-      "drapeau": "🇺🇿"
+      "drapeau": "🇺🇿",
+      "iso2": "uz"
     },
     {
       "code": "COL",
       "nom": "Colombie",
       "groupe": "K",
-      "drapeau": "🇨🇴"
+      "drapeau": "🇨🇴",
+      "iso2": "co"
     },
     {
       "code": "ENG",
       "nom": "Angleterre",
       "groupe": "L",
-      "drapeau": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
+      "drapeau": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "iso2": "gb-eng"
     },
     {
       "code": "CRO",
       "nom": "Croatie",
       "groupe": "L",
-      "drapeau": "🇭🇷"
+      "drapeau": "🇭🇷",
+      "iso2": "hr"
     },
     {
       "code": "GHA",
       "nom": "Ghana",
       "groupe": "L",
-      "drapeau": "🇬🇭"
+      "drapeau": "🇬🇭",
+      "iso2": "gh"
     },
     {
       "code": "PAN",
       "nom": "Panama",
       "groupe": "L",
-      "drapeau": "🇵🇦"
+      "drapeau": "🇵🇦",
+      "iso2": "pa"
     }
   ],
   "groupes": {
@@ -521,8 +569,8 @@
       },
       {
         "id": "B_4",
-        "dom": "BIH",
-        "ext": "SUI",
+        "dom": "SUI",
+        "ext": "BIH",
         "date": null,
         "journee": "B_J2"
       },
@@ -986,113 +1034,113 @@
     "seizièmes": [
       {
         "id": "S16_1",
-        "dom_source": "1A",
-        "ext_source": "T3_BCDE",
+        "dom_source": "2A",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J1"
       },
       {
         "id": "S16_2",
-        "dom_source": "1C",
-        "ext_source": "T3_ABFG",
+        "dom_source": "1E",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J1"
       },
       {
         "id": "S16_3",
-        "dom_source": "1B",
-        "ext_source": "T3_AHIJ",
+        "dom_source": "1F",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J2"
       },
       {
         "id": "S16_4",
-        "dom_source": "1D",
-        "ext_source": "T3_CKLM",
+        "dom_source": "1C",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J2"
       },
       {
         "id": "S16_5",
-        "dom_source": "2A",
-        "ext_source": "2C",
+        "dom_source": "1I",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J3"
       },
       {
         "id": "S16_6",
-        "dom_source": "2B",
-        "ext_source": "2D",
+        "dom_source": "2E",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J3"
       },
       {
         "id": "S16_7",
-        "dom_source": "1E",
-        "ext_source": "T3_FGHL",
+        "dom_source": "1A",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J4"
       },
       {
         "id": "S16_8",
-        "dom_source": "1G",
-        "ext_source": "T3_IJKL",
+        "dom_source": "1L",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J4"
       },
       {
         "id": "S16_9",
-        "dom_source": "1F",
-        "ext_source": "T3_ABCD",
+        "dom_source": "1D",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J5"
       },
       {
         "id": "S16_10",
-        "dom_source": "1H",
-        "ext_source": "T3_EFKL",
+        "dom_source": "1G",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J5"
       },
       {
         "id": "S16_11",
-        "dom_source": "2E",
-        "ext_source": "2G",
+        "dom_source": "2K",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J6"
       },
       {
         "id": "S16_12",
-        "dom_source": "2F",
-        "ext_source": "2H",
+        "dom_source": "1H",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J6"
       },
       {
         "id": "S16_13",
-        "dom_source": "1I",
-        "ext_source": "T3_GHKL",
+        "dom_source": "1B",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J7"
       },
       {
         "id": "S16_14",
-        "dom_source": "1K",
-        "ext_source": "T3_ABIJ",
+        "dom_source": "1J",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J7"
       },
       {
         "id": "S16_15",
-        "dom_source": "2I",
-        "ext_source": "2K",
+        "dom_source": "1K",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J8"
       },
       {
         "id": "S16_16",
-        "dom_source": "2J",
-        "ext_source": "2L",
+        "dom_source": "2D",
+        "ext_source": "T3",
         "date": null,
         "journee": "S16_J8"
       }
@@ -1100,14 +1148,14 @@
     "huitièmes": [
       {
         "id": "S8_1",
-        "dom_source": "W_S16_1",
-        "ext_source": "W_S16_2",
+        "dom_source": "W_S16_2",
+        "ext_source": "W_S16_3",
         "date": null,
         "journee": "S8_J1"
       },
       {
         "id": "S8_2",
-        "dom_source": "W_S16_3",
+        "dom_source": "W_S16_1",
         "ext_source": "W_S16_4",
         "date": null,
         "journee": "S8_J1"
@@ -1128,28 +1176,28 @@
       },
       {
         "id": "S8_5",
-        "dom_source": "W_S16_9",
-        "ext_source": "W_S16_10",
-        "date": null,
-        "journee": "S8_J3"
-      },
-      {
-        "id": "S8_6",
         "dom_source": "W_S16_11",
         "ext_source": "W_S16_12",
         "date": null,
         "journee": "S8_J3"
       },
       {
+        "id": "S8_6",
+        "dom_source": "W_S16_9",
+        "ext_source": "W_S16_10",
+        "date": null,
+        "journee": "S8_J3"
+      },
+      {
         "id": "S8_7",
-        "dom_source": "W_S16_13",
-        "ext_source": "W_S16_14",
+        "dom_source": "W_S16_14",
+        "ext_source": "W_S16_15",
         "date": null,
         "journee": "S8_J4"
       },
       {
         "id": "S8_8",
-        "dom_source": "W_S16_15",
+        "dom_source": "W_S16_13",
         "ext_source": "W_S16_16",
         "date": null,
         "journee": "S8_J4"

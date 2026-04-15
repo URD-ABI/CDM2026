@@ -512,7 +512,7 @@ async function loadParticipantDetail(pid, pseudo, el) {
       const r   = reels_map[m.id];
       const dom = CONFIG.equipes.find(e=>e.code===m.dom);
       const ext = CONFIG.equipes.find(e=>e.code===m.ext);
-      const teams = `${dom?.drapeau||''} ${dom?.nom||m.dom} – ${ext?.drapeau||''} ${ext?.nom||m.ext}`;
+      const teams = `${dom ? teamDisplay(dom) : m.dom} – ${ext ? teamDisplay(ext) : m.ext}`;
 
       if (!p) {
         html += `<div class="detail-match"><span class="match-teams">${teams}</span><span class="match-prono pending">—</span></div>`;
@@ -550,7 +550,7 @@ async function loadParticipantDetail(pid, pseudo, el) {
     const t2 = CONFIG.equipes.find(e=>e.code===q.equipe_2eme);
     html += `<div class="detail-match">
       <span class="match-teams">Groupe ${g}</span>
-      <span class="match-prono pending">${t1?.drapeau||''} ${t1?.nom||q.equipe_1er} &amp; ${t2?.drapeau||''} ${t2?.nom||q.equipe_2eme}</span>
+      <span class="match-prono pending">${t1 ? teamDisplay(t1) : q.equipe_1er} &amp; ${t2 ? teamDisplay(t2) : q.equipe_2eme}</span>
     </div>`;
   });
   html += `<div class="detail-match"><span class="match-teams" style="color:var(--text)">Meilleurs 3es :</span><span class="match-prono pending">${tiers.join(', ')||'—'}</span></div>`;
@@ -568,7 +568,7 @@ async function loadParticipantDetail(pid, pseudo, el) {
       const t = CONFIG.equipes.find(e=>e.code===b.equipe);
       html += `<div class="detail-match">
         <span class="match-teams">${brLabels[tour]} ${matchs.length>1?i+1:''}</span>
-        <span class="match-prono pending">${t?.drapeau||''} ${t?.nom||b.equipe}</span>
+        <span class="match-prono pending">${t ? teamDisplay(t) : b.equipe}</span>
       </div>`;
     });
   });
@@ -698,7 +698,7 @@ function renderGroupCard(g, matchs, reels, standing, best8groups) {
     else if(r?.verrouille) scoreHtml=`<div class="gm-score pending">🔒</div>`;
     else scoreHtml=`<div class="gm-score pending">vs</div>`;
     return `<div class="groupe-match-row">
-      <div class="gm-team">${dom?.drapeau||''} ${dom?.nom||m.dom}</div>
+      <div class="gm-team">${dom ? teamDisplay(dom) : m.dom}</div>
       ${scoreHtml}
       <div class="gm-team right">${ext?.nom||m.ext} ${ext?.drapeau||''}</div>
     </div>`;
@@ -710,7 +710,7 @@ function renderGroupCard(g, matchs, reels, standing, best8groups) {
     const badge = i<2 ? '<span class="gs-q q12">Q</span>' : (i===2&&best8groups.has(g)?'<span class="gs-q q3">3e</span>':'');
     return `<div class="gs-row">
       <div class="gs-rank ${rankClass}">${i+1}</div>
-      <div class="gs-team">${team?.drapeau||''} ${team?.nom||t.code} ${badge}</div>
+      <div class="gs-team">${team ? teamDisplay(team) : t.code} ${badge}</div>
       <div class="gs-diff" style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${t.bd>0?'+':''}${t.bd}</div>
       <div class="gs-pts">${t.pts}</div>
     </div>`;
@@ -743,9 +743,17 @@ function renderElimCard(m, reels) {
   </div>`;
 }
 
+function teamFlag(t) {
+  if (!t?.iso2) return '';
+  return `<img src="https://flagcdn.com/20x15/${t.iso2}.png" alt="${t.code}" style="vertical-align:middle;margin-right:3px;border-radius:1px">`;
+}
+function teamDisplay(t) {
+  if (!t) return '';
+  return teamFlag(t) + t.nom;
+}
 function getTeamLabel(code) {
   const t = CONFIG.equipes.find(e=>e.code===code);
-  return t ? `${t.drapeau} ${t.nom}` : code;
+  return t ? teamDisplay(t) : code;
 }
 
 // ── Onglet Pronostics participants ────────────────────
@@ -882,7 +890,7 @@ async function selectParticipant(pid, pseudo) {
         if (r?.verrouille) statusHtml = `<div class="gm-score pending">🔒</div>`;
         else statusHtml = `<div class="gm-score pending">vs</div>`;
         return `<div class="groupe-match-row" style="opacity:.5">
-          <div class="gm-team">${dom?.drapeau||''} ${dom?.nom||m.dom}</div>
+          <div class="gm-team">${dom ? teamDisplay(dom) : m.dom}</div>
           ${statusHtml}
           <div class="gm-team right">${ext?.nom||m.ext} ${ext?.drapeau||''}</div>
         </div>`;
@@ -905,7 +913,7 @@ async function selectParticipant(pid, pseudo) {
       }
 
       return `<div class="groupe-match-row" style="background:${borderColor}">
-        <div class="gm-team">${dom?.drapeau||''} ${dom?.nom||m.dom}</div>
+        <div class="gm-team">${dom ? teamDisplay(dom) : m.dom}</div>
         ${pronoScore}
         <div class="gm-team right">${ext?.nom||m.ext} ${ext?.drapeau||''}</div>
       </div>`;
@@ -920,7 +928,7 @@ async function selectParticipant(pid, pseudo) {
       const badge = showBadge&&i<2?'<span class="gs-q q12">Q</span>':(showBadge&&i===2&&best8.has(g)?'<span class="gs-q q3">3e</span>':'');
       return `<div class="gs-row">
         <div class="gs-rank ${rankClass}">${i+1}</div>
-        <div class="gs-team">${team?.drapeau||''} ${team?.nom||t.code} ${badge}</div>
+        <div class="gs-team">${team ? teamDisplay(team) : t.code} ${badge}</div>
         <div class="gs-diff" style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${anyMatchPlayed?((t.bd>0?'+':'')+t.bd):'–'}</div>
         <div class="gs-pts">${anyMatchPlayed?t.pts:'–'}</div>
       </div>`;

@@ -512,7 +512,16 @@ function getTeamByCode(code) {
 }
 function getTeamLabel(code) {
   const t = getTeamByCode(code);
-  return t ? `${t.drapeau} ${t.nom}` : code;
+  return t ? teamDisplay(t) : code;
+}
+function teamFlag(t) {
+  if (!t) return '';
+  if (t.iso2) return `<img src="https://flagcdn.com/20x15/${t.iso2}.png" alt="${t.code}" style="vertical-align:middle;margin-right:3px;border-radius:1px">`;
+  return '';
+}
+function teamDisplay(t) {
+  if (!t) return '';
+  return teamFlag(t) + t.nom;
 }
 
 // ── Init ─────────────────────────────────────────────────────
@@ -649,13 +658,13 @@ function renderGroupContent(g) {
       <div class="match-info">Journée ${j.replace('J','')} · ${m.id}</div>
       <button class="team-btn home ${st.resultat==='H'?'selected':''}"
         onclick="setResult('${m.id}','H','${g}')">
-        ${dom?.drapeau||''} ${dom?.nom||m.dom}
+        ${dom ? teamDisplay(dom) : m.dom}
       </button>
       <button class="draw-btn ${st.resultat==='N'?'selected':''}"
         onclick="setResult('${m.id}','N','${g}')">NUL</button>
       <button class="team-btn away ${st.resultat==='A'?'selected':''}"
         onclick="setResult('${m.id}','A','${g}')">
-        ${ext?.drapeau||''} ${ext?.nom||m.ext}
+        ${ext ? teamDisplay(ext) : m.ext}
       </button>
       <div class="score-inputs">
         <input type="number" min="0" max="20" placeholder="-" value="${st.score_dom??''}"
@@ -948,8 +957,18 @@ function buildQualified32() {
 
 function resolveSource(src, q32) {
   if (!src) return null;
-  // src = "1A","2B","T3_C" etc.
-  const found = q32.find(q=>q.source===src);
+  if (src === 'T3') {
+    // Source générique T3 : prendre le premier T3 disponible non encore utilisé
+    const found = q32.find(q => q.source.startsWith('T3_'));
+    return found ? getTeamByCode(found.code) : null;
+  }
+  if (src.startsWith('T3_')) {
+    // Source comme "T3_BCDE" : trouver le T3 dont le groupe est dans la liste
+    const validGroups = src.replace('T3_', '').split('');
+    const found = q32.find(q => q.source.startsWith('T3_') && validGroups.includes(q.source.slice(3)));
+    return found ? getTeamByCode(found.code) : null;
+  }
+  const found = q32.find(q => q.source === src);
   return found ? getTeamByCode(found.code) : null;
 }
 
@@ -994,11 +1013,18 @@ function renderBracket() {
 
 function getBothTeamsR32(match, q32) {
   const dom = resolveSource(match.dom_source, q32);
-  const ext = resolveSource(match.ext_source, q32);
+  // Pour ext T3: proposer tous les T3 disponibles si on ne peut pas résoudre précisément
+  let extCodes = [];
+  if (match.ext_source === 'T3' || match.ext_source?.startsWith('T3')) {
+    extCodes = q32.filter(q => q.source.startsWith('T3_')).map(q => q.code);
+  } else {
+    const ext = resolveSource(match.ext_source, q32);
+    if (ext) extCodes = [ext.code];
+  }
   const res = [];
   if (dom) res.push(dom.code);
-  if (ext) res.push(ext.code);
-  if (res.length===0) return q32.map(q=>q.code); // fallback
+  extCodes.forEach(c => { if (!res.includes(c)) res.push(c); });
+  if (res.length === 0) return q32.map(q => q.code);
   return res;
 }
 
@@ -1028,7 +1054,7 @@ function renderBonus() {
   document.getElementById('bonusList').innerHTML = qs.map(q=>{
     let input = '';
     if (q.type==='equipe') {
-      const opts = allTeams.map(t=>`<option value="${t.code}" ${state.bonus[q.id]===t.code?'selected':''}>${t.drapeau} ${t.nom}</option>`).join('');
+      const opts = allTeams.map(t=>`<option value="${t.code}" ${state.bonus[q.id]===t.code?'selected':''}>${t.nom}</option>`).join('');
       input = `<select onchange="setBonus('${q.id}','equipe',this.value)"><option value="">— Choisir une équipe —</option>${opts}</select>`;
     } else if (q.type==='entier') {
       input = `<input type="number" min="0" max="100" value="${state.bonus[q.id]??''}" placeholder="Entrer un nombre" onchange="setBonus('${q.id}','entier',this.value)">`;
