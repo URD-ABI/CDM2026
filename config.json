@@ -1306,7 +1306,7 @@
       "date_verrou": "2026-06-11T21:30:00-06:00"
     },
     "A_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "A_J3": {
