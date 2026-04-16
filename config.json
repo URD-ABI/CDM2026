@@ -1302,11 +1302,11 @@
   },
   "journees": {
     "A_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": "2026-06-11T21:30:00-06:00"
     },
     "A_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "A_J3": {
@@ -1314,204 +1314,204 @@
       "date_verrou": null
     },
     "B_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "B_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "B_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "C_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "C_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "C_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "D_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "D_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "D_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "E_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "E_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "E_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "F_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "F_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "F_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "G_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "G_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "G_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "H_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "H_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "H_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "I_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "I_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "I_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "J_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "J_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "J_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "K_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "K_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "K_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "L_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "L_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "L_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J4": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J5": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J6": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J7": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J8": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S8_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S8_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S8_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S8_J4": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "QF_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "QF_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "SF_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "P3_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     }
   },
   "phase_initiale_verrou": {
-    "verrouille": false,
+    "verrouille": true,
     "date_verrou": "2026-06-11T21:30:00-06:00"
   },
   "admin_password": "PePeJ1Ns51"
