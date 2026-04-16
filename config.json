@@ -28,39 +28,71 @@
       "texte": "Meilleure attaque de la phase de groupes",
       "description": "Quelle équipe marquera le plus de buts lors de la phase de groupes ?",
       "type": "equipe",
-      "points": 3,
+      "points": 2,
       "active": true
     },
     {
       "id": "b2",
-      "texte": "Nombre d'équipes invaincues à l'issue de la phase de groupes",
-      "description": "Combien d'équipes termineront la phase de groupes sans défaite (3 victoires ou moins de 3 matchs sans défaite) ?",
-      "type": "entier",
-      "points": 3,
+      "texte": "Meilleure défense de la phase de groupes",
+      "description": "Quelle équipe encaissera le moins de buts lors de la phase de groupes ?",
+      "type": "equipe",
+      "points": 2,
       "active": true
     },
     {
       "id": "b3",
-      "texte": "Meilleure défense de la phase de groupes",
-      "description": "Quelle équipe encaissera le moins de buts lors de la phase de groupes ?",
-      "type": "equipe",
-      "points": 3,
+      "texte": "Nombre d'équipes invaincues à l'issue de la phase de groupes",
+      "description": "Combien d'équipes termineront la phase de groupes sans défaite (3 victoires ou nuls) ?",
+      "type": "entier",
+      "points": 2,
       "active": true
     },
     {
       "id": "b4",
-      "texte": "Vainqueur du Ballon d'Or du tournoi (meilleur joueur)",
-      "description": "Quel sera le meilleur joueur du tournoi ?",
-      "type": "joueur",
-      "points": 5,
+      "texte": "Nombre total de buts marqués en phase de groupes",
+      "description": "Combien de buts au total seront marqués lors des 36 matchs de la phase de groupes ?",
+      "type": "entier",
+      "points": 3,
       "active": true
     },
     {
       "id": "b5",
-      "texte": "Nombre total de buts marqués en phase de groupes",
-      "description": "Combien de buts au total seront marqués lors des 36 matchs de la phase de groupes ?",
+      "texte": "Meilleur buteur du tournoi ?",
+      "description": "Quel sera le meilleur buteur du tournoi ?",
+      "type": "joueur",
+      "points": 2,
+      "active": true
+    },
+    {
+      "id": "b6",
+      "texte": "Meilleur gardien du tournoi ?",
+      "description": "Quel sera le meilleur gardien du tournoi ?",
+      "type": "joueur",
+      "points": 2,
+      "active": true
+    },
+    {
+      "id": "b7",
+      "texte": "Meilleur joueur du tournoi ?",
+      "description": "Quel sera le meilleur joueur du tournoi ?",
+      "type": "joueur",
+      "points": 2,
+      "active": true
+    },
+    {
+      "id": "b8",
+      "texte": "Nombre total de cartons rouge dans le tournoi",
+      "description": "Combien de cartons rouges au total seront distribués dans le tournoi ?",
       "type": "entier",
-      "points": 4,
+      "points": 2,
+      "active": true
+    },
+    {
+      "id": "b9",
+      "texte": "Nombre total de buts marqués dans le tournois",
+      "description": "Combien de buts au total seront marqués durant le tournoi ?",
+      "type": "entier",
+      "points": 3,
       "active": true
     }
   ],
