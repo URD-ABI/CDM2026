@@ -6,21 +6,21 @@
     "format": "48 équipes • 12 groupes de 4 • Seizièmes → Huitièmes → QF → SF → Finale"
   },
   "points": {
-    "resultat_correct": 3,
-    "score_exact_bonus": 2,
-    "qualifie_1er": 3,
-    "qualifie_2eme": 3,
-    "meilleur_tiers_correct": 2,
+    "resultat_correct": 1,
+    "score_exact_bonus": 1,
+    "qualifie_1er": 1,
+    "qualifie_2eme": 1,
+    "meilleur_tiers_correct": 1,
     "bracket": {
-      "S16_correct": 2,
-      "S8_correct": 4,
-      "QF_correct": 6,
-      "SF_correct": 8,
-      "P3_correct": 4,
-      "F_correct": 12
+      "S16_correct": 1,
+      "S8_correct": 2,
+      "QF_correct": 3,
+      "SF_correct": 4,
+      "P3_correct": 0,
+      "F_correct": 5
     },
-    "elim_resultat_correct": 3,
-    "elim_score_exact_bonus": 2
+    "elim_resultat_correct": 0,
+    "elim_score_exact_bonus": 0
   },
   "questions_bonus": [
     {
