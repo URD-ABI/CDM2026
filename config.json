@@ -1035,112 +1035,112 @@
       {
         "id": "S16_1",
         "dom_source": "2A",
-        "ext_source": "T3",
+        "ext_source": "2B",
         "date": null,
         "journee": "S16_J1"
       },
       {
         "id": "S16_2",
         "dom_source": "1E",
-        "ext_source": "T3",
+        "ext_source": "T3_ABCDF",
         "date": null,
         "journee": "S16_J1"
       },
       {
         "id": "S16_3",
         "dom_source": "1F",
-        "ext_source": "T3",
+        "ext_source": "2C",
         "date": null,
         "journee": "S16_J2"
       },
       {
         "id": "S16_4",
         "dom_source": "1C",
-        "ext_source": "T3",
+        "ext_source": "2F",
         "date": null,
         "journee": "S16_J2"
       },
       {
         "id": "S16_5",
         "dom_source": "1I",
-        "ext_source": "T3",
+        "ext_source": "T3_CDFGH",
         "date": null,
         "journee": "S16_J3"
       },
       {
         "id": "S16_6",
         "dom_source": "2E",
-        "ext_source": "T3",
+        "ext_source": "2I",
         "date": null,
         "journee": "S16_J3"
       },
       {
         "id": "S16_7",
         "dom_source": "1A",
-        "ext_source": "T3",
+        "ext_source": "T3_CEFHI",
         "date": null,
         "journee": "S16_J4"
       },
       {
         "id": "S16_8",
         "dom_source": "1L",
-        "ext_source": "T3",
+        "ext_source": "T3_EHIJK",
         "date": null,
         "journee": "S16_J4"
       },
       {
         "id": "S16_9",
         "dom_source": "1D",
-        "ext_source": "T3",
+        "ext_source": "T3_BEFIJ",
         "date": null,
         "journee": "S16_J5"
       },
       {
         "id": "S16_10",
         "dom_source": "1G",
-        "ext_source": "T3",
+        "ext_source": "T3_AEHIJ",
         "date": null,
         "journee": "S16_J5"
       },
       {
         "id": "S16_11",
         "dom_source": "2K",
-        "ext_source": "T3",
+        "ext_source": "2L",
         "date": null,
         "journee": "S16_J6"
       },
       {
         "id": "S16_12",
         "dom_source": "1H",
-        "ext_source": "T3",
+        "ext_source": "2J",
         "date": null,
         "journee": "S16_J6"
       },
       {
         "id": "S16_13",
         "dom_source": "1B",
-        "ext_source": "T3",
+        "ext_source": "T3_EFGIJ",
         "date": null,
         "journee": "S16_J7"
       },
       {
         "id": "S16_14",
         "dom_source": "1J",
-        "ext_source": "T3",
+        "ext_source": "2H",
         "date": null,
         "journee": "S16_J7"
       },
       {
         "id": "S16_15",
         "dom_source": "1K",
-        "ext_source": "T3",
+        "ext_source": "T3_DEIJL",
         "date": null,
         "journee": "S16_J8"
       },
       {
         "id": "S16_16",
         "dom_source": "2D",
-        "ext_source": "T3",
+        "ext_source": "2G",
         "date": null,
         "journee": "S16_J8"
       }

@@ -474,7 +474,7 @@ body {
 // ╔══════════════════════════════════════════════════════════╗
 // ║  CONFIG — remplace par tes vraies clés Supabase          ║
 // ╚══════════════════════════════════════════════════════════╝
-const SUPABASE_URL = 'https://kbrzsgzztrpavcgcnsuy.supabase.co';
+const SUPABASE_URL     = 'https://kbrzsgzztrpavcgcnsuy.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_V2_o3AoOSkOzP3PhlQWbVw_ucW2C6S1';
 
 const { createClient } = supabase;
@@ -957,13 +957,8 @@ function buildQualified32() {
 
 function resolveSource(src, q32) {
   if (!src) return null;
-  if (src === 'T3') {
-    // Source générique T3 : prendre le premier T3 disponible non encore utilisé
-    const found = q32.find(q => q.source.startsWith('T3_'));
-    return found ? getTeamByCode(found.code) : null;
-  }
   if (src.startsWith('T3_')) {
-    // Source comme "T3_BCDE" : trouver le T3 dont le groupe est dans la liste
+    // "T3_ABCDF" → trouver le T3 qualifié dont le groupe est dans la liste
     const validGroups = src.replace('T3_', '').split('');
     const found = q32.find(q => q.source.startsWith('T3_') && validGroups.includes(q.source.slice(3)));
     return found ? getTeamByCode(found.code) : null;
@@ -995,7 +990,7 @@ function renderBracket() {
         <select onchange="setBracket('${m.id}',this.value)">
           <option value="">— Choisir le vainqueur —</option>${opts}
         </select>
-        <div class="bracket-teams">${srcLabel}</div>
+        <div class="bracket-teams" style="font-size:.7rem;color:var(--muted)">${srcLabel}</div>
       </div>`;
     }).join('');
     html += '</div></div>';
@@ -1013,14 +1008,30 @@ function renderBracket() {
 
 function getBothTeamsR32(match, q32) {
   const dom = resolveSource(match.dom_source, q32);
-  // Pour ext T3: proposer tous les T3 disponibles si on ne peut pas résoudre précisément
   let extCodes = [];
-  if (match.ext_source === 'T3' || match.ext_source?.startsWith('T3')) {
-    extCodes = q32.filter(q => q.source.startsWith('T3_')).map(q => q.code);
+
+  if (match.ext_source?.startsWith('T3_')) {
+    // Extraire les groupes éligibles depuis "T3_ABCDF" → ['A','B','C','D','F']
+    const eligibleGroups = match.ext_source.replace('T3_', '').split('');
+    // Parmi les T3 qualifiés pronostiqués par l'utilisateur,
+    // ne garder que ceux dont le groupe est dans la liste éligible
+    extCodes = q32
+      .filter(q => q.source.startsWith('T3_') && eligibleGroups.includes(q.source.slice(3)))
+      .map(q => q.code);
+    // Fallback : si aucun T3 éligible qualifié, proposer tous les T3 éligibles (3e de chaque groupe éligible)
+    if (extCodes.length === 0) {
+      eligibleGroups.forEach(g => {
+        const equipes = CONFIG.groupes[g]?.equipes || [];
+        const already = [state.qualifies[g]?.equipe_1er, state.qualifies[g]?.equipe_2eme];
+        const tiers = equipes.find(e => !already.includes(e));
+        if (tiers && !extCodes.includes(tiers)) extCodes.push(tiers);
+      });
+    }
   } else {
     const ext = resolveSource(match.ext_source, q32);
     if (ext) extCodes = [ext.code];
   }
+
   const res = [];
   if (dom) res.push(dom.code);
   extCodes.forEach(c => { if (!res.includes(c)) res.push(c); });
