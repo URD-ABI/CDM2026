@@ -981,7 +981,7 @@ function renderBracket() {
       const teamsForSlot = round==='seizièmes' ? getBothTeamsR32(m, q32) : allCodes;
       const opts = teamsForSlot.map(code=>{
         const t = getTeamByCode(code);
-        return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.drapeau+' '+t.nom:code}</option>`;
+        return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.nom:code}</option>`;
       }).join('');
       // Traduire les sources en labels lisibles
       function srcToLabel(s) {
@@ -1056,7 +1056,7 @@ function getBothTeamsR32(match, q32) {
 function renderSimpleBracketSlot(m, allCodes) {
   const opts = allCodes.map(code=>{
     const t = getTeamByCode(code);
-    return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.drapeau+' '+t.nom:code}</option>`;
+    return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.nom:code}</option>`;
   }).join('');
   return `
   <div class="bracket-match">
@@ -1079,7 +1079,7 @@ function renderBonus() {
   document.getElementById('bonusList').innerHTML = qs.map(q=>{
     let input = '';
     if (q.type==='equipe') {
-      const opts = allTeams.map(t=>`<option value="${t.code}" ${state.bonus[q.id]===t.code?'selected':''}>${t.nom}</option>`).join('');
+      const opts = allTeams.map(t=>`<option value="${t.code}" ${state.bonus[q.id]===t.code?'selected':''}>${t.iso2?t.iso2.toUpperCase()+' – ':''} ${t.nom}</option>`).join('');
       input = `<select onchange="setBonus('${q.id}','equipe',this.value)"><option value="">— Choisir une équipe —</option>${opts}</select>`;
     } else if (q.type==='entier') {
       input = `<input type="number" min="0" max="100" value="${state.bonus[q.id]??''}" placeholder="Entrer un nombre" onchange="setBonus('${q.id}','entier',this.value)">`;
