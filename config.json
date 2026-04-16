@@ -1310,7 +1310,7 @@
       "date_verrou": null
     },
     "A_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "B_J1": {
