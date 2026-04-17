@@ -16,11 +16,11 @@
       "S8_correct": 2,
       "QF_correct": 3,
       "SF_correct": 4,
-      "P3_correct": 0,
+      "P3_correct": 4,
       "F_correct": 5
     },
-    "elim_resultat_correct": 0,
-    "elim_score_exact_bonus": 0
+    "elim_resultat_correct": 1,
+    "elim_score_exact_bonus": 1
   },
   "questions_bonus": [
     {
@@ -42,57 +42,65 @@
     {
       "id": "b3",
       "texte": "Nombre d'équipes invaincues à l'issue de la phase de groupes",
-      "description": "Combien d'équipes termineront la phase de groupes sans défaite (3 victoires ou nuls) ?",
+      "description": "Combien d'équipes termineront la phase de groupes sans défaite ?",
       "type": "entier",
       "points": 2,
       "active": true
     },
     {
       "id": "b4",
-      "texte": "Nombre total de buts marqués en phase de groupes",
-      "description": "Combien de buts au total seront marqués lors des 36 matchs de la phase de groupes ?",
-      "type": "entier",
+      "texte": "Nombre total de buts marqués en phase de groupe",
+      "description": "Combien de buts au total seront marqués lors des 72 matchs de la phase de groupes ?",
+      "type": "equipe",
       "points": 3,
       "active": true
     },
     {
       "id": "b5",
-      "texte": "Meilleur buteur du tournoi ?",
+      "texte": "Meilleure buteur du tournoi",
       "description": "Quel sera le meilleur buteur du tournoi ?",
       "type": "joueur",
-      "points": 2,
+      "points": 3,
       "active": true
     },
     {
       "id": "b6",
-      "texte": "Meilleur gardien du tournoi ?",
-      "description": "Quel sera le meilleur gardien du tournoi ?",
+      "texte": "Meilleure gardien du tournoi",
+      "description": "Qui sera le meilleur gardien du tournoi ?",
       "type": "joueur",
-      "points": 2,
+      "points": 3,
       "active": true
     },
     {
       "id": "b7",
-      "texte": "Meilleur joueur du tournoi ?",
+      "texte": "Meilleur joueur du tournoi",
       "description": "Quel sera le meilleur joueur du tournoi ?",
       "type": "joueur",
-      "points": 2,
+      "points": 5,
       "active": true
     },
     {
       "id": "b8",
-      "texte": "Nombre total de cartons rouge dans le tournoi",
+      "texte": "Nombre total de cartons rouges dans le tournoi",
       "description": "Combien de cartons rouges au total seront distribués dans le tournoi ?",
       "type": "entier",
-      "points": 2,
+      "points": 3,
       "active": true
     },
     {
       "id": "b9",
-      "texte": "Nombre total de buts marqués dans le tournois",
-      "description": "Combien de buts au total seront marqués durant le tournoi ?",
+      "texte": "Nombre de but contre son camp (csc) marqué dans le tournoi",
+      "description": "Combien de buts seront inscrit par un joueur contre son camp ?",
       "type": "entier",
       "points": 3,
+      "active": true
+    },
+    {
+      "id": "b10",
+      "texte": "Nombre total de buts marqués dans le tournoi",
+      "description": "Combien de buts au total seront marqués lors de la coupe du monde ?",
+      "type": "entier",
+      "points": 4,
       "active": true
     }
   ],
@@ -1181,20 +1189,20 @@
       {
         "id": "S8_1",
         "dom_source": "W_S16_2",
-        "ext_source": "W_S16_3",
+        "ext_source": "W_S16_5",
         "date": null,
         "journee": "S8_J1"
       },
       {
         "id": "S8_2",
         "dom_source": "W_S16_1",
-        "ext_source": "W_S16_4",
+        "ext_source": "W_S16_3",
         "date": null,
         "journee": "S8_J1"
       },
       {
         "id": "S8_3",
-        "dom_source": "W_S16_5",
+        "dom_source": "W_S16_4",
         "ext_source": "W_S16_6",
         "date": null,
         "journee": "S8_J2"
@@ -1223,14 +1231,14 @@
       {
         "id": "S8_7",
         "dom_source": "W_S16_14",
-        "ext_source": "W_S16_15",
+        "ext_source": "W_S16_16",
         "date": null,
         "journee": "S8_J4"
       },
       {
         "id": "S8_8",
         "dom_source": "W_S16_13",
-        "ext_source": "W_S16_16",
+        "ext_source": "W_S16_15",
         "date": null,
         "journee": "S8_J4"
       }
@@ -1245,15 +1253,15 @@
       },
       {
         "id": "QF_2",
-        "dom_source": "W_S8_3",
-        "ext_source": "W_S8_4",
+        "dom_source": "W_S8_5",
+        "ext_source": "W_S8_6",
         "date": null,
         "journee": "QF_J1"
       },
       {
         "id": "QF_3",
-        "dom_source": "W_S8_5",
-        "ext_source": "W_S8_6",
+        "dom_source": "W_S8_3",
+        "ext_source": "W_S8_4",
         "date": null,
         "journee": "QF_J2"
       },

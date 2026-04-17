@@ -523,35 +523,52 @@ function renderClassement() {
       <td class="right hide-mobile" style="color:var(--muted);text-align:right">${row.pts_bonus||0}</td>
       <td><div class="score-total">${row.total||0}</div></td>
     </tr>
-    <tr id="${id}_detail" style="${isExpanded?'':'display:none'}">
-      <td colspan="8"><div class="detail-inner" id="${id}_inner">
-        <div class="spinner"></div>
-      </div></td>
-    </tr>`;
+    ${isExpanded ? `<tr id="${id}_detail">
+      <td colspan="8"><div class="detail-inner" id="${id}_inner"></div></td>
+    </tr>` : ''}`;
   }).join('');
 }
 
 async function toggleDetail(pid, pseudo) {
-  const detailRow = document.getElementById('row_'+pid+'_detail');
-  const innerEl   = document.getElementById('row_'+pid+'_inner');
-
+  // Si déjà ouvert : fermer
   if (expandedRows.has(pid)) {
     expandedRows.delete(pid);
-    detailRow.style.display='none';
-    renderClassement();
+    // Mettre à jour visuellement sans re-render total
+    const row = document.querySelector(`tr.classement-row[onclick*="${pid}"]`);
+    const arrow = row?.querySelector('.pseudo-arrow');
+    if (arrow) { arrow.classList.remove('open'); row.classList.remove('expanded'); }
+    const detailRow = document.getElementById('row_'+pid+'_detail');
+    if (detailRow) detailRow.style.display = 'none';
     return;
   }
 
+  // Ouvrir : marquer comme expanded et afficher le panneau
   expandedRows.add(pid);
-  detailRow.style.display='';
-  innerEl.innerHTML='<div class="spinner" style="margin:1.5rem auto"></div>';
-  renderClassement();
+  const row = document.querySelector(`tr.classement-row[onclick*="${pid}"]`);
+  const arrow = row?.querySelector('.pseudo-arrow');
+  if (arrow) { arrow.classList.add('open'); row?.classList.add('expanded'); }
+
+  // Récupérer ou créer la ligne de détail
+  let detailRow = document.getElementById('row_'+pid+'_detail');
+  let innerEl   = document.getElementById('row_'+pid+'_inner');
+
+  if (!detailRow) {
+    // La ligne n'existe pas encore (premier clic) → insérer après la ligne du participant
+    const newDetail = document.createElement('tr');
+    newDetail.id = 'row_'+pid+'_detail';
+    newDetail.innerHTML = '<td colspan="8"><div class="detail-inner" id="row_'+pid+'_inner"><div class="spinner" style="margin:1.5rem auto"></div></div></td>';
+    row?.insertAdjacentElement('afterend', newDetail);
+    innerEl = document.getElementById('row_'+pid+'_inner');
+  } else {
+    detailRow.style.display = '';
+    innerEl.innerHTML = '<div class="spinner" style="margin:1.5rem auto"></div>';
+  }
 
   try {
     await loadParticipantDetail(pid, pseudo, innerEl);
   } catch(e) {
-    innerEl.innerHTML = '<div style="color:var(--red);padding:1rem;font-size:.85rem">Erreur : ' + e.message + '</div>';
-    console.error('loadParticipantDetail error:', e);
+    if (innerEl) innerEl.innerHTML = '<div style="color:var(--red);padding:1rem;font-size:.85rem">Erreur chargement : ' + e.message + '</div>';
+    console.error('toggleDetail error:', e);
   }
 }
 
