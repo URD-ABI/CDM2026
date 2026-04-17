@@ -700,8 +700,28 @@ async function runEngine() {
       });
 
       const total = pts_g+pts_q+pts_br+pts_elim+pts_bo;
+
+      // Stats pour l'affichage dans le classement
+      let nb_matchs_joues=0, nb_resultats_ok=0, nb_scores_exacts=0;
+      Object.entries(CONFIG.matchs_groupes)
+        .filter(([g])=>!g.startsWith('_'))
+        .forEach(([,matchs])=>{
+          matchs.forEach(m=>{
+            const r=reelsMap[m.id]; const p=pronos_g[m.id];
+            if(!r?.joue) return;
+            nb_matchs_joues++;
+            if(!p) return;
+            const real_res=r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
+            if(p.resultat===real_res){
+              nb_resultats_ok++;
+              if(p.score_dom===r.score_dom&&p.score_ext===r.score_ext) nb_scores_exacts++;
+            }
+          });
+        });
+
       results.push({ participant_id:pid, pts_matchs_groupes:pts_g, pts_qualifies:pts_q,
         pts_bracket:pts_br, pts_matchs_elim:pts_elim, pts_bonus:pts_bo, total,
+        nb_matchs_joues, nb_resultats_ok, nb_scores_exacts,
         updated_at:new Date().toISOString() });
 
       log(`${pseudo} → Groupes:${pts_g} Qualifiés:${pts_q} Bracket:${pts_br} Élim:${pts_elim} Bonus:${pts_bo} = ${total} pts`,'ok');
