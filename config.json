@@ -51,7 +51,7 @@
       "id": "b4",
       "texte": "Nombre total de buts marqués en phase de groupe",
       "description": "Combien de buts au total seront marqués lors des 72 matchs de la phase de groupes ?",
-      "type": "equipe",
+      "type": "entier",
       "points": 3,
       "active": true
     },
