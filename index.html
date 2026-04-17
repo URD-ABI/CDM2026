@@ -471,6 +471,16 @@ async function loadClassement() {
   renderClassement();
 }
 
+function buildStatsTags(row) {
+  const played  = row.nb_matchs_joues  || 0;
+  const correct = row.nb_resultats_ok  || 0;
+  const exact   = row.nb_scores_exacts || 0;
+  if (played === 0) return '<span class="sub-tag" style="color:var(--muted);font-style:italic">Aucun match joué</span>';
+  const pct = Math.round(correct / played * 100);
+  return '<span class="sub-tag">Bons résultats <span>' + pct + '%</span></span> ' +
+         '<span class="sub-tag">Scores exacts <span>' + exact + '</span></span>';
+}
+
 function renderClassement() {
   const pMap = Object.fromEntries(allParticipants.map(p=>[p.id,p]));
 
@@ -503,16 +513,7 @@ function renderClassement() {
           ${row.pseudo}
         </div>
         <div class="sub-scores" style="margin-top:.3rem">
-          ${(()=>{
-            const played = row.nb_matchs_joues||0;
-            const correct = row.nb_resultats_ok||0;
-            const exact = row.nb_scores_exacts||0;
-            const pct = played>0 ? Math.round(correct/played*100) : null;
-            return pct!==null
-              ? `<span class="sub-tag">🎯 Bons résultats<span>${pct}%</span></span>
-                 <span class="sub-tag">🔢 Scores exacts<span>${exact}</span></span>`
-              : `<span class="sub-tag" style="font-style:italic">Aucun match joué</span>`;
-          })()}
+          ${buildStatsTags(row)}
         </div>
       </td>
       <td class="right hide-mobile" style="color:var(--muted);text-align:right">${row.pts_matchs_groupes||0}</td>
@@ -531,20 +532,27 @@ function renderClassement() {
 }
 
 async function toggleDetail(pid, pseudo) {
-  const detailRow  = document.getElementById('row_'+pid+'_detail');
-  const innerEl    = document.getElementById('row_'+pid+'_inner');
-  const arrowEls   = document.querySelectorAll(`.classement-row`);
+  const detailRow = document.getElementById('row_'+pid+'_detail');
+  const innerEl   = document.getElementById('row_'+pid+'_inner');
 
   if (expandedRows.has(pid)) {
     expandedRows.delete(pid);
     detailRow.style.display='none';
-  } else {
-    expandedRows.add(pid);
-    detailRow.style.display='';
-    innerEl.innerHTML='<div class="spinner"></div>';
-    await loadParticipantDetail(pid, pseudo, innerEl);
+    renderClassement();
+    return;
   }
+
+  expandedRows.add(pid);
+  detailRow.style.display='';
+  innerEl.innerHTML='<div class="spinner" style="margin:1.5rem auto"></div>';
   renderClassement();
+
+  try {
+    await loadParticipantDetail(pid, pseudo, innerEl);
+  } catch(e) {
+    innerEl.innerHTML = '<div style="color:var(--red);padding:1rem;font-size:.85rem">Erreur : ' + e.message + '</div>';
+    console.error('loadParticipantDetail error:', e);
+  }
 }
 
 async function loadParticipantDetail(pid, pseudo, el) {
