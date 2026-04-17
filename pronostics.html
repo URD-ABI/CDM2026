@@ -347,6 +347,7 @@ body {
   <div class="progress-step" data-step="4"></div>
   <div class="progress-step" data-step="5"></div>
   <div class="progress-step" data-step="6"></div>
+  <div class="progress-step" data-step="7"></div>
 </div>
 <div class="step-label" id="stepLabel" style="display:none"></div>
 
@@ -449,8 +450,23 @@ body {
     </div>
   </div>
 
-  <!-- STEP 6 : RÉCAPITULATIF + SOUMISSION -->
+  <!-- STEP 6 : MATCHS ÉLIMINATOIRES RÉELS -->
   <div id="step6" class="step">
+    <div class="card">
+      <div class="card-title">Matchs éliminatoires <span>Résultat + score des vrais matchs (déverrouillés journée par journée)</span></div>
+      <div class="alert" style="margin-bottom:1rem;background:rgba(59,130,246,.1);border:1px solid #1e3a5f;color:#93c5fd">
+        Ces pronostics sont indépendants de ton bracket. Tu peux les soumettre et les modifier tant que la journée n'est pas verrouillée.
+      </div>
+      <div id="elimContent"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn btn-secondary" onclick="gotoStep(5)">← Retour</button>
+      <button class="btn btn-primary" onclick="gotoStep(7)">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- STEP 7 : RÉCAPITULATIF + SOUMISSION -->
+  <div id="step7" class="step">
     <div class="card">
       <div class="card-title">Récapitulatif</div>
       <div id="reviewContent"></div>
@@ -460,7 +476,7 @@ body {
       </div>
     </div>
     <div class="nav-btns">
-      <button class="btn btn-secondary" onclick="gotoStep(5)">← Retour</button>
+      <button class="btn btn-secondary" onclick="gotoStep(6)">← Retour</button>
       <button class="btn btn-gold btn-lg" onclick="submitAll()" id="submitBtn">✓ Soumettre mes pronostics</button>
     </div>
   </div>
@@ -488,6 +504,7 @@ let activeGroup = 'A';
 
 // Pronostics state
 const state = {
+  elim:     {},  // match_id → { resultat, score_dom, score_ext }
   groupes:  {},  // match_id → { resultat:'H'|'N'|'A', score_dom, score_ext }
   qualifies:{},  // groupe_id → { equipe_1er, equipe_2eme }
   tiers:    [],  // array of 8 groupe letters
@@ -551,7 +568,7 @@ function showStep(n) {
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById(`step${n}`)?.classList.add('active');
 
-  const labels = ['','Identification','Phase de groupes','Qualifiés & 3es','Bracket éliminatoire','Questions bonus','Récapitulatif'];
+  const labels = ['','Identification','Phase de groupes','Qualifiés & 3es','Bracket éliminatoire','Questions bonus','Matchs élim. réels','Récapitulatif'];
   document.getElementById('stepLabel').textContent = `Étape ${n}/6 — ${labels[n]}`;
 
   const wrap = document.getElementById('progressWrap');
@@ -568,7 +585,8 @@ function showStep(n) {
   if (n===3) renderQualifies();
   if (n===4) renderBracket();
   if (n===5) renderBonus();
-  if (n===6) renderReview();
+  if (n===6) renderElim();
+  if (n===7) renderReview();
 }
 
 function gotoStep(n) { showStep(n); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -608,12 +626,13 @@ async function loadExistingPronostics() {
   // Charger les pronostics existants pour pré-remplir le formulaire
   const pid = participant.id;
 
-  const [pg, pq, pt, pb, pbo] = await Promise.all([
+  const [pg, pq, pt, pb, pbo, pe] = await Promise.all([
     sb.from('pronostics_groupes').select('*').eq('participant_id',pid),
     sb.from('pronostics_qualifies').select('*').eq('participant_id',pid),
-    sb.from('pronostics_meilleurs_tiers').select('*').eq('participant_id',pid).single(),
+    sb.from('pronostics_meilleurs_tiers').select('*').eq('participant_id',pid).maybeSingle(),
     sb.from('pronostics_bracket').select('*').eq('participant_id',pid),
     sb.from('pronostics_bonus').select('*').eq('participant_id',pid),
+    sb.from('pronostics_elim').select('*').eq('participant_id',pid),
   ]);
 
   (pg.data||[]).forEach(r=>{ state.groupes[r.match_id]={ resultat:r.resultat, score_dom:r.score_dom, score_ext:r.score_ext }; });
@@ -621,6 +640,7 @@ async function loadExistingPronostics() {
   if (pt.data) state.tiers = pt.data.groupes || [];
   (pb.data||[]).forEach(r=>{ state.bracket[r.slot_id]=r.equipe; });
   (pbo.data||[]).forEach(r=>{ state.bonus[r.question_id]=r.reponse_equipe||r.reponse_entier; });
+  (pe.data||[]).forEach(r=>{ state.elim[r.match_id]={ resultat:r.resultat, score_dom:r.score_dom, score_ext:r.score_ext }; });
 }
 
 // ── STEP 2 : Phase de groupes ─────────────────────────────────
@@ -967,6 +987,51 @@ function resolveSource(src, q32) {
   return found ? getTeamByCode(found.code) : null;
 }
 
+// Retourne les codes équipes disponibles pour un slot de bracket
+// en cherchant les vainqueurs pronostiqués du tour précédent
+function getTeamsForBracketSlot(slotId, round, q32) {
+  const matchData = CONFIG.bracket_eliminatoire[round]?.find(m => m.id === slotId);
+  if (!matchData) return q32.map(q => q.code);
+
+  const resolveSlot = src => {
+    if (!src) return [];
+    if (src.startsWith('W_S16_')) {
+      const s16id = 'S16_' + src.replace('W_S16_','');
+      const winner = state.bracket[s16id];
+      return winner ? [winner] : getBothTeamsR32(CONFIG.bracket_eliminatoire.seizièmes.find(m=>m.id===s16id)||{}, q32);
+    }
+    if (src.startsWith('W_S8_')) {
+      const s8id = 'S8_' + src.replace('W_S8_','');
+      const winner = state.bracket[s8id];
+      if (winner) return [winner];
+      // Fallback: teams from the S8 match
+      const s8m = CONFIG.bracket_eliminatoire.huitièmes.find(m=>m.id===s8id);
+      if (s8m) {
+        const d = resolveSlot(s8m.dom_source);
+        const e = resolveSlot(s8m.ext_source);
+        return [...d, ...e];
+      }
+      return q32.map(q=>q.code);
+    }
+    if (src.startsWith('W_QF_')) {
+      const qfid = 'QF_' + src.replace('W_QF_','');
+      const winner = state.bracket[qfid];
+      return winner ? [winner] : q32.map(q=>q.code);
+    }
+    if (src.startsWith('W_SF_') || src.startsWith('L_SF_')) {
+      const sfid = 'SF_' + src.replace('W_SF_','').replace('L_SF_','');
+      const winner = state.bracket[sfid];
+      return winner ? [winner] : q32.map(q=>q.code);
+    }
+    return [];
+  };
+
+  const domTeams = resolveSlot(matchData.dom_source);
+  const extTeams = resolveSlot(matchData.ext_source);
+  const combined = [...new Set([...domTeams, ...extTeams])];
+  return combined.length > 0 ? combined : q32.map(q=>q.code);
+}
+
 function renderBracket() {
   const rounds = ['seizièmes','huitièmes','QF','SF'];
   const labels = { seizièmes:'Seizièmes de finale', huitièmes:'Huitièmes de finale', QF:'Quarts de finale', SF:'Demi-finales' };
@@ -978,24 +1043,27 @@ function renderBracket() {
     const matchs = CONFIG.bracket_eliminatoire[round]||[];
     html += `<div class="bracket-section"><h3>${labels[round]}</h3><div class="bracket-grid">`;
     html += matchs.map((m,i)=>{
-      const teamsForSlot = round==='seizièmes' ? getBothTeamsR32(m, q32) : allCodes;
+      const teamsForSlot = round==='seizièmes'
+        ? getBothTeamsR32(m, q32)
+        : getTeamsForBracketSlot(m.id, round, q32);
       const opts = teamsForSlot.map(code=>{
         const t = getTeamByCode(code);
         return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.nom:code}</option>`;
       }).join('');
-      // Traduire les sources en labels lisibles
       function srcToLabel(s) {
         if (!s) return '?';
-        if (/^1[A-L]$/.test(s)) return `1er Groupe ${s[1]}`;
-        if (/^2[A-L]$/.test(s)) return `2e Groupe ${s[1]}`;
+        if (/^1[A-L]$/.test(s)) return `1er Grp ${s[1]}`;
+        if (/^2[A-L]$/.test(s)) return `2e Grp ${s[1]}`;
         if (s.startsWith('T3_')) return `Meilleur 3e (${s.replace('T3_','').split('').join('/')})`;
+        if (s.startsWith('W_')) return `Vainq. ${s.slice(2)}`;
+        if (s.startsWith('L_')) return `Perdant ${s.slice(2)}`;
         return s;
       }
       const srcLabel = `${srcToLabel(m.dom_source)} vs ${srcToLabel(m.ext_source)}`;
       return `
       <div class="bracket-match">
         <div class="bm-label">${round}_${i+1} · Vainqueur de ce match</div>
-        <select onchange="setBracket('${m.id}',this.value)">
+        <select onchange="setBracket('${m.id}',this.value,'${round}')">
           <option value="">— Choisir —</option>${opts}
         </select>
         <div class="bracket-teams" style="font-size:.7rem;color:var(--muted)">${srcLabel}</div>
@@ -1004,12 +1072,25 @@ function renderBracket() {
     html += '</div></div>';
   }
 
-  // P3 et Finale
+  // P3 et Finale — équipes depuis les SF
+  const sfWinners = [];
+  const sfLosers = [];
+  (CONFIG.bracket_eliminatoire.SF||[]).forEach(m => {
+    const w = state.bracket[m.id];
+    if (w) { sfWinners.push(w); }
+    else {
+      const t = getTeamsForBracketSlot(m.id, 'SF', q32);
+      sfWinners.push(...t); sfLosers.push(...t);
+    }
+  });
+  const finalists = sfWinners.length > 0 ? [...new Set(sfWinners)] : allCodes;
+  const p3teams   = sfLosers.length > 0  ? [...new Set(sfLosers)]  : allCodes;
+
   html += `<div class="bracket-section"><h3>Match pour la 3e place</h3><div class="bracket-grid">`;
-  html += renderSimpleBracketSlot(CONFIG.bracket_eliminatoire.P3[0], allCodes);
+  html += renderSimpleBracketSlot(CONFIG.bracket_eliminatoire.P3[0], p3teams.length?p3teams:allCodes);
   html += `</div></div>`;
   html += `<div class="bracket-section"><h3>🏆 Finale</h3><div class="bracket-grid">`;
-  html += renderSimpleBracketSlot(CONFIG.bracket_eliminatoire.F[0], allCodes);
+  html += renderSimpleBracketSlot(CONFIG.bracket_eliminatoire.F[0], finalists.length?finalists:allCodes);
   html += `</div></div>`;
   document.getElementById('bracketContent').innerHTML = html;
 }
@@ -1068,8 +1149,78 @@ function renderSimpleBracketSlot(m, allCodes) {
   </div>`;
 }
 
-function setBracket(slotId, val) {
+function setBracket(slotId, val, round) {
   state.bracket[slotId] = val;
+  // Re-render the bracket so downstream rounds update their available teams
+  if (round && round !== 'F' && round !== 'P3') {
+    renderBracket();
+  }
+}
+
+// ── STEP 6 : Matchs éliminatoires réels ─────────────────────────
+function renderElim() {
+  const tours = ['seizièmes','huitièmes','QF','SF','P3','F'];
+  const labels = {seizièmes:'Seizièmes',huitièmes:'Huitièmes',QF:'Quarts',SF:'Demi-finales',P3:'3e place',F:'Finale'};
+  const reels_map = {}; // Pas de données réelles ici, on se base sur le config
+  let html = '';
+  let hasUnlocked = false;
+
+  tours.forEach(tour=>{
+    const matchs = CONFIG.bracket_eliminatoire[tour]||[];
+    matchs.forEach((m,i)=>{
+      // Vérifier si la journée est déverrouillée
+      const journee = CONFIG.journees[m.journee];
+      const locked = CONFIG.phase_initiale_verrou?.verrouille || journee?.verrouille || false;
+
+      const st = state.elim[m.id] || {};
+      const labelTour = `${labels[tour]} ${matchs.length>1?i+1:''}`;
+
+      if (locked && !st.resultat) {
+        // Verrouillé et pas encore pronostiqué
+        return;
+      }
+      hasUnlocked = true;
+
+      html += `
+      <div class="match-row" style="margin-bottom:.5rem">
+        <div class="match-info">${labelTour} · ${m.id}${locked?' 🔒':''}</div>
+        <button class="team-btn home ${st.resultat==='H'?'selected':''}"
+          ${locked?'disabled':''} onclick="setElimResult('${m.id}','H')">
+          ${m.dom_source||'Équipe 1'}
+        </button>
+        <button class="draw-btn ${st.resultat==='N'?'selected':''}"
+          ${locked?'disabled':''} onclick="setElimResult('${m.id}','N')">NUL</button>
+        <button class="team-btn away ${st.resultat==='A'?'selected':''}"
+          ${locked?'disabled':''} onclick="setElimResult('${m.id}','A')">
+          ${m.ext_source||'Équipe 2'}
+        </button>
+        <div class="score-inputs">
+          <input type="number" min="0" max="20" placeholder="-" value="${st.score_dom??''}"
+            ${locked?'disabled':''}
+            onchange="setElimScore('${m.id}','dom',this.value)">
+          <span class="score-sep">–</span>
+          <input type="number" min="0" max="20" placeholder="-" value="${st.score_ext??''}"
+            ${locked?'disabled':''}
+            onchange="setElimScore('${m.id}','ext',this.value)">
+        </div>
+      </div>`;
+    });
+  });
+
+  if (!html) {
+    html = '<div style="color:var(--muted);font-size:.85rem;padding:1rem 0">Les matchs éliminatoires se déverrouilleront au fur et à mesure du tournoi. Reviens ici pour pronostiquer chaque journée !</div>';
+  }
+  document.getElementById('elimContent').innerHTML = html;
+}
+
+function setElimResult(matchId, res) {
+  if (!state.elim[matchId]) state.elim[matchId] = {};
+  state.elim[matchId].resultat = res;
+  renderElim();
+}
+function setElimScore(matchId, side, val) {
+  if (!state.elim[matchId]) state.elim[matchId] = {};
+  state.elim[matchId]['score_'+side] = val===''?null:parseInt(val);
 }
 
 // ── STEP 5 : Bonus ────────────────────────────────────────────
@@ -1082,7 +1233,7 @@ function renderBonus() {
       const opts = allTeams.map(t=>`<option value="${t.code}" ${state.bonus[q.id]===t.code?'selected':''}>${t.iso2?t.iso2.toUpperCase()+' – ':''} ${t.nom}</option>`).join('');
       input = `<select onchange="setBonus('${q.id}','equipe',this.value)"><option value="">— Choisir une équipe —</option>${opts}</select>`;
     } else if (q.type==='entier') {
-      input = `<input type="number" min="0" max="100" value="${state.bonus[q.id]??''}" placeholder="Entrer un nombre" onchange="setBonus('${q.id}','entier',this.value)">`;
+      input = `<input type="number" min="0" max="9999" value="${state.bonus[q.id]??''}" placeholder="Entrer un nombre" onchange="setBonus('${q.id}','entier',this.value)">`;
     } else if (q.type==='joueur') {
       input = `<input type="text" value="${state.bonus[q.id]??''}" placeholder="Nom du joueur" oninput="setBonus('${q.id}','joueur',this.value)" style="padding:.5rem .8rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans';font-size:.9rem;width:100%">`;
     }
@@ -1125,6 +1276,10 @@ function renderReview() {
     <div class="review-section">
       <h3>Bracket éliminatoire</h3>
       <span class="review-tag ${brDone===brSlots.length?'ok':'nok'}">${brDone}/${brSlots.length} slots remplis</span>
+    </div>
+    <div class="review-section">
+      <h3>Matchs élim. réels</h3>
+      <span class="review-tag ok">${Object.values(state.elim).filter(v=>v.resultat).length} pronostic(s) soumis</span>
     </div>
     <div class="review-section">
       <h3>Questions bonus</h3>
@@ -1179,7 +1334,16 @@ async function submitAll() {
       if (error) throw error;
     }
 
-    // 5. Bonus (upsert)
+    // 5. Pronostics élim réels (upsert)
+    const peRows = Object.entries(state.elim)
+      .filter(([,v])=>v.resultat)
+      .map(([match_id,v])=>({ participant_id:pid, match_id, resultat:v.resultat, score_dom:v.score_dom??null, score_ext:v.score_ext??null }));
+    if (peRows.length) {
+      const { error } = await sb.from('pronostics_elim').upsert(peRows, { onConflict:'participant_id,match_id' });
+      if (error) throw error;
+    }
+
+    // 6. Bonus (upsert)
     const pboRows = Object.entries(state.bonus)
       .filter(([,v])=>v!=null)
       .map(([question_id,v])=>{

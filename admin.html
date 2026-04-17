@@ -388,14 +388,33 @@ function renderScores(phase, btnEl) {
         ? `<span class="match-status-badge badge-locked">🔒 Verrouillé</span>`
         : `<span class="match-status-badge badge-pending">En attente</span>`;
 
+    // Pour les matchs élim sans équipes connues: ajouter des sélecteurs
+    const isElim = !m.dom && !m.ext;
+    const teamOpts = CONFIG.equipes.map(e=>`<option value="${e.code}">${e.nom}</option>`).join('');
+    const domSelector = isElim ? `
+      <select id="dom_${m.id}" onchange="setPending('${m.id}','equipe_dom',this.value)"
+        style="flex:1;padding:.35rem .5rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.82rem">
+        <option value="${r.equipe_dom||''}">— ${domLabel} —</option>${teamOpts}
+      </select>` : `<div class="team-label">${domLabel}</div>`;
+    const extSelector = isElim ? `
+      <select id="ext_${m.id}" onchange="setPending('${m.id}','equipe_ext',this.value)"
+        style="flex:1;padding:.35rem .5rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.82rem">
+        <option value="${r.equipe_ext||''}">— ${extLabel} —</option>${teamOpts}
+      </select>` : `<div class="team-label right">${extLabel}</div>`;
+
     return `
     <div class="match-entry ${joue?'saved':''}" id="entry_${m.id}">
       <div class="match-entry-header">
         <span class="match-id-badge">${m.id}</span>
         ${statusBadge}
       </div>
+      ${isElim ? `<div style="display:flex;gap:.5rem;margin-bottom:.6rem;align-items:center">
+        ${domSelector}
+        <span style="color:var(--muted);font-size:.8rem;flex-shrink:0">vs</span>
+        ${extSelector}
+      </div>` : ''}
       <div class="score-entry">
-        <div class="team-label">${domLabel}</div>
+        ${isElim ? '' : domSelector}
         <input class="score-box" type="number" min="0" max="30" placeholder="–"
           value="${scoreD}" id="sd_${m.id}"
           onchange="setPending('${m.id}','score_dom',+this.value)">
@@ -403,14 +422,14 @@ function renderScores(phase, btnEl) {
         <input class="score-box" type="number" min="0" max="30" placeholder="–"
           value="${scoreE}" id="se_${m.id}"
           onchange="setPending('${m.id}','score_ext',+this.value)">
-        <div class="team-label right">${extLabel}</div>
+        ${isElim ? '' : extSelector}
       </div>
       <div class="match-actions">
         <div class="toggle-wrap" onclick="toggleJoue('${m.id}')">
           <div class="toggle ${joue?'on':''}" id="toggle_${m.id}"></div>
           <span class="toggle-label">Match joué</span>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="saveMatch('${m.id}','${domCode||''}','${extCode||''}')">Enregistrer</button>
+        <button class="btn btn-primary btn-sm" onclick="saveMatchFromForm('${m.id}','${domCode||''}','${extCode||''}')">Enregistrer</button>
       </div>
     </div>`;
   }).join('');
@@ -427,6 +446,18 @@ function toggleJoue(matchId) {
   pendingScores[matchId].joue = !cur;
   const tog = document.getElementById('toggle_'+matchId);
   if (tog) tog.className = 'toggle '+(pendingScores[matchId].joue?'on':'');
+}
+
+async function saveMatchFromForm(matchId, domCode, extCode) {
+  // Read team selectors if present (elim matches)
+  const domSel = document.getElementById('dom_'+matchId);
+  const extSel = document.getElementById('ext_'+matchId);
+  if (domSel && domSel.value) domCode = domSel.value;
+  if (extSel && extSel.value) extCode = extSel.value;
+  // Also read pending team values
+  if (pendingScores[matchId]?.equipe_dom) domCode = pendingScores[matchId].equipe_dom;
+  if (pendingScores[matchId]?.equipe_ext) extCode = pendingScores[matchId].equipe_ext;
+  await saveMatch(matchId, domCode, extCode);
 }
 
 async function saveMatch(matchId, domCode, extCode) {
@@ -639,21 +670,24 @@ async function runEngine() {
           });
         });
 
-      // ─ Points qualifiés ─
+      // ─ Points qualifiés (uniquement si TOUS les matchs du groupe sont joués) ─
       const pronos_q = pqMap[pid]||{};
-      if (Object.keys(realQualifies).length) {
-        Object.keys(CONFIG.groupes).forEach(g=>{
-          const p = pronos_q[g];
-          const r = realQualifies[g];
-          if (!p||!r) return;
-          if (p.equipe_1er===r.premier)  pts_q += pts.qualifie_1er;
-          if (p.equipe_2eme===r.deuxieme)pts_q += pts.qualifie_2eme;
-        });
-        // Meilleurs tiers
+      Object.keys(CONFIG.groupes).filter(k=>!k.startsWith('_')).forEach(g=>{
+        const matchsGroupe = CONFIG.matchs_groupes[g]||[];
+        const allPlayed = matchsGroupe.every(m=>reelsMap[m.id]?.joue);
+        if (!allPlayed) return; // groupe pas terminé → pas de points qualifiés
+        const p = pronos_q[g];
+        const r = realQualifies[g];
+        if (!p||!r) return;
+        if (p.equipe_1er===r.premier)   pts_q += pts.qualifie_1er;
+        if (p.equipe_2eme===r.deuxieme) pts_q += pts.qualifie_2eme;
+      });
+      // Meilleurs tiers (si tous les groupes ont terminé)
+      const allGroupsDone = Object.keys(CONFIG.groupes).filter(k=>!k.startsWith('_'))
+        .every(g=>(CONFIG.matchs_groupes[g]||[]).every(m=>reelsMap[m.id]?.joue));
+      if (allGroupsDone && realTiers.length) {
         const tiersP = ptMap[pid]||[];
-        if (realTiers.length) {
-          tiersP.forEach(g=>{ if(realTiers.includes(g)) pts_q += pts.meilleur_tiers_correct; });
-        }
+        tiersP.forEach(g=>{ if(realTiers.includes(g)) pts_q += pts.meilleur_tiers_correct; });
       }
 
       // ─ Points bracket ─
