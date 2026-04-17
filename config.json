@@ -19,8 +19,8 @@
       "P3_correct": 0,
       "F_correct": 5
     },
-    "elim_resultat_correct": 0,
-    "elim_score_exact_bonus": 0
+    "elim_resultat_correct": 1,
+    "elim_score_exact_bonus": 1
   },
   "questions_bonus": [
     {
