@@ -1158,49 +1158,127 @@ function setBracket(slotId, val, round) {
 }
 
 // ── STEP 6 : Matchs éliminatoires réels ─────────────────────────
-function renderElim() {
+// Résout un code source (2A, 1C, W_S16_3…) en nom d'équipe affichable
+// en priorité depuis matchs_reels (données admin), puis depuis les pronostics user
+function resolveElimLabel(src, reelsMap) {
+  if (!src) return '?';
+
+  // Cas 1 : groupe direct (2A, 1C, T3_…) → chercher dans matchs_reels le match S16 concerné
+  if (/^[12][A-L]$/.test(src)) {
+    // Chercher parmi les S16 quel match a ce src comme dom_source ou ext_source
+    for (const m of CONFIG.bracket_eliminatoire.seizièmes||[]) {
+      const r = reelsMap[m.id];
+      if (!r) continue;
+      if (m.dom_source === src && r.equipe_dom) return teamDisplay(getTeamByCode(r.equipe_dom));
+      if (m.ext_source === src && r.equipe_ext) return teamDisplay(getTeamByCode(r.equipe_ext));
+    }
+    // Fallback sur pronostics user
+    const grp = src[1];
+    const pos = src[0];
+    const q = state.qualifies[grp];
+    if (q) {
+      const code = pos==='1' ? q.equipe_1er : q.equipe_2eme;
+      const t = getTeamByCode(code);
+      return t ? teamDisplay(t) : (code||src);
+    }
+    return src;
+  }
+
+  // Cas 2 : vainqueur d'un match précédent (W_S16_3, W_S8_2, W_QF_1…)
+  if (src.startsWith('W_')) {
+    const matchId = src.slice(2); // ex: 'S16_3', 'S8_2'
+    const r = reelsMap[matchId];
+    if (r?.joue && r.equipe_dom && r.equipe_ext) {
+      const winner = r.score_dom > r.score_ext ? r.equipe_dom : r.equipe_ext;
+      const t = getTeamByCode(winner);
+      return t ? teamDisplay(t) : winner;
+    }
+    // Match pas encore joué : chercher dans les pronostics bracket user
+    const bracketWinner = state.bracket[matchId];
+    if (bracketWinner) {
+      const t = getTeamByCode(bracketWinner);
+      return t ? `${teamDisplay(t)} <span style="font-size:.7rem;color:var(--muted)">(prévu)</span>` : bracketWinner;
+    }
+    // Dernier recours : label lisible
+    if (matchId.startsWith('S16_')) return `Vainq. 16e n°${matchId.replace('S16_','')}`;
+    if (matchId.startsWith('S8_'))  return `Vainq. 8e n°${matchId.replace('S8_','')}`;
+    if (matchId.startsWith('QF_'))  return `Vainq. QF n°${matchId.replace('QF_','')}`;
+    if (matchId.startsWith('SF_'))  return `Vainq. SF n°${matchId.replace('SF_','')}`;
+    return src;
+  }
+
+  // Cas 3 : perdant (L_SF_1…)
+  if (src.startsWith('L_')) {
+    const matchId = src.slice(2);
+    const r = reelsMap[matchId];
+    if (r?.joue && r.equipe_dom && r.equipe_ext) {
+      const loser = r.score_dom < r.score_ext ? r.equipe_dom : r.equipe_ext;
+      const t = getTeamByCode(loser);
+      return t ? teamDisplay(t) : loser;
+    }
+    return `Perdant SF n°${matchId.replace('SF_','')}`;
+  }
+
+  // Cas T3
+  if (src.startsWith('T3_')) {
+    const groups = src.replace('T3_','').split('');
+    return `Meilleur 3e (${groups.join('/')})`;
+  }
+
+  return src;
+}
+
+async function renderElim() {
   const tours = ['seizièmes','huitièmes','QF','SF','P3','F'];
-  const labels = {seizièmes:'Seizièmes',huitièmes:'Huitièmes',QF:'Quarts',SF:'Demi-finales',P3:'3e place',F:'Finale'};
-  const reels_map = {}; // Pas de données réelles ici, on se base sur le config
+  const labels = {seizièmes:'Seizième',huitièmes:'Huitième',QF:'Quart',SF:'Demi-finale',P3:'3e place',F:'Finale'};
   let html = '';
-  let hasUnlocked = false;
+
+  // Charger matchs_reels depuis Supabase pour avoir les équipes réelles
+  let reelsMap = {};
+  try {
+    const { data } = await sb.from('matchs_reels').select('match_id,equipe_dom,equipe_ext,score_dom,score_ext,joue,verrouille');
+    (data||[]).forEach(r => { reelsMap[r.match_id] = r; });
+  } catch(e) { /* silently ignore, fallback to pronostics */ }
 
   tours.forEach(tour=>{
     const matchs = CONFIG.bracket_eliminatoire[tour]||[];
     matchs.forEach((m,i)=>{
-      // Vérifier si la journée est déverrouillée
       const journee = CONFIG.journees[m.journee];
       const locked = CONFIG.phase_initiale_verrou?.verrouille || journee?.verrouille || false;
-
       const st = state.elim[m.id] || {};
-      const labelTour = `${labels[tour]} ${matchs.length>1?i+1:''}`;
+      const labelTour = `${labels[tour]}${matchs.length>1?' '+(i+1):''}`;
 
-      if (locked && !st.resultat) {
-        // Verrouillé et pas encore pronostiqué
-        return;
-      }
-      hasUnlocked = true;
+      // Masquer si verrouillé et pas encore pronostiqué
+      if (locked && !st.resultat) return;
+
+      // Résoudre les labels des équipes
+      const domLabel = resolveElimLabel(m.dom_source, reelsMap);
+      const extLabel = resolveElimLabel(m.ext_source, reelsMap);
+
+      // Si les deux équipes ne sont pas encore connues : afficher un message d'attente
+      const domUnknown = domLabel.includes('Vainq.') || domLabel.includes('prévu') || domLabel === m.dom_source;
+      const extUnknown = extLabel.includes('Vainq.') || extLabel.includes('prévu') || extLabel === m.ext_source;
 
       html += `
       <div class="match-row" style="margin-bottom:.5rem">
         <div class="match-info">${labelTour} · ${m.id}${locked?' 🔒':''}</div>
         <button class="team-btn home ${st.resultat==='H'?'selected':''}"
           ${locked?'disabled':''} onclick="setElimResult('${m.id}','H')">
-          ${m.dom_source||'Équipe 1'}
+          ${domLabel}
         </button>
         <button class="draw-btn ${st.resultat==='N'?'selected':''}"
           ${locked?'disabled':''} onclick="setElimResult('${m.id}','N')">NUL</button>
         <button class="team-btn away ${st.resultat==='A'?'selected':''}"
           ${locked?'disabled':''} onclick="setElimResult('${m.id}','A')">
-          ${m.ext_source||'Équipe 2'}
+          ${extLabel}
         </button>
         <div class="score-inputs">
           <input type="number" min="0" max="20" placeholder="-" value="${st.score_dom??''}"
-            ${locked?'disabled':''}
+            style="-moz-appearance:textfield" ${locked?'disabled':''}
             onchange="setElimScore('${m.id}','dom',this.value)">
           <span class="score-sep">–</span>
           <input type="number" min="0" max="20" placeholder="-" value="${st.score_ext??''}"
-            ${locked?'disabled':''}
+            style="-moz-appearance:textfield" ${locked?'disabled':''}
             onchange="setElimScore('${m.id}','ext',this.value)">
         </div>
       </div>`;
