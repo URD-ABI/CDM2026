@@ -566,7 +566,22 @@ async function init() {
 function showStep(n) {
   currentStep = n;
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
-  document.getElementById(`step${n}`)?.classList.add('active');
+  const activeStep = document.getElementById(`step${n}`);
+  activeStep?.classList.add('active');
+
+  // Dupliquer les boutons nav en haut du step actif
+  if (activeStep && n > 1) {
+    const existingTop = activeStep.querySelector('.nav-btns-top');
+    if (existingTop) existingTop.remove();
+    const bottomNav = activeStep.querySelector('.nav-btns');
+    if (bottomNav) {
+      const topNav = bottomNav.cloneNode(true);
+      topNav.classList.add('nav-btns-top');
+      topNav.style.marginBottom = '1rem';
+      topNav.style.marginTop = '0';
+      activeStep.insertBefore(topNav, activeStep.firstChild);
+    }
+  }
 
   const labels = ['','Identification','Phase de groupes','Qualifiés & 3es','Bracket éliminatoire','Questions bonus','Matchs élim. réels','Récapitulatif'];
   document.getElementById('stepLabel').textContent = `Étape ${n}/6 — ${labels[n]}`;
@@ -1158,73 +1173,60 @@ function setBracket(slotId, val, round) {
 }
 
 // ── STEP 6 : Matchs éliminatoires réels ─────────────────────────
-// Résout un code source (2A, 1C, W_S16_3…) en nom d'équipe affichable
-// en priorité depuis matchs_reels (données admin), puis depuis les pronostics user
+// Résout un code source en label affiché :
+// - Si matchs_reels contient les équipes réelles (saisies admin) → affiche le nom
+// - Sinon → affiche le code brut (2A, 1F, W_S16_3…) comme dans l'onglet Matchs
 function resolveElimLabel(src, reelsMap) {
   if (!src) return '?';
 
-  // Cas 1 : groupe direct (2A, 1C, T3_…) → chercher dans matchs_reels le match S16 concerné
+  // Équipe directe depuis un slot de groupe (2A, 1C, T3_…)
   if (/^[12][A-L]$/.test(src)) {
-    // Chercher parmi les S16 quel match a ce src comme dom_source ou ext_source
     for (const m of CONFIG.bracket_eliminatoire.seizièmes||[]) {
       const r = reelsMap[m.id];
       if (!r) continue;
-      if (m.dom_source === src && r.equipe_dom) return teamDisplay(getTeamByCode(r.equipe_dom));
-      if (m.ext_source === src && r.equipe_ext) return teamDisplay(getTeamByCode(r.equipe_ext));
+      if (m.dom_source === src && r.equipe_dom) {
+        const t = getTeamByCode(r.equipe_dom);
+        return t ? teamDisplay(t) : src;
+      }
+      if (m.ext_source === src && r.equipe_ext) {
+        const t = getTeamByCode(r.equipe_ext);
+        return t ? teamDisplay(t) : src;
+      }
     }
-    // Fallback sur pronostics user
-    const grp = src[1];
-    const pos = src[0];
-    const q = state.qualifies[grp];
-    if (q) {
-      const code = pos==='1' ? q.equipe_1er : q.equipe_2eme;
-      const t = getTeamByCode(code);
-      return t ? teamDisplay(t) : (code||src);
-    }
-    return src;
+    return src; // pas encore saisi en admin → code brut
   }
 
-  // Cas 2 : vainqueur d'un match précédent (W_S16_3, W_S8_2, W_QF_1…)
+  // Vainqueur d'un match précédent (W_S16_3, W_S8_2…)
   if (src.startsWith('W_')) {
-    const matchId = src.slice(2); // ex: 'S16_3', 'S8_2'
+    const matchId = src.slice(2);
     const r = reelsMap[matchId];
-    if (r?.joue && r.equipe_dom && r.equipe_ext) {
-      const winner = r.score_dom > r.score_ext ? r.equipe_dom : r.equipe_ext;
-      const t = getTeamByCode(winner);
-      return t ? teamDisplay(t) : winner;
+    if (r?.equipe_dom && r.equipe_ext) {
+      if (r.joue) {
+        const winner = r.score_dom > r.score_ext ? r.equipe_dom : r.equipe_ext;
+        const t = getTeamByCode(winner);
+        return t ? teamDisplay(t) : src;
+      }
+      // Équipes connues mais match pas encore joué → afficher les deux
+      const d = getTeamByCode(r.equipe_dom);
+      const e = getTeamByCode(r.equipe_ext);
+      return (d ? teamDisplay(d) : r.equipe_dom) + ' / ' + (e ? teamDisplay(e) : r.equipe_ext);
     }
-    // Match pas encore joué : chercher dans les pronostics bracket user
-    const bracketWinner = state.bracket[matchId];
-    if (bracketWinner) {
-      const t = getTeamByCode(bracketWinner);
-      return t ? `${teamDisplay(t)} <span style="font-size:.7rem;color:var(--muted)">(prévu)</span>` : bracketWinner;
-    }
-    // Dernier recours : label lisible
-    if (matchId.startsWith('S16_')) return `Vainq. 16e n°${matchId.replace('S16_','')}`;
-    if (matchId.startsWith('S8_'))  return `Vainq. 8e n°${matchId.replace('S8_','')}`;
-    if (matchId.startsWith('QF_'))  return `Vainq. QF n°${matchId.replace('QF_','')}`;
-    if (matchId.startsWith('SF_'))  return `Vainq. SF n°${matchId.replace('SF_','')}`;
-    return src;
+    return src; // pas encore saisi en admin → code brut
   }
 
-  // Cas 3 : perdant (L_SF_1…)
+  // Perdant d'une demi-finale (P3)
   if (src.startsWith('L_')) {
     const matchId = src.slice(2);
     const r = reelsMap[matchId];
     if (r?.joue && r.equipe_dom && r.equipe_ext) {
       const loser = r.score_dom < r.score_ext ? r.equipe_dom : r.equipe_ext;
       const t = getTeamByCode(loser);
-      return t ? teamDisplay(t) : loser;
+      return t ? teamDisplay(t) : src;
     }
-    return `Perdant SF n°${matchId.replace('SF_','')}`;
+    return src;
   }
 
-  // Cas T3
-  if (src.startsWith('T3_')) {
-    const groups = src.replace('T3_','').split('');
-    return `Meilleur 3e (${groups.join('/')})`;
-  }
-
+  // T3 → code brut suffisant
   return src;
 }
 
@@ -1254,10 +1256,6 @@ async function renderElim() {
       // Résoudre les labels des équipes
       const domLabel = resolveElimLabel(m.dom_source, reelsMap);
       const extLabel = resolveElimLabel(m.ext_source, reelsMap);
-
-      // Si les deux équipes ne sont pas encore connues : afficher un message d'attente
-      const domUnknown = domLabel.includes('Vainq.') || domLabel.includes('prévu') || domLabel === m.dom_source;
-      const extUnknown = extLabel.includes('Vainq.') || extLabel.includes('prévu') || extLabel === m.ext_source;
 
       html += `
       <div class="match-row" style="margin-bottom:.5rem">
