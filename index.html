@@ -671,7 +671,77 @@ async function loadParticipantDetail(pid, pseudo, el) {
   });
   html += `</div>`;
 
-  // ── 2. Qualifiés & 3es : flags + pts ─────────────────────────────
+  // ── 2. Bracket Éliminatoire ──────────────────────────────────────
+  html += `<div class="detail-section"><h4>Bracket Éliminatoire</h4>`;
+  const brLabels={seizièmes:'S16',huitièmes:'S8',QF:'QF',SF:'SF',P3:'P3',F:'Finale'};
+  brTours.forEach(tour=>{
+    const matchs=CONFIG.bracket_eliminatoire[tour]||[];
+    matchs.forEach((m,i)=>{
+      const b=pronos_b[m.id]; if(!b) return;
+      const r=reels_map[m.id];
+      const tWinner=CONFIG.equipes.find(e=>e.code===b.equipe);
+      // Résoudre les équipes du match depuis matchs_reels ou les sources
+      const domTeam = r?.equipe_dom ? CONFIG.equipes.find(e=>e.code===r.equipe_dom) : null;
+      const extTeam = r?.equipe_ext ? CONFIG.equipes.find(e=>e.code===r.equipe_ext) : null;
+      const matchFlags = (domTeam||extTeam)
+        ? `${flag(domTeam)||'?'} – ${flag(extTeam)||'?'}`
+        : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
+      let pts=0,status='pending';
+      if(r?.joue){
+        const winner=r.score_dom>r.score_ext?r.equipe_dom:r.equipe_ext;
+        status=b.equipe===winner?'ok':'nok';
+        if(status==='ok'){
+          const key={'seizièmes':'S16','huitièmes':'S8','QF':'QF','SF':'SF','P3':'P3','F':'F'}[tour];
+          pts=pts_conf.bracket[key+'_correct']||0;
+        }
+      }
+      html += `<div class="detail-match">
+        <span class="match-teams">${matchFlags}</span>
+        <span class="match-prono ${status}">${flag(tWinner)||b.equipe}</span>
+        ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
+      </div>`;
+    });
+  });
+  html += `</div>`;
+
+  // ── 3. Matchs Élim. Réels ─────────────────────────────────────────
+  html += `<div class="detail-section"><h4>Matchs Élim. Réels</h4>`;
+  const brTours = ['seizièmes','huitièmes','QF','SF','P3','F'];
+  let hasElim = false;
+  brTours.forEach(tour=>{
+    (CONFIG.bracket_eliminatoire[tour]||[]).forEach((m,i)=>{
+      const p  = pronos_e[m.id];
+      const r  = reels_map[m.id];
+      if (!r?.joue && !p) return; // masquer si pas joué et pas pronostiqué
+      hasElim = true;
+      const dom = r?.equipe_dom ? CONFIG.equipes.find(e=>e.code===r.equipe_dom) : null;
+      const ext = r?.equipe_ext ? CONFIG.equipes.find(e=>e.code===r.equipe_ext) : null;
+      const flagLine = dom||ext ? `${flag(dom)||'?'} – ${flag(ext)||'?'}` : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
+      if (!p) {
+        html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
+        return;
+      }
+      const score = (p.score_dom!=null&&p.score_ext!=null)?`${p.score_dom}–${p.score_ext}`:'?–?';
+      let pts=0, status='pending';
+      if (r?.joue) {
+        const real_res=r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
+        if(p.resultat===real_res){
+          pts+=pts_conf.elim_resultat_correct;
+          if(p.score_dom===r.score_dom&&p.score_ext===r.score_ext) pts+=pts_conf.elim_score_exact_bonus;
+          status='ok';
+        } else status='nok';
+      }
+      html += `<div class="detail-match">
+        <span class="match-teams">${flagLine}</span>
+        <span class="match-prono ${status}">${score}</span>
+        ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
+      </div>`;
+    });
+  });
+  if (!hasElim) html += `<div style="color:var(--muted);font-size:.82rem">Aucun match éliminatoire joué pour l'instant.</div>`;
+  html += `</div>`;
+
+  // ── 4. Qualifiés & 3es : flags + pts ─────────────────────────────
   html += `<div class="detail-section"><h4>Qualifiés & 3es</h4>`;
   // Vérité terrain qualifiés
   const realQ = {};
@@ -766,70 +836,6 @@ async function loadParticipantDetail(pid, pseudo, el) {
     });
     html += `</span></div>`;
   }
-  html += `</div>`;
-
-  // ── 3. Matchs Élim. Réels (position de l'ancien Bracket) ─────────
-  html += `<div class="detail-section"><h4>Matchs Élim. Réels</h4>`;
-  const brTours = ['seizièmes','huitièmes','QF','SF','P3','F'];
-  let hasElim = false;
-  brTours.forEach(tour=>{
-    (CONFIG.bracket_eliminatoire[tour]||[]).forEach((m,i)=>{
-      const p  = pronos_e[m.id];
-      const r  = reels_map[m.id];
-      if (!r?.joue && !p) return; // masquer si pas joué et pas pronostiqué
-      hasElim = true;
-      const dom = r?.equipe_dom ? CONFIG.equipes.find(e=>e.code===r.equipe_dom) : null;
-      const ext = r?.equipe_ext ? CONFIG.equipes.find(e=>e.code===r.equipe_ext) : null;
-      const flagLine = dom||ext ? `${flag(dom)||'?'} – ${flag(ext)||'?'}` : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
-      if (!p) {
-        html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
-        return;
-      }
-      const score = (p.score_dom!=null&&p.score_ext!=null)?`${p.score_dom}–${p.score_ext}`:'?–?';
-      let pts=0, status='pending';
-      if (r?.joue) {
-        const real_res=r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
-        if(p.resultat===real_res){
-          pts+=pts_conf.elim_resultat_correct;
-          if(p.score_dom===r.score_dom&&p.score_ext===r.score_ext) pts+=pts_conf.elim_score_exact_bonus;
-          status='ok';
-        } else status='nok';
-      }
-      html += `<div class="detail-match">
-        <span class="match-teams">${flagLine}</span>
-        <span class="match-prono ${status}">${score}</span>
-        ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
-      </div>`;
-    });
-  });
-  if (!hasElim) html += `<div style="color:var(--muted);font-size:.82rem">Aucun match éliminatoire joué pour l'instant.</div>`;
-  html += `</div>`;
-
-  // ── 4. Bracket Éliminatoire (après Qualifiés) ─────────────────────
-  html += `<div class="detail-section"><h4>Bracket Éliminatoire</h4>`;
-  const brLabels={seizièmes:'S16',huitièmes:'S8',QF:'QF',SF:'SF',P3:'P3',F:'Finale'};
-  brTours.forEach(tour=>{
-    const matchs=CONFIG.bracket_eliminatoire[tour]||[];
-    matchs.forEach((m,i)=>{
-      const b=pronos_b[m.id]; if(!b) return;
-      const r=reels_map[m.id];
-      const t=CONFIG.equipes.find(e=>e.code===b.equipe);
-      let pts=0,status='pending';
-      if(r?.joue){
-        const winner=r.score_dom>r.score_ext?r.equipe_dom:r.equipe_ext;
-        status=b.equipe===winner?'ok':'nok';
-        if(status==='ok'){
-          const key={'seizièmes':'S16','huitièmes':'S8','QF':'QF','SF':'SF','P3':'P3','F':'F'}[tour];
-          pts=pts_conf.bracket[key+'_correct']||0;
-        }
-      }
-      html += `<div class="detail-match">
-        <span class="match-teams">${brLabels[tour]}${matchs.length>1?' '+(i+1):''}</span>
-        <span class="match-prono ${status}">${flag(t)||b.equipe}</span>
-        ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
-      </div>`;
-    });
-  });
   html += `</div>`;
 
   // ── 5. Bonus ─────────────────────────────────────────────────────
