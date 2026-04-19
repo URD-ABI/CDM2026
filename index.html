@@ -633,6 +633,8 @@ async function loadParticipantDetail(pid, pseudo, el) {
 
   // Helper : flag image only
   const flag = t => t?.iso2 ? `<img src="https://flagcdn.com/20x15/${t.iso2}.png" style="vertical-align:middle;border-radius:1px">` : '';
+  const brTours  = ['seizièmes','huitièmes','QF','SF','P3','F'];
+  const brLabels = {seizièmes:'S16',huitièmes:'S8',QF:'QF',SF:'SF',P3:'P3',F:'Finale'};
 
   let html = `<div class="detail-sections">`;
 
@@ -673,7 +675,6 @@ async function loadParticipantDetail(pid, pseudo, el) {
 
   // ── 2. Bracket Éliminatoire ──────────────────────────────────────
   html += `<div class="detail-section"><h4>Bracket Éliminatoire</h4>`;
-  const brLabels={seizièmes:'S16',huitièmes:'S8',QF:'QF',SF:'SF',P3:'P3',F:'Finale'};
   brTours.forEach(tour=>{
     const matchs=CONFIG.bracket_eliminatoire[tour]||[];
     matchs.forEach((m,i)=>{
@@ -706,7 +707,6 @@ async function loadParticipantDetail(pid, pseudo, el) {
 
   // ── 3. Matchs Élim. Réels ─────────────────────────────────────────
   html += `<div class="detail-section"><h4>Matchs Élim. Réels</h4>`;
-  const brTours = ['seizièmes','huitièmes','QF','SF','P3','F'];
   let hasElim = false;
   brTours.forEach(tour=>{
     (CONFIG.bracket_eliminatoire[tour]||[]).forEach((m,i)=>{
