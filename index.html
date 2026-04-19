@@ -674,6 +674,41 @@ async function loadParticipantDetail(pid, pseudo, el) {
   html += `</div>`;
 
   // ── 2. Bracket Éliminatoire ──────────────────────────────────────
+  // Résout les équipes prédites par le joueur dans les tours précédents
+  function resolvePredictedTeam(src) {
+    if (!src) return null;
+    // Slot fixe (1A, 2B) → depuis les pronos qualifiés du joueur
+    if (/^1[A-L]$/.test(src)) {
+      const code = pronos_q[src[1]]?.equipe_1er;
+      return code ? CONFIG.equipes.find(e=>e.code===code) : null;
+    }
+    if (/^2[A-L]$/.test(src)) {
+      const code = pronos_q[src[1]]?.equipe_2eme;
+      return code ? CONFIG.equipes.find(e=>e.code===code) : null;
+    }
+    // T3 → on ne peut pas résoudre précisément, retourner null
+    if (src.startsWith('T3_')) return null;
+    // Vainqueur d'un match précédent → chercher dans les pronos bracket
+    if (src.startsWith('W_')) {
+      const prevId = src.slice(2);
+      const prevWinner = pronos_b[prevId]?.equipe;
+      return prevWinner ? CONFIG.equipes.find(e=>e.code===prevWinner) : null;
+    }
+    // Perdant SF
+    if (src.startsWith('L_')) {
+      const sfId = src.slice(2);
+      // Le perdant = les deux équipes du SF pronostiqué minus le vainqueur
+      const sfMatch = CONFIG.bracket_eliminatoire.SF?.find(m=>m.id===sfId);
+      if (!sfMatch) return null;
+      const winner = pronos_b[sfId]?.equipe;
+      const d = resolvePredictedTeam(sfMatch.dom_source);
+      const e2 = resolvePredictedTeam(sfMatch.ext_source);
+      if (winner && d && e2) return d.code===winner ? e2 : d;
+      return null;
+    }
+    return null;
+  }
+
   html += `<div class="detail-section"><h4>Bracket Éliminatoire</h4>`;
   brTours.forEach(tour=>{
     const matchs=CONFIG.bracket_eliminatoire[tour]||[];
@@ -681,11 +716,11 @@ async function loadParticipantDetail(pid, pseudo, el) {
       const b=pronos_b[m.id]; if(!b) return;
       const r=reels_map[m.id];
       const tWinner=CONFIG.equipes.find(e=>e.code===b.equipe);
-      // Résoudre les équipes du match depuis matchs_reels ou les sources
-      const domTeam = r?.equipe_dom ? CONFIG.equipes.find(e=>e.code===r.equipe_dom) : null;
-      const extTeam = r?.equipe_ext ? CONFIG.equipes.find(e=>e.code===r.equipe_ext) : null;
-      const matchFlags = (domTeam||extTeam)
-        ? `${flag(domTeam)||'?'} – ${flag(extTeam)||'?'}`
+      // Équipes prédites du match (depuis bracket du joueur)
+      const predDom = resolvePredictedTeam(m.dom_source);
+      const predExt = resolvePredictedTeam(m.ext_source);
+      const matchFlags = (predDom||predExt)
+        ? `${predDom?flag(predDom):'?'} – ${predExt?flag(predExt):'?'}`
         : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
       let pts=0,status='pending';
       if(r?.joue){
