@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Classement — Pronostics CdM 2026</title>
+<title>FIFA World Cup 2026 — ABI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -170,9 +170,12 @@ body {
   transition:background .15s;
 }
 .detail-match:last-child { border-bottom:none; }
-.detail-match.ok   { background:rgba(0,197,90,.12); }
-.detail-match.nok  { background:rgba(232,69,69,.1); }
+.detail-match.ok    { background:rgba(0,197,90,.12); }
+.detail-match.nok   { background:rgba(232,69,69,.10); }
 .detail-match.exact { background:rgba(245,183,49,.15); }
+body:not(.light) .detail-match.ok    { background:rgba(0,197,90,.22); }
+body:not(.light) .detail-match.nok   { background:rgba(232,69,69,.22); }
+body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
 .match-teams { color:var(--muted); flex:1; }
 .match-prono { font-weight:600; color:var(--text); }
 .match-prono.pending { color:var(--muted); }
@@ -255,7 +258,8 @@ body {
 .gs-rank.top { color:var(--green); }
 .gs-rank.third { color:var(--blue); }
 .gs-team { flex:1; display:flex; align-items:center; gap:.3rem; }
-.gs-pts { font-family:'Bebas Neue'; font-size:.95rem; color:var(--gold); }
+.gs-pts { font-family:'Bebas Neue'; font-size:.9rem; color:var(--gold); text-align:right; }
+.gs-stat { font-size:.72rem; color:var(--muted); text-align:right; min-width:18px; }
 .gs-diff { font-size:.72rem; color:var(--muted); min-width:28px; text-align:right; }
 .gs-q { font-size:.6rem; padding:.1rem .3rem; border-radius:3px; font-weight:700; flex-shrink:0; }
 .gs-q.q12 { background:var(--green-dim); color:var(--green); }
@@ -327,8 +331,8 @@ body {
 <body>
 
 <header class="site-header">
-  <h1><a href="https://urd-abi.github.io/CDM2026/index.html" style="color:inherit;text-decoration:none">⚽ Classement — CdM 2026</a></h1>
-  <p>Canada · États-Unis · Mexique · 11 juin – 19 juillet 2026</p>
+  <h1><a href="https://urd-abi.github.io/CDM2026/index.html" style="color:inherit;text-decoration:none">⚽ FIFA World Cup 2026</a></h1>
+  <p>Championnat du monde d'ABI des pronostiques</p>
   <div class="header-actions">
     <a href="pronostics.html" class="btn-pronostics">✏️ Mes pronostics</a>
     <div style="display:flex;gap:.5rem;align-items:center">
@@ -678,11 +682,31 @@ async function loadParticipantDetail(pid, pseudo, el) {
   });
   html += `</div>`;
 
+  // Reconstruit q32 depuis les pronostics du participant (pour index.html)
+  function buildQ32Snapshot(pq, tiers_list) {
+    const q32 = [];
+    const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
+    for (const g of groups) {
+      const q = pq[g]||{};
+      if (q.equipe_1er) q32.push({code:q.equipe_1er, source:`1${g}`});
+      if (q.equipe_2eme) q32.push({code:q.equipe_2eme, source:`2${g}`});
+    }
+    for (const g of (tiers_list||[])) {
+      const q = pq[g]||{};
+      const equipes = CONFIG.groupes[g]?.equipes||[];
+      const already = [q.equipe_1er, q.equipe_2eme].filter(Boolean);
+      const tiers = equipes.find(e=>!already.includes(e));
+      if (tiers) q32.push({code:tiers, source:`T3_${g}`});
+    }
+    return q32;
+  }
+
   // ── 2. Bracket Éliminatoire ──────────────────────────────────────
   // Résout les équipes prédites par le joueur dans les tours précédents
-  function resolvePredictedTeam(src) {
+  // resolvePredictedTeam : résout src en équipe depuis les pronos du joueur
+  // matchId optionnel = l'ID du match S16 concerné, pour résoudre les T3
+  function resolvePredictedTeam(src, matchId) {
     if (!src) return null;
-    // Slot fixe (1A, 2B) → depuis les pronos qualifiés du joueur
     if (/^1[A-L]$/.test(src)) {
       const code = pronos_q[src[1]]?.equipe_1er;
       return code ? CONFIG.equipes.find(e=>e.code===code) : null;
@@ -691,18 +715,39 @@ async function loadParticipantDetail(pid, pseudo, el) {
       const code = pronos_q[src[1]]?.equipe_2eme;
       return code ? CONFIG.equipes.find(e=>e.code===code) : null;
     }
-    // T3 → on ne peut pas résoudre précisément, retourner null
-    if (src.startsWith('T3_')) return null;
-    // Vainqueur d'un match précédent → chercher dans les pronos bracket
+    if (src.startsWith('T3_')) {
+      // Le joueur a sélectionné un vainqueur pour ce match S16 dans son bracket
+      // On cherche l'équipe ext sélectionnée = la T3
+      if (matchId) {
+        const bracketEntry = pronos_b[matchId];
+        if (bracketEntry) {
+          // Le vainqueur pronostiqué est dom ou ext ; l'ext est la T3
+          // On ne peut pas savoir direct lequel est T3 sans plus de contexte
+          // → chercher parmi les S16 matches quel est le ext_source T3 et reconstruire
+          const s16m = CONFIG.bracket_eliminatoire.seizièmes?.find(m=>m.id===matchId);
+          if (s16m && s16m.ext_source?.startsWith('T3_')) {
+            // Le vainqueur du match est soit 1X soit T3. Si c'est 1X → T3 est l'autre
+            const dom1X = resolvePredictedTeam(s16m.dom_source);
+            if (dom1X && bracketEntry.equipe !== dom1X.code) {
+              // Le vainqueur n'est pas le 1X → c'est la T3 qui a gagné → T3 = bracketEntry.equipe
+              return CONFIG.equipes.find(e=>e.code===bracketEntry.equipe) || null;
+            }
+            // Le vainqueur est 1X → chercher la T3 dans les pronostics (elle est l'ext non-vainqueur)
+            // On peut la trouver si on sait quelle T3 était sélectionnée
+          }
+        }
+        // Fallback : chercher directement la T3 de ce groupe dans pronos_bracket en ext
+        // via le fait que le joueur a forcément sélectionné une T3 dans getBothTeamsR32
+      }
+      return null; // T3 non résolvable sans contexte supplémentaire
+    }
     if (src.startsWith('W_')) {
       const prevId = src.slice(2);
       const prevWinner = pronos_b[prevId]?.equipe;
       return prevWinner ? CONFIG.equipes.find(e=>e.code===prevWinner) : null;
     }
-    // Perdant SF
     if (src.startsWith('L_')) {
       const sfId = src.slice(2);
-      // Le perdant = les deux équipes du SF pronostiqué minus le vainqueur
       const sfMatch = CONFIG.bracket_eliminatoire.SF?.find(m=>m.id===sfId);
       if (!sfMatch) return null;
       const winner = pronos_b[sfId]?.equipe;
@@ -713,6 +758,27 @@ async function loadParticipantDetail(pid, pseudo, el) {
     }
     return null;
   }
+  
+  // Pour les matchs S16 avec T3 : retrouver la T3 choisie depuis le bracket
+  // Le bracket stocke le VAINQUEUR; la T3 est l'équipe ext non-vainqueur
+  // La seule façon fiable est de stocker quelle T3 était disponible
+  // → On utilise le vainqueur bracket + le 1X pour déduire la T3
+  function resolveT3FromBracket(s16Match) {
+    if (!s16Match.ext_source?.startsWith('T3_')) return null;
+    const bracketWinner = pronos_b[s16Match.id]?.equipe;
+    if (!bracketWinner) return null;
+    // Le 1X du match
+    const dom1X = resolvePredictedTeam(s16Match.dom_source);
+    if (!dom1X) return null;
+    if (bracketWinner !== dom1X.code) {
+      // La T3 a gagné → c'est elle le vainqueur
+      return CONFIG.equipes.find(e=>e.code===bracketWinner) || null;
+    }
+    // Le 1X a gagné → la T3 est l'équipe perdante, pas stockée directement
+    // → Chercher dans les pronostics bracket ce qui était sélectionnable
+    // → Utiliser buildQualified32 snapshot
+    return null; // non résolvable si 1X a gagné
+  }
 
   html += `<div class="detail-section"><h4>Bracket Éliminatoire</h4>`;
   brTours.forEach(tour=>{
@@ -722,8 +788,22 @@ async function loadParticipantDetail(pid, pseudo, el) {
       const r=reels_map[m.id];
       const tWinner=CONFIG.equipes.find(e=>e.code===b.equipe);
       // Équipes prédites du match (depuis bracket du joueur)
-      const predDom = resolvePredictedTeam(m.dom_source);
-      const predExt = resolvePredictedTeam(m.ext_source);
+      const predDom = resolvePredictedTeam(m.dom_source, m.id);
+      // Pour T3: utiliser resolveT3FromBracket si disponible
+      let predExt = resolvePredictedTeam(m.ext_source, m.id);
+      if (!predExt && m.ext_source?.startsWith('T3_')) {
+        predExt = resolveT3FromBracket(m);
+        // Dernier fallback: si on connait le 1X et le vainqueur bracket est 1X,
+        // la T3 est inconnue mais on peut montrer au moins le drapeau du groupe T3
+        // depuis les pronostics q32 du joueur
+        if (!predExt) {
+          // Chercher dans les pronostics bracket via buildQualified32
+          const q32snap = buildQ32Snapshot(pronos_q, pt.data?.groupes||[]);
+          const t3 = q32snap.find(q=>q.source.startsWith('T3_') && 
+            m.ext_source.replace('T3_','').includes(q.source.replace('T3_','')));
+          if (t3) predExt = CONFIG.equipes.find(e=>e.code===t3.code);
+        }
+      }
       const matchFlags = (predDom||predExt)
         ? `${predDom?flag(predDom):'?'} – ${predExt?flag(predExt):'?'}`
         : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
@@ -945,14 +1025,17 @@ function renderMatchs(phase, btnEl) {
     groups.forEach(g => {
       const matchs = CONFIG.matchs_groupes[g];
       const teams = {};
-      CONFIG.groupes[g].equipes.forEach(c=>{ teams[c]={pts:0,j:0,bd:0,bp:0}; });
+      CONFIG.groupes[g].equipes.forEach(c=>{ teams[c]={pts:0,j:0,g:0,n:0,d:0,bp:0,bc:0,bd:0}; });
       matchs.forEach(m=>{
         const r=reels[m.id]; if(!r?.joue) return;
         const {score_dom:sd,score_ext:se,equipe_dom:ed,equipe_ext:ee}=r;
+        if(!teams[ed]||!teams[ee]) return;
         teams[ed].j++; teams[ee].j++;
-        teams[ed].bp+=sd; teams[ed].bd+=(sd-se);
-        teams[ee].bp+=se; teams[ee].bd+=(se-sd);
-        if(sd>se){teams[ed].pts+=3;}else if(sd<se){teams[ee].pts+=3;}else{teams[ed].pts+=1;teams[ee].pts+=1;}
+        teams[ed].bp+=sd; teams[ed].bc+=se; teams[ed].bd+=(sd-se);
+        teams[ee].bp+=se; teams[ee].bc+=sd; teams[ee].bd+=(se-sd);
+        if(sd>se){teams[ed].pts+=3;teams[ed].g++;teams[ee].d++;}
+        else if(sd<se){teams[ee].pts+=3;teams[ee].g++;teams[ed].d++;}
+        else{teams[ed].pts+=1;teams[ed].n++;teams[ee].pts+=1;teams[ee].n++;}
       });
       standings[g]=Object.entries(teams)
         .sort((a,b)=>b[1].pts-a[1].pts||b[1].bd-a[1].bd||b[1].bp-a[1].bp)
@@ -1020,8 +1103,14 @@ function renderGroupCard(g, matchs, reels, standing, best8groups) {
     return `<div class="gs-row">
       <div class="gs-rank ${rankClass}">${i+1}</div>
       <div class="gs-team">${team ? teamDisplay(team) : t.code} ${badge}</div>
-      <div class="gs-diff" style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${t.bd>0?'+':''}${t.bd}</div>
-      <div class="gs-pts">${t.pts}</div>
+      <div class="gs-stat">${t.j||0}</div>
+      <div class="gs-stat" style="color:var(--green)">${t.g||0}</div>
+      <div class="gs-stat">${t.n||0}</div>
+      <div class="gs-stat" style="color:var(--red)">${t.d||0}</div>
+      <div class="gs-stat">${t.bp||0}</div>
+      <div class="gs-stat">${t.bc||0}</div>
+      <div class="gs-stat" style="color:${(t.bd||0)>0?'var(--green)':(t.bd||0)<0?'var(--red)':'var(--muted)'}">${(t.bd||0)>0?'+':''}${t.bd||0}</div>
+      <div class="gs-pts">${t.pts||0}</div>
     </div>`;
   }).join('');
 
@@ -1031,7 +1120,15 @@ function renderGroupCard(g, matchs, reels, standing, best8groups) {
       <span class="groupe-card-played">${played}/3 joués</span>
     </div>
     <div class="groupe-matches">${matchRows}</div>
-    <div class="groupe-standings">${standingRows||'<div style="color:var(--muted);font-size:.78rem;padding:.3rem 0">Aucun match joué</div>'}</div>
+    <div class="groupe-standings">
+      ${standing?.length ? `<div class="gs-row" style="opacity:.5;font-size:.65rem;border-bottom:1px solid var(--border);margin-bottom:.2rem">
+        <div class="gs-rank"></div><div class="gs-team"></div>
+        <div class="gs-stat">MJ</div><div class="gs-stat">G</div><div class="gs-stat">N</div>
+        <div class="gs-stat">D</div><div class="gs-stat">BP</div><div class="gs-stat">BC</div>
+        <div class="gs-stat">DB</div><div class="gs-pts">Pts</div>
+      </div>` : ''}
+      ${standingRows||'<div style="color:var(--muted);font-size:.78rem;padding:.3rem 0">Aucun match joué</div>'}
+    </div>
   </div>`;
 }
 

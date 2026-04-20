@@ -988,10 +988,10 @@ function buildQualified32() {
     if (q.equipe_2eme) q32.push({code:q.equipe_2eme, source:`2${g}`});
   }
   for (const g of state.tiers) {
-    // 3e qualifié fictif — on prend la 3e équipe du groupe
-    const equipes = CONFIG.groupes[g]?.equipes||[];
-    const already = [state.qualifies[g]?.equipe_1er, state.qualifies[g]?.equipe_2eme];
-    const tiers = equipes.find(e=>!already.includes(e));
+    // 3e place : utiliser le classement calculé depuis les pronostics (computeGroupStandings)
+    // qui donne le vrai 3e selon pts/diff de buts, pas juste le premier dans la liste config
+    const ranked = computeGroupStandings(g);
+    const tiers = ranked[2]?.code; // 3e du classement pronostiqué
     if (tiers) q32.push({code:tiers, source:`T3_${g}`});
   }
   return q32;
