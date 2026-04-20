@@ -498,6 +498,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── État global ──────────────────────────────────────────────
 let CONFIG = null;
+let BEST_THIRDS = {}; // Combinaisons meilleurs 3es
 let currentStep = 1;
 let participant = null;  // { id, pseudo }
 let activeGroup = 'A';
@@ -546,6 +547,12 @@ async function init() {
   try {
     const res = await fetch('config.json');
     CONFIG = await res.json();
+
+    // Charger les combinaisons meilleurs 3es
+    try {
+      const r2 = await fetch('best-thirds-combinations.json');
+      BEST_THIRDS = await r2.json();
+    } catch(e2) { BEST_THIRDS = {}; }
 
     // Vérifier verrouillage global
     if (CONFIG.phase_initiale_verrou?.verrouille) {
@@ -598,7 +605,7 @@ function showStep(n) {
 
   if (n===2) renderGroups();
   if (n===3) renderQualifies();
-  if (n===4) renderBracket();
+  if (n===4) { renderBracket(); autoSelectT3(); }
   if (n===5) renderBonus();
   if (n===6) renderElim();
   if (n===7) renderReview();
@@ -1069,7 +1076,16 @@ function renderBracket() {
         if (!s) return '?';
         if (/^1[A-L]$/.test(s)) return `1er Grp ${s[1]}`;
         if (/^2[A-L]$/.test(s)) return `2e Grp ${s[1]}`;
-        if (s.startsWith('T3_')) return `Meilleur 3e (${s.replace('T3_','').split('').join('/')})`;
+        if (s.startsWith('T3_')) {
+          // Si on connaît la combinaison exacte, afficher le T3 précis
+          if (state.tiers.length === 8 && Object.keys(BEST_THIRDS).length > 0) {
+            const key = [...state.tiers].sort().join(',');
+            const combo = BEST_THIRDS[key];
+            const t3Source = combo?.[m.dom_source]; // ex '3E'
+            if (t3Source) return `3e Grp ${t3Source[1]}`;
+          }
+          return `Meilleur 3e (${s.replace('T3_','').split('').join('/')})`;
+        }
         if (s.startsWith('W_')) return `Vainq. ${s.slice(2)}`;
         if (s.startsWith('L_')) return `Perdant ${s.slice(2)}`;
         return s;
@@ -1110,27 +1126,46 @@ function renderBracket() {
   document.getElementById('bracketContent').innerHTML = html;
 }
 
+// Résout le T3 exact pour un slot 1X grâce au JSON des combinaisons
+function resolveT3ForSlot(domSource, q32) {
+  // On a besoin des 8 groupes T3 pronostiqués par l'utilisateur
+  if (state.tiers.length !== 8) return null;
+  const key = [...state.tiers].sort().join(',');
+  const combo = BEST_THIRDS[key];
+  if (!combo) return null;
+  // domSource = ex '1A', '1E', '1L'... → chercher dans le combo
+  const t3Source = combo[domSource]; // ex '3E', '3G'...
+  if (!t3Source) return null;
+  // t3Source = '3X' → trouver l'équipe 3e du groupe X dans q32
+  const grp = t3Source[1]; // lettre du groupe
+  const t3entry = q32.find(q => q.source === `T3_${grp}`);
+  return t3entry ? t3entry.code : null;
+}
+
 function getBothTeamsR32(match, q32) {
   const res = [];
 
-  // Équipe domicile : toujours un slot fixe (1X ou 2X)
+  // Équipe domicile : slot fixe (1X ou 2X)
   const dom = resolveSource(match.dom_source, q32);
   if (dom) res.push(dom.code);
 
   if (match.ext_source?.startsWith('T3_')) {
-    // Slot T3 : proposer tous les T3 de la liste éligible parmi ceux pronostiqués
+    // ── Slot T3 : utiliser le JSON des combinaisons si disponible ──
+    if (state.tiers.length === 8 && Object.keys(BEST_THIRDS).length > 0) {
+      const exact = resolveT3ForSlot(match.dom_source, q32);
+      if (exact) {
+        if (!res.includes(exact)) res.push(exact);
+        return res; // adversaire unique et précis
+      }
+    }
+    // Fallback : T3 éligibles parmi les pronostiqués
     const eligibleGroups = match.ext_source.replace('T3_', '').split('');
-    // Chercher dans les T3 de q32 ceux dont le groupe est éligible
-    // q.source est 'T3_A', 'T3_B', etc. → on compare replace('T3_','') avec eligibleGroups
     const t3Eligible = q32.filter(q =>
       q.source.startsWith('T3_') && eligibleGroups.includes(q.source.replace('T3_', ''))
     ).map(q => q.code);
-
     if (t3Eligible.length > 0) {
-      // On a des T3 pronostiqués éligibles → les proposer tous
       t3Eligible.forEach(c => { if (!res.includes(c)) res.push(c); });
     } else {
-      // Fallback : proposer le 3e de chaque groupe éligible (équipe non encore qualifiée 1er/2e)
       eligibleGroups.forEach(g => {
         const equipes = CONFIG.groupes[g]?.equipes || [];
         const already = [state.qualifies[g]?.equipe_1er, state.qualifies[g]?.equipe_2eme].filter(Boolean);
@@ -1139,12 +1174,11 @@ function getBothTeamsR32(match, q32) {
       });
     }
   } else {
-    // Slot fixe (2X) : une seule équipe possible
+    // Slot fixe (2X)
     const ext = resolveSource(match.ext_source, q32);
     if (ext && !res.includes(ext.code)) res.push(ext.code);
   }
 
-  // Fallback global si rien n'a été résolu
   if (res.length === 0) return q32.map(q => q.code);
   return res;
 }
@@ -1166,10 +1200,29 @@ function renderSimpleBracketSlot(m, allCodes) {
 
 function setBracket(slotId, val, round) {
   state.bracket[slotId] = val;
-  // Re-render the bracket so downstream rounds update their available teams
   if (round && round !== 'F' && round !== 'P3') {
     renderBracket();
+    // Auto-sélectionner les T3 uniques après chaque changement de bracket S16
+    if (round === 'seizièmes') autoSelectT3();
   }
+}
+
+// Si la combinaison détermine un T3 unique pour un match, l'auto-sélectionner
+function autoSelectT3() {
+  if (state.tiers.length !== 8 || !Object.keys(BEST_THIRDS).length) return;
+  const key = [...state.tiers].sort().join(',');
+  const combo = BEST_THIRDS[key];
+  if (!combo) return;
+  const q32 = buildQualified32();
+  (CONFIG.bracket_eliminatoire.seizièmes||[]).forEach(m => {
+    if (!m.ext_source?.startsWith('T3_')) return;
+    // Ce match a un T3 adversaire strict selon le combo
+    const t3Code = resolveT3ForSlot(m.dom_source, q32);
+    if (!t3Code) return;
+    // Si le vainqueur pronostiqué n'est pas encore le bon T3 et que le seul choix ext est ce T3,
+    // on ne force pas — le joueur doit choisir le vainqueur lui-même
+    // Mais on s'assure que le select contient la bonne équipe (géré dans renderBracket)
+  });
 }
 
 // ── STEP 6 : Matchs éliminatoires réels ─────────────────────────

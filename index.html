@@ -165,14 +165,16 @@ body {
 }
 .detail-match {
   display:flex; justify-content:space-between; align-items:center;
-  padding:.35rem 0; border-bottom:1px solid rgba(255,255,255,.05);
-  font-size:.82rem; gap:.5rem;
+  padding:.35rem .5rem; border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:.82rem; gap:.5rem; border-radius:4px; margin:.1rem 0;
+  transition:background .15s;
 }
 .detail-match:last-child { border-bottom:none; }
+.detail-match.ok   { background:rgba(0,197,90,.12); }
+.detail-match.nok  { background:rgba(232,69,69,.1); }
+.detail-match.exact { background:rgba(245,183,49,.15); }
 .match-teams { color:var(--muted); flex:1; }
-.match-prono { font-weight:600; }
-.match-prono.ok   { color:var(--green); }
-.match-prono.nok  { color:var(--red); }
+.match-prono { font-weight:600; color:var(--text); }
 .match-prono.pending { color:var(--muted); }
 .pts-badge {
   font-family:'Bebas Neue'; font-size:.9rem;
@@ -664,9 +666,12 @@ async function loadParticipantDetail(pid, pseudo, el) {
         } else status='nok';
       }
 
-      html += `<div class="detail-match">
+      // score exact = status ok ET les deux scores correspondent
+      const isExact = status==='ok' && p.score_dom===r?.score_dom && p.score_ext===r?.score_ext;
+      const rowClass = isExact ? 'exact' : status;
+      html += `<div class="detail-match ${rowClass}">
         <span class="match-teams">${flagLine}</span>
-        <span class="match-prono ${status}">${score}</span>
+        <span class="match-prono">${score}</span>
         ${r?.joue ? `<span class="pts-badge">+${pts}</span>` : ''}
       </div>`;
     });
@@ -731,9 +736,9 @@ async function loadParticipantDetail(pid, pseudo, el) {
           pts=pts_conf.bracket[key+'_correct']||0;
         }
       }
-      html += `<div class="detail-match">
+      html += `<div class="detail-match ${status}">
         <span class="match-teams">${matchFlags}</span>
-        <span class="match-prono ${status}">${flag(tWinner)||b.equipe}</span>
+        <span class="match-prono">${flag(tWinner)||b.equipe}</span>
         ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
       </div>`;
     });
@@ -766,9 +771,11 @@ async function loadParticipantDetail(pid, pseudo, el) {
           status='ok';
         } else status='nok';
       }
-      html += `<div class="detail-match">
+      const isExactElim = status==='ok' && p.score_dom===r?.score_dom && p.score_ext===r?.score_ext;
+      const rowClassElim = isExactElim ? 'exact' : status;
+      html += `<div class="detail-match ${rowClassElim}">
         <span class="match-teams">${flagLine}</span>
-        <span class="match-prono ${status}">${score}</span>
+        <span class="match-prono">${score}</span>
         ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
       </div>`;
     });
@@ -814,9 +821,9 @@ async function loadParticipantDetail(pid, pseudo, el) {
     }
     html += `<div class="detail-match">
       <span class="match-teams" style="font-weight:600;color:var(--text)">Grp ${g}</span>
-      <span class="match-prono ${status1}">${flag(t1)}</span>
+      <span class="match-prono" style="background:${status1==='ok'?'rgba(0,197,90,.2)':status1==='nok'?'rgba(232,69,69,.2)':'transparent'};border-radius:3px;padding:.1rem .3rem">${flag(t1)}</span>
       ${rq?`<span class="pts-badge">+${pts1}</span>`:''}
-      <span class="match-prono ${status2}">${flag(t2)}</span>
+      <span class="match-prono" style="background:${status2==='ok'?'rgba(0,197,90,.2)':status2==='nok'?'rgba(232,69,69,.2)':'transparent'};border-radius:3px;padding:.1rem .3rem">${flag(t2)}</span>
       ${rq?`<span class="pts-badge">+${pts2}</span>`:''}
     </div>`;
   });
