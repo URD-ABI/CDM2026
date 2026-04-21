@@ -258,8 +258,8 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
 .gs-rank.top { color:var(--green); }
 .gs-rank.third { color:var(--blue); }
 .gs-team { flex:1; display:flex; align-items:center; gap:.3rem; }
-.gs-pts { font-family:'Bebas Neue'; font-size:.9rem; color:var(--gold); text-align:right; }
-.gs-stat { font-size:.72rem; color:var(--muted); text-align:right; min-width:18px; }
+.gs-pts { font-family:'Bebas Neue'; font-size:.9rem; color:var(--gold); text-align:center; }
+.gs-stat { font-size:.72rem; color:var(--muted); text-align:center; min-width:18px; }
 .gs-diff { font-size:.72rem; color:var(--muted); min-width:28px; text-align:right; }
 .gs-q { font-size:.6rem; padding:.1rem .3rem; border-radius:3px; font-weight:700; flex-shrink:0; }
 .gs-q.q12 { background:var(--green-dim); color:var(--green); }
@@ -1047,7 +1047,12 @@ function renderMatchs(phase, btnEl) {
       .filter(g=>standings[g]?.[2])
       .map(g=>({g, ...standings[g][2]}))
       .sort((a,b)=>b.pts-a.pts||b.bd-a.bd||b.bp-a.bp);
-    const best8groups = new Set(real3rds.slice(0,8).map(t=>t.g));
+    // Si tous les groupes ne sont pas terminés, best8 basé sur classements partiels
+    const best8groups = new Set(
+      real3rds.length >= 8
+        ? real3rds.slice(0,8).map(t=>t.g)
+        : real3rds.map(t=>t.g) // afficher les best3 connus même si < 8
+    );
 
     if (phase==='all') {
       // En vue "Tous", afficher groupes en premier puis le reste
@@ -1098,8 +1103,14 @@ function renderGroupCard(g, matchs, reels, standing, best8groups) {
 
   const standingRows = (standing||[]).map((t,i)=>{
     const team=CONFIG.equipes.find(e=>e.code===t.code);
-    const rankClass = i<2?'top': (i===2&&best8groups.has(g)?'third':'');
-    const badge = i<2 ? '<span class="gs-q q12">Q</span>' : (i===2&&best8groups.has(g)?'<span class="gs-q q3">3e</span>':'');
+    const rankClass = i<2?'top': (i===2?( best8groups.has(g)?'third':''):'');
+    const badge = i<2
+      ? '<span class="gs-q q12">Q</span>'
+      : i===2
+        ? (best8groups.has(g)
+            ? '<span class="gs-q q3">3e</span>'
+            : '<span class="gs-q" style="background:var(--border);color:var(--muted)">3e</span>')
+        : '';
     return `<div class="gs-row">
       <div class="gs-rank ${rankClass}">${i+1}</div>
       <div class="gs-team">${team ? teamDisplay(team) : t.code} ${badge}</div>
