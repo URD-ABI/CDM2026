@@ -113,7 +113,7 @@ body {
   color:var(--muted); text-align:left; padding:.6rem .8rem;
   border-bottom:1px solid var(--border); white-space:nowrap;
 }
-.classement-table th.right { text-align:right; }
+.classement-table th.right { text-align:center; }
 .classement-row { cursor:pointer; transition:background .15s; }
 .classement-row:hover td { background:rgba(255,255,255,.03); }
 .classement-row td {
@@ -139,7 +139,7 @@ body {
 /* Score total */
 .score-total {
   font-family:'Bebas Neue'; font-size:1.5rem; letter-spacing:.05em;
-  color:var(--gold); text-align:right;
+  color:var(--gold); text-align:center;
 }
 
 /* Barres de sous-scores */
@@ -466,8 +466,9 @@ function toggleTheme() {
 }
 
 async function init() {
-  // Restore theme
-  if (localStorage.getItem('theme') === 'light') {
+  // Mode clair par défaut ; sombre si explicitement enregistré
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme !== 'dark') {
     document.body.classList.add('light');
     setTimeout(()=>{ const b=document.getElementById('themeBtn'); if(b) b.textContent='🌑 Sombre'; },0);
   }
@@ -561,11 +562,11 @@ function renderClassement() {
           ${buildStatsTags(row)}
         </div>
       </td>
-      <td class="right hide-mobile" style="color:var(--muted);text-align:right">${row.pts_matchs_groupes||0}</td>
-      <td class="right hide-mobile" style="color:var(--muted);text-align:right">${row.pts_qualifies||0}</td>
-      <td class="right hide-mobile" style="color:var(--muted);text-align:right">${row.pts_bracket||0}</td>
-      <td class="right hide-mobile" style="color:var(--muted);text-align:right">${row.pts_matchs_elim||0}</td>
-      <td class="right hide-mobile" style="color:var(--muted);text-align:right">${row.pts_bonus||0}</td>
+      <td class="right hide-mobile" style="color:var(--muted);text-align:center">${row.pts_matchs_groupes||0}</td>
+      <td class="right hide-mobile" style="color:var(--muted);text-align:center">${row.pts_qualifies||0}</td>
+      <td class="right hide-mobile" style="color:var(--muted);text-align:center">${row.pts_bracket||0}</td>
+      <td class="right hide-mobile" style="color:var(--muted);text-align:center">${row.pts_matchs_elim||0}</td>
+      <td class="right hide-mobile" style="color:var(--muted);text-align:center">${row.pts_bonus||0}</td>
       <td><div class="score-total">${row.total||0}</div></td>
     </tr>
     ${isExpanded ? `<tr id="${id}_detail">
@@ -1042,17 +1043,15 @@ function renderMatchs(phase, btnEl) {
         .map(([code,s])=>({code,...s}));
     });
 
-    // Meilleurs 3es réels
-    const real3rds = groups
-      .filter(g=>standings[g]?.[2])
-      .map(g=>({g, ...standings[g][2]}))
-      .sort((a,b)=>b.pts-a.pts||b.bd-a.bd||b.bp-a.bp);
-    // Si tous les groupes ne sont pas terminés, best8 basé sur classements partiels
-    const best8groups = new Set(
-      real3rds.length >= 8
-        ? real3rds.slice(0,8).map(t=>t.g)
-        : real3rds.map(t=>t.g) // afficher les best3 connus même si < 8
+    // Meilleurs 3es — uniquement depuis les groupes où les 3 matchs sont joués
+    const completedGroups = groups.filter(g =>
+      CONFIG.matchs_groupes[g].every(m => reels[m.id]?.joue)
     );
+    const real3rds = completedGroups
+      .filter(g => standings[g]?.[2])
+      .map(g => ({g, ...standings[g][2]}))
+      .sort((a,b) => b.pts-a.pts || b.bd-a.bd || b.bp-a.bp);
+    const best8groups = new Set(real3rds.slice(0,8).map(t=>t.g));
 
     if (phase==='all') {
       // En vue "Tous", afficher groupes en premier puis le reste
