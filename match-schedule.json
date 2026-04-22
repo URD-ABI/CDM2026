@@ -1,0 +1,1670 @@
+{
+  "tournament": "Coupe du Monde de la FIFA 2026™",
+  "totalMatches": 104,
+  "matches": [
+    {
+      "id": "A_1",
+      "date": "jeudi 11 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "A",
+      "homeTeam": {
+        "code": "",
+        "name": "Mexique"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Afrique du Sud"
+      },
+      "stadium": "Stade de Mexico"
+    },
+    {
+      "id": "A_2",
+      "date": "vendredi 12 juin 2026",
+      "time": "04:00",
+      "phase": "Phase de groupes",
+      "group": "A",
+      "homeTeam": {
+        "code": "",
+        "name": "République de Corée"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Tchéquie"
+      },
+      "stadium": "Stade de Guadalajara"
+    },
+    {
+      "id": "B_1",
+      "date": "vendredi 12 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "B",
+      "homeTeam": {
+        "code": "",
+        "name": "Canada"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Bosnie-et-Herzégovine"
+      },
+      "stadium": "Stade de Toronto"
+    },
+    {
+      "id": "D_1",
+      "date": "samedi 13 juin 2026",
+      "time": "03:00",
+      "phase": "Phase de groupes",
+      "group": "D",
+      "homeTeam": {
+        "code": "",
+        "name": "États-Unis"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Paraguay"
+      },
+      "stadium": "Stade de Los Angeles"
+    },
+    {
+      "id": "B_2",
+      "date": "samedi 13 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "B",
+      "homeTeam": {
+        "code": "",
+        "name": "Qatar"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Suisse"
+      },
+      "stadium": "Stade de la baie de San Francisco"
+    },
+    {
+      "id": "C_1",
+      "date": "dimanche 14 juin 2026",
+      "time": "00:00",
+      "phase": "Phase de groupes",
+      "group": "C",
+      "homeTeam": {
+        "code": "",
+        "name": "Brésil"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Maroc"
+      },
+      "stadium": "Stade de New York/New Jersey"
+    },
+    {
+      "id": "C_2",
+      "date": "dimanche 14 juin 2026",
+      "time": "03:00",
+      "phase": "Phase de groupes",
+      "group": "C",
+      "homeTeam": {
+        "code": "",
+        "name": "Haïti"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Écosse"
+      },
+      "stadium": "Stade de Boston"
+    },
+    {
+      "id": "D_2",
+      "date": "dimanche 14 juin 2026",
+      "time": "06:00",
+      "phase": "Phase de groupes",
+      "group": "D",
+      "homeTeam": {
+        "code": "",
+        "name": "Australie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Turquie"
+      },
+      "stadium": "BC Place de Vancouver"
+    },
+    {
+      "id": "E_1",
+      "date": "dimanche 14 juin 2026",
+      "time": "19:00",
+      "phase": "Phase de groupes",
+      "group": "E",
+      "homeTeam": {
+        "code": "",
+        "name": "Allemagne"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Curaçao"
+      },
+      "stadium": "Stade de Houston"
+    },
+    {
+      "id": "F_1",
+      "date": "dimanche 14 juin 2026",
+      "time": "22:00",
+      "phase": "Phase de groupes",
+      "group": "F",
+      "homeTeam": {
+        "code": "",
+        "name": "Pays-Bas"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Japon"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "E_2",
+      "date": "lundi 15 juin 2026",
+      "time": "01:00",
+      "phase": "Phase de groupes",
+      "group": "E",
+      "homeTeam": {
+        "code": "",
+        "name": "Côte d’Ivoire"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Équateur"
+      },
+      "stadium": "Stade de Philadelphie"
+    },
+    {
+      "id": "F_2",
+      "date": "lundi 15 juin 2026",
+      "time": "04:00",
+      "phase": "Phase de groupes",
+      "group": "F",
+      "homeTeam": {
+        "code": "",
+        "name": "Suède"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Tunisie"
+      },
+      "stadium": "Stade de Monterrey"
+    },
+    {
+      "id": "H_1",
+      "date": "lundi 15 juin 2026",
+      "time": "18:00",
+      "phase": "Phase de groupes",
+      "group": "H",
+      "homeTeam": {
+        "code": "",
+        "name": "Espagne"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Cap-Vert"
+      },
+      "stadium": "Stade d'Atlanta"
+    },
+    {
+      "id": "G_1",
+      "date": "lundi 15 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "G",
+      "homeTeam": {
+        "code": "",
+        "name": "Belgique"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Égypte"
+      },
+      "stadium": "Stade de Seattle"
+    },
+    {
+      "id": "H_2",
+      "date": "mardi 16 juin 2026",
+      "time": "00:00",
+      "phase": "Phase de groupes",
+      "group": "H",
+      "homeTeam": {
+        "code": "",
+        "name": "Arabie saoudite"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Uruguay"
+      },
+      "stadium": "Stade de Miami"
+    },
+    {
+      "id": "G_2",
+      "date": "mardi 16 juin 2026",
+      "time": "03:00",
+      "phase": "Phase de groupes",
+      "group": "G",
+      "homeTeam": {
+        "code": "",
+        "name": "RI Iran"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Nouvelle-Zélande"
+      },
+      "stadium": "Stade de Los Angeles"
+    },
+    {
+      "id": "I_1",
+      "date": "mardi 16 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "I",
+      "homeTeam": {
+        "code": "",
+        "name": "France"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Sénégal"
+      },
+      "stadium": "Stade de New York/New Jersey"
+    },
+    {
+      "id": "I_2",
+      "date": "mercredi 17 juin 2026",
+      "time": "00:00",
+      "phase": "Phase de groupes",
+      "group": "I",
+      "homeTeam": {
+        "code": "",
+        "name": "Irak"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Norvège"
+      },
+      "stadium": "Stade de Boston"
+    },
+    {
+      "id": "J_1",
+      "date": "mercredi 17 juin 2026",
+      "time": "03:00",
+      "phase": "Phase de groupes",
+      "group": "J",
+      "homeTeam": {
+        "code": "",
+        "name": "Argentine"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Algérie"
+      },
+      "stadium": "Stade de Kansas City"
+    },
+    {
+      "id": "J_2",
+      "date": "mercredi 17 juin 2026",
+      "time": "06:00",
+      "phase": "Phase de groupes",
+      "group": "J",
+      "homeTeam": {
+        "code": "",
+        "name": "Autriche"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Jordanie"
+      },
+      "stadium": "Stade de la baie de San Francisco"
+    },
+    {
+      "id": "K_1",
+      "date": "mercredi 17 juin 2026",
+      "time": "19:00",
+      "phase": "Phase de groupes",
+      "group": "K",
+      "homeTeam": {
+        "code": "",
+        "name": "Portugal"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "RD Congo"
+      },
+      "stadium": "Stade de Houston"
+    },
+    {
+      "id": "L_1",
+      "date": "mercredi 17 juin 2026",
+      "time": "22:00",
+      "phase": "Phase de groupes",
+      "group": "L",
+      "homeTeam": {
+        "code": "",
+        "name": "Angleterre"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Croatie"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "L_2",
+      "date": "jeudi 18 juin 2026",
+      "time": "01:00",
+      "phase": "Phase de groupes",
+      "group": "L",
+      "homeTeam": {
+        "code": "",
+        "name": "Ghana"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Panamá"
+      },
+      "stadium": "Stade de Toronto"
+    },
+    {
+      "id": "K_2",
+      "date": "jeudi 18 juin 2026",
+      "time": "04:00",
+      "phase": "Phase de groupes",
+      "group": "K",
+      "homeTeam": {
+        "code": "",
+        "name": "Ouzbékistan"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Colombie"
+      },
+      "stadium": "Stade de Mexico"
+    },
+    {
+      "id": "A_3",
+      "date": "jeudi 18 juin 2026",
+      "time": "18:00",
+      "phase": "Phase de groupes",
+      "group": "A",
+      "homeTeam": {
+        "code": "",
+        "name": "Tchéquie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Afrique du Sud"
+      },
+      "stadium": "Stade d'Atlanta"
+    },
+    {
+      "id": "B_3",
+      "date": "jeudi 18 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "B",
+      "homeTeam": {
+        "code": "",
+        "name": "Suisse"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Bosnie-et-Herzégovine"
+      },
+      "stadium": "Stade de Los Angeles"
+    },
+    {
+      "id": "B_4",
+      "date": "vendredi 19 juin 2026",
+      "time": "00:00",
+      "phase": "Phase de groupes",
+      "group": "B",
+      "homeTeam": {
+        "code": "",
+        "name": "Canada"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Qatar"
+      },
+      "stadium": "BC Place de Vancouver"
+    },
+    {
+      "id": "A_4",
+      "date": "vendredi 19 juin 2026",
+      "time": "03:00",
+      "phase": "Phase de groupes",
+      "group": "A",
+      "homeTeam": {
+        "code": "",
+        "name": "Mexique"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "République de Corée"
+      },
+      "stadium": "Stade de Guadalajara"
+    },
+    {
+      "id": "D_3",
+      "date": "vendredi 19 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "D",
+      "homeTeam": {
+        "code": "",
+        "name": "États-Unis"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Australie"
+      },
+      "stadium": "Stade de Seattle"
+    },
+    {
+      "id": "C_3",
+      "date": "samedi 20 juin 2026",
+      "time": "00:00",
+      "phase": "Phase de groupes",
+      "group": "C",
+      "homeTeam": {
+        "code": "",
+        "name": "Écosse"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Maroc"
+      },
+      "stadium": "Stade de Boston"
+    },
+    {
+      "id": "C_4",
+      "date": "samedi 20 juin 2026",
+      "time": "02:30",
+      "phase": "Phase de groupes",
+      "group": "C",
+      "homeTeam": {
+        "code": "",
+        "name": "Brésil"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Haïti"
+      },
+      "stadium": "Stade de Philadelphie"
+    },
+    {
+      "id": "D_4",
+      "date": "samedi 20 juin 2026",
+      "time": "05:00",
+      "phase": "Phase de groupes",
+      "group": "D",
+      "homeTeam": {
+        "code": "",
+        "name": "Turquie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Paraguay"
+      },
+      "stadium": "Stade de la baie de San Francisco"
+    },
+    {
+      "id": "F_3",
+      "date": "samedi 20 juin 2026",
+      "time": "19:00",
+      "phase": "Phase de groupes",
+      "group": "F",
+      "homeTeam": {
+        "code": "",
+        "name": "Pays-Bas"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Suède"
+      },
+      "stadium": "Stade de Houston"
+    },
+    {
+      "id": "E_3",
+      "date": "samedi 20 juin 2026",
+      "time": "22:00",
+      "phase": "Phase de groupes",
+      "group": "E",
+      "homeTeam": {
+        "code": "",
+        "name": "Allemagne"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Côte d’Ivoire"
+      },
+      "stadium": "Stade de Toronto"
+    },
+    {
+      "id": "E_4",
+      "date": "dimanche 21 juin 2026",
+      "time": "02:00",
+      "phase": "Phase de groupes",
+      "group": "E",
+      "homeTeam": {
+        "code": "",
+        "name": "Équateur"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Curaçao"
+      },
+      "stadium": "Stade de Kansas City"
+    },
+    {
+      "id": "F_4",
+      "date": "dimanche 21 juin 2026",
+      "time": "06:00",
+      "phase": "Phase de groupes",
+      "group": "F",
+      "homeTeam": {
+        "code": "",
+        "name": "Tunisie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Japon"
+      },
+      "stadium": "Stade de Monterrey"
+    },
+    {
+      "id": "H_3",
+      "date": "dimanche 21 juin 2026",
+      "time": "18:00",
+      "phase": "Phase de groupes",
+      "group": "H",
+      "homeTeam": {
+        "code": "",
+        "name": "Espagne"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Arabie saoudite"
+      },
+      "stadium": "Stade d'Atlanta"
+    },
+    {
+      "id": "G_3",
+      "date": "dimanche 21 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "G",
+      "homeTeam": {
+        "code": "",
+        "name": "Belgique"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "RI Iran"
+      },
+      "stadium": "Stade de Los Angeles"
+    },
+    {
+      "id": "H_4",
+      "date": "lundi 22 juin 2026",
+      "time": "00:00",
+      "phase": "Phase de groupes",
+      "group": "H",
+      "homeTeam": {
+        "code": "",
+        "name": "Uruguay"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Cap-Vert"
+      },
+      "stadium": "Stade de Miami"
+    },
+    {
+      "id": "G_4",
+      "date": "lundi 22 juin 2026",
+      "time": "03:00",
+      "phase": "Phase de groupes",
+      "group": "G",
+      "homeTeam": {
+        "code": "",
+        "name": "Nouvelle-Zélande"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Égypte"
+      },
+      "stadium": "BC Place de Vancouver"
+    },
+    {
+      "id": "J_3",
+      "date": "lundi 22 juin 2026",
+      "time": "19:00",
+      "phase": "Phase de groupes",
+      "group": "J",
+      "homeTeam": {
+        "code": "",
+        "name": "Argentine"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Autriche"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "I_3",
+      "date": "lundi 22 juin 2026",
+      "time": "23:00",
+      "phase": "Phase de groupes",
+      "group": "I",
+      "homeTeam": {
+        "code": "",
+        "name": "France"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Irak"
+      },
+      "stadium": "Stade de Philadelphie"
+    },
+    {
+      "id": "I_4",
+      "date": "mardi 23 juin 2026",
+      "time": "02:00",
+      "phase": "Phase de groupes",
+      "group": "I",
+      "homeTeam": {
+        "code": "",
+        "name": "Norvège"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Sénégal"
+      },
+      "stadium": "Stade de New York/New Jersey"
+    },
+    {
+      "id": "J_4",
+      "date": "mardi 23 juin 2026",
+      "time": "05:00",
+      "phase": "Phase de groupes",
+      "group": "J",
+      "homeTeam": {
+        "code": "",
+        "name": "Jordanie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Algérie"
+      },
+      "stadium": "Stade de la baie de San Francisco"
+    },
+    {
+      "id": "K_3",
+      "date": "mardi 23 juin 2026",
+      "time": "19:00",
+      "phase": "Phase de groupes",
+      "group": "K",
+      "homeTeam": {
+        "code": "",
+        "name": "Portugal"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Ouzbékistan"
+      },
+      "stadium": "Stade de Houston"
+    },
+    {
+      "id": "L_3",
+      "date": "mardi 23 juin 2026",
+      "time": "22:00",
+      "phase": "Phase de groupes",
+      "group": "L",
+      "homeTeam": {
+        "code": "",
+        "name": "Angleterre"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Ghana"
+      },
+      "stadium": "Stade de Boston"
+    },
+    {
+      "id": "L_4",
+      "date": "mercredi 24 juin 2026",
+      "time": "01:00",
+      "phase": "Phase de groupes",
+      "group": "L",
+      "homeTeam": {
+        "code": "",
+        "name": "Panamá"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Croatie"
+      },
+      "stadium": "Stade de Toronto"
+    },
+    {
+      "id": "K_4",
+      "date": "mercredi 24 juin 2026",
+      "time": "04:00",
+      "phase": "Phase de groupes",
+      "group": "K",
+      "homeTeam": {
+        "code": "",
+        "name": "Colombie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "RD Congo"
+      },
+      "stadium": "Stade de Guadalajara"
+    },
+    {
+      "id": "B_5",
+      "date": "mercredi 24 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "B",
+      "homeTeam": {
+        "code": "",
+        "name": "Suisse"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Canada"
+      },
+      "stadium": "BC Place de Vancouver"
+    },
+    {
+      "id": "B_6",
+      "date": "mercredi 24 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "B",
+      "homeTeam": {
+        "code": "",
+        "name": "Bosnie-et-Herzégovine"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Qatar"
+      },
+      "stadium": "Stade de Seattle"
+    },
+    {
+      "id": "C_5",
+      "date": "jeudi 25 juin 2026",
+      "time": "00:00",
+      "phase": "Phase de groupes",
+      "group": "C",
+      "homeTeam": {
+        "code": "",
+        "name": "Écosse"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Brésil"
+      },
+      "stadium": "Stade de Miami"
+    },
+    {
+      "id": "C_6",
+      "date": "jeudi 25 juin 2026",
+      "time": "00:00",
+      "phase": "Phase de groupes",
+      "group": "C",
+      "homeTeam": {
+        "code": "",
+        "name": "Maroc"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Haïti"
+      },
+      "stadium": "Stade d'Atlanta"
+    },
+    {
+      "id": "A_5",
+      "date": "jeudi 25 juin 2026",
+      "time": "03:00",
+      "phase": "Phase de groupes",
+      "group": "A",
+      "homeTeam": {
+        "code": "",
+        "name": "Tchéquie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Mexique"
+      },
+      "stadium": "Stade de Mexico"
+    },
+    {
+      "id": "A_6",
+      "date": "jeudi 25 juin 2026",
+      "time": "03:00",
+      "phase": "Phase de groupes",
+      "group": "A",
+      "homeTeam": {
+        "code": "",
+        "name": "Afrique du Sud"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "République de Corée"
+      },
+      "stadium": "Stade de Monterrey"
+    },
+    {
+      "id": "E_5",
+      "date": "jeudi 25 juin 2026",
+      "time": "22:00",
+      "phase": "Phase de groupes",
+      "group": "E",
+      "homeTeam": {
+        "code": "",
+        "name": "Curaçao"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Côte d’Ivoire"
+      },
+      "stadium": "Stade de Philadelphie"
+    },
+    {
+      "id": "E_6",
+      "date": "jeudi 25 juin 2026",
+      "time": "22:00",
+      "phase": "Phase de groupes",
+      "group": "E",
+      "homeTeam": {
+        "code": "",
+        "name": "Équateur"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Allemagne"
+      },
+      "stadium": "Stade de New York/New Jersey"
+    },
+    {
+      "id": "F_5",
+      "date": "vendredi 26 juin 2026",
+      "time": "01:00",
+      "phase": "Phase de groupes",
+      "group": "F",
+      "homeTeam": {
+        "code": "",
+        "name": "Japon"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Suède"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "F_6",
+      "date": "vendredi 26 juin 2026",
+      "time": "01:00",
+      "phase": "Phase de groupes",
+      "group": "F",
+      "homeTeam": {
+        "code": "",
+        "name": "Tunisie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Pays-Bas"
+      },
+      "stadium": "Stade de Kansas City"
+    },
+    {
+      "id": "D_5",
+      "date": "vendredi 26 juin 2026",
+      "time": "04:00",
+      "phase": "Phase de groupes",
+      "group": "D",
+      "homeTeam": {
+        "code": "",
+        "name": "Turquie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "États-Unis"
+      },
+      "stadium": "Stade de Los Angeles"
+    },
+    {
+      "id": "D_6",
+      "date": "vendredi 26 juin 2026",
+      "time": "04:00",
+      "phase": "Phase de groupes",
+      "group": "D",
+      "homeTeam": {
+        "code": "",
+        "name": "Paraguay"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Australie"
+      },
+      "stadium": "Stade de la baie de San Francisco"
+    },
+    {
+      "id": "I_5",
+      "date": "vendredi 26 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "I",
+      "homeTeam": {
+        "code": "",
+        "name": "Norvège"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "France"
+      },
+      "stadium": "Stade de Boston"
+    },
+    {
+      "id": "I_6",
+      "date": "vendredi 26 juin 2026",
+      "time": "21:00",
+      "phase": "Phase de groupes",
+      "group": "I",
+      "homeTeam": {
+        "code": "",
+        "name": "Sénégal"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Irak"
+      },
+      "stadium": "Stade de Toronto"
+    },
+    {
+      "id": "H_5",
+      "date": "samedi 27 juin 2026",
+      "time": "02:00",
+      "phase": "Phase de groupes",
+      "group": "H",
+      "homeTeam": {
+        "code": "",
+        "name": "Cap-Vert"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Arabie saoudite"
+      },
+      "stadium": "Stade de Houston"
+    },
+    {
+      "id": "H_6",
+      "date": "samedi 27 juin 2026",
+      "time": "02:00",
+      "phase": "Phase de groupes",
+      "group": "H",
+      "homeTeam": {
+        "code": "",
+        "name": "Uruguay"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Espagne"
+      },
+      "stadium": "Stade de Guadalajara"
+    },
+    {
+      "id": "G_5",
+      "date": "samedi 27 juin 2026",
+      "time": "05:00",
+      "phase": "Phase de groupes",
+      "group": "G",
+      "homeTeam": {
+        "code": "",
+        "name": "Égypte"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "RI Iran"
+      },
+      "stadium": "Stade de Seattle"
+    },
+    {
+      "id": "G_6",
+      "date": "samedi 27 juin 2026",
+      "time": "05:00",
+      "phase": "Phase de groupes",
+      "group": "G",
+      "homeTeam": {
+        "code": "",
+        "name": "Nouvelle-Zélande"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Belgique"
+      },
+      "stadium": "BC Place de Vancouver"
+    },
+    {
+      "id": "L_5",
+      "date": "samedi 27 juin 2026",
+      "time": "23:00",
+      "phase": "Phase de groupes",
+      "group": "L",
+      "homeTeam": {
+        "code": "",
+        "name": "Panamá"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Angleterre"
+      },
+      "stadium": "Stade de New York/New Jersey"
+    },
+    {
+      "id": "L_6",
+      "date": "samedi 27 juin 2026",
+      "time": "23:00",
+      "phase": "Phase de groupes",
+      "group": "L",
+      "homeTeam": {
+        "code": "",
+        "name": "Croatie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Ghana"
+      },
+      "stadium": "Stade de Philadelphie"
+    },
+    {
+      "id": "K_5",
+      "date": "dimanche 28 juin 2026",
+      "time": "01:30",
+      "phase": "Phase de groupes",
+      "group": "K",
+      "homeTeam": {
+        "code": "",
+        "name": "Colombie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Portugal"
+      },
+      "stadium": "Stade de Miami"
+    },
+    {
+      "id": "K_6",
+      "date": "dimanche 28 juin 2026",
+      "time": "01:30",
+      "phase": "Phase de groupes",
+      "group": "K",
+      "homeTeam": {
+        "code": "",
+        "name": "RD Congo"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Ouzbékistan"
+      },
+      "stadium": "Stade d'Atlanta"
+    },
+    {
+      "id": "J_5",
+      "date": "dimanche 28 juin 2026",
+      "time": "04:00",
+      "phase": "Phase de groupes",
+      "group": "J",
+      "homeTeam": {
+        "code": "",
+        "name": "Algérie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Autriche"
+      },
+      "stadium": "Stade de Kansas City"
+    },
+    {
+      "id": "J_6",
+      "date": "dimanche 28 juin 2026",
+      "time": "04:00",
+      "phase": "Phase de groupes",
+      "group": "J",
+      "homeTeam": {
+        "code": "",
+        "name": "Jordanie"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "Argentine"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "S16_1",
+      "date": "dimanche 28 juin 2026",
+      "time": "21:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "2A"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "2B"
+      },
+      "stadium": "Stade de Los Angeles"
+    },
+    {
+      "id": "S16_2",
+      "date": "lundi 29 juin 2026",
+      "time": "19:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1C"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "2F"
+      },
+      "stadium": "Stade de Houston"
+    },
+    {
+      "id": "S16_3",
+      "date": "lundi 29 juin 2026",
+      "time": "22:30",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1E"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "3ABCDF"
+      },
+      "stadium": "Stade de Boston"
+    },
+    {
+      "id": "S16_4",
+      "date": "mardi 30 juin 2026",
+      "time": "03:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1F"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "2C"
+      },
+      "stadium": "Stade de Monterrey"
+    },
+    {
+      "id": "S16_5",
+      "date": "mardi 30 juin 2026",
+      "time": "19:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "2E"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "2I"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "S16_6",
+      "date": "mardi 30 juin 2026",
+      "time": "23:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1I"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "3CDFGH"
+      },
+      "stadium": "Stade de New York/New Jersey"
+    },
+    {
+      "id": "S16_7",
+      "date": "mercredi 01 juillet 2026",
+      "time": "03:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1A"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "3CEFHI"
+      },
+      "stadium": "Stade de Mexico"
+    },
+    {
+      "id": "S16_8",
+      "date": "mercredi 01 juillet 2026",
+      "time": "18:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1L"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "3EHIJK"
+      },
+      "stadium": "Stade d'Atlanta"
+    },
+    {
+      "id": "S16_9",
+      "date": "mercredi 01 juillet 2026",
+      "time": "22:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1G"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "3AEHIJ"
+      },
+      "stadium": "Stade de Seattle"
+    },
+    {
+      "id": "S16_10",
+      "date": "jeudi 02 juillet 2026",
+      "time": "02:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1D"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "3BEFIJ"
+      },
+      "stadium": "Stade de la baie de San Francisco"
+    },
+    {
+      "id": "S16_11",
+      "date": "jeudi 02 juillet 2026",
+      "time": "21:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1H"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "2J"
+      },
+      "stadium": "Stade de Los Angeles"
+    },
+    {
+      "id": "S16_12",
+      "date": "vendredi 03 juillet 2026",
+      "time": "01:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "2K"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "2L"
+      },
+      "stadium": "Stade de Toronto"
+    },
+    {
+      "id": "S16_13",
+      "date": "vendredi 03 juillet 2026",
+      "time": "05:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1B"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "3EFGIJ"
+      },
+      "stadium": "BC Place de Vancouver"
+    },
+    {
+      "id": "S16_14",
+      "date": "vendredi 03 juillet 2026",
+      "time": "20:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "2D"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "2G"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "S16_15",
+      "date": "samedi 04 juillet 2026",
+      "time": "00:00",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1J"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "2H"
+      },
+      "stadium": "Stade de Miami"
+    },
+    {
+      "id": "S16_16",
+      "date": "samedi 04 juillet 2026",
+      "time": "03:30",
+      "phase": "Seizièmes de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "1K"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "3DEIJL"
+      },
+      "stadium": "Stade de Kansas City"
+    },
+    {
+      "id": "S8_1",
+      "date": "samedi 04 juillet 2026",
+      "time": "19:00",
+      "phase": "Huitième de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S16_2"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S16_5"
+      },
+      "stadium": "Stade de Houston"
+    },
+    {
+      "id": "S8_2",
+      "date": "samedi 04 juillet 2026",
+      "time": "23:00",
+      "phase": "Huitième de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S16_1"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S16_3"
+      },
+      "stadium": "Stade de Philadelphie"
+    },
+    {
+      "id": "S8_3",
+      "date": "dimanche 05 juillet 2026",
+      "time": "22:00",
+      "phase": "Huitième de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S16_4"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S16_6"
+      },
+      "stadium": "Stade de New York/New Jersey"
+    },
+    {
+      "id": "S8_4",
+      "date": "lundi 06 juillet 2026",
+      "time": "02:00",
+      "phase": "Huitième de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S16_7"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S16_8"
+      },
+      "stadium": "Stade de Mexico"
+    },
+    {
+      "id": "S8_5",
+      "date": "lundi 06 juillet 2026",
+      "time": "21:00",
+      "phase": "Huitième de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S16_11"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S16_12"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "S8_6",
+      "date": "mardi 07 juillet 2026",
+      "time": "02:00",
+      "phase": "Huitième de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S16_9"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S16_10"
+      },
+      "stadium": "Stade de Seattle"
+    },
+    {
+      "id": "S8_7",
+      "date": "mardi 07 juillet 2026",
+      "time": "18:00",
+      "phase": "Huitième de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S16_14"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S16_16"
+      },
+      "stadium": "Stade d'Atlanta"
+    },
+    {
+      "id": "S8_8",
+      "date": "mardi 07 juillet 2026",
+      "time": "22:00",
+      "phase": "Huitième de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S16_13"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S16_15"
+      },
+      "stadium": "BC Place de Vancouver"
+    },
+    {
+      "id": "QF_1",
+      "date": "jeudi 09 juillet 2026",
+      "time": "22:00",
+      "phase": "Quart de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S8_1"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S8_2"
+      },
+      "stadium": "Stade de Boston"
+    },
+    {
+      "id": "QF_2",
+      "date": "vendredi 10 juillet 2026",
+      "time": "21:00",
+      "phase": "Quart de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S8_5"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S8_6"
+      },
+      "stadium": "Stade de Los Angeles"
+    },
+    {
+      "id": "QF_3",
+      "date": "samedi 11 juillet 2026",
+      "time": "23:00",
+      "phase": "Quart de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S8_3"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S8_4"
+      },
+      "stadium": "Stade de Miami"
+    },
+    {
+      "id": "QF_4",
+      "date": "dimanche 12 juillet 2026",
+      "time": "03:00",
+      "phase": "Quart de finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_S8_7"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_S8_8"
+      },
+      "stadium": "Stade de Kansas City"
+    },
+    {
+      "id": "SF_1",
+      "date": "mardi 14 juillet 2026",
+      "time": "21:00",
+      "phase": "Demi-finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_QF_1"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_QF_2"
+      },
+      "stadium": "Stade de Dallas"
+    },
+    {
+      "id": "SF_2",
+      "date": "mercredi 15 juillet 2026",
+      "time": "21:00",
+      "phase": "Demi-finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_QF_3"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_QF_4"
+      },
+      "stadium": "Stade d'Atlanta"
+    },
+    {
+      "id": "P3",
+      "date": "samedi 18 juillet 2026",
+      "time": "23:00",
+      "phase": "Match pour la troisième place",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "L_SF_1"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "L_SF_2"
+      },
+      "stadium": "Stade de Miami"
+    },
+    {
+      "id": "F",
+      "date": "dimanche 19 juillet 2026",
+      "time": "21:00",
+      "phase": "Finale",
+      "group": null,
+      "homeTeam": {
+        "code": "",
+        "name": "W_SF_1"
+      },
+      "awayTeam": {
+        "code": "",
+        "name": "W_SF_2"
+      },
+      "stadium": "Stade de New York/New Jersey"
+    }
+  ]
+}
