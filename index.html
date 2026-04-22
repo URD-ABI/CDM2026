@@ -226,6 +226,43 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
 /* ── Alertes ── */
 .empty-state { text-align:center; color:var(--muted); padding:3rem 1rem; font-size:.9rem; }
 
+/* ── Calendrier ── */
+.cal-day-header {
+  font-family:'DM Sans'; font-size:.9rem; font-weight:600;
+  color:var(--text); padding:.8rem 0 .5rem;
+  border-bottom:1px solid var(--border); margin-bottom:.3rem;
+}
+.cal-match {
+  display:flex; align-items:center; padding:.8rem 0;
+  border-bottom:1px solid var(--border); gap:0;
+}
+.cal-match:last-child { border-bottom:none; }
+.cal-home, .cal-away {
+  display:flex; align-items:center; gap:.5rem;
+  flex:1;
+}
+.cal-home { justify-content:flex-end; }
+.cal-away { justify-content:flex-start; }
+.cal-team-name { font-weight:600; font-size:.9rem; }
+.cal-center {
+  width:120px; flex-shrink:0; text-align:center;
+}
+.cal-time {
+  font-family:'Bebas Neue'; font-size:1.4rem; letter-spacing:.05em;
+  color:var(--text); line-height:1;
+}
+.cal-meta {
+  font-size:.7rem; color:var(--muted); margin-top:.2rem; line-height:1.3;
+}
+.cal-flag { border-radius:1px; vertical-align:middle; }
+.cal-placeholder-flag {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:20px; height:15px; background:var(--border); border-radius:1px;
+  font-size:.6rem; color:var(--muted); font-weight:700; vertical-align:middle;
+}
+body.light .cal-match { border-bottom-color:#e5e7eb; }
+body.light .cal-day-header { border-bottom-color:#d1d5db; }
+
 /* ── Groupes avec classement ── */
 .groupes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1rem; }
 .groupe-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
@@ -344,6 +381,7 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
 
 <div class="nav-tabs">
   <button class="nav-tab active" onclick="switchTab('classement',this)">🏆 Classement</button>
+  <button class="nav-tab" onclick="switchTab('calendrier',this)">📅 Calendrier</button>
   <button class="nav-tab" onclick="switchTab('matchs',this)">⚽ Matchs</button>
   <button class="nav-tab" onclick="switchTab('pronostics',this)">👁 Pronostics</button>
   <button class="nav-tab" onclick="switchTab('support',this)">🆘 Support</button>
@@ -379,6 +417,15 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
         Aucun pronostic soumis pour l'instant.
       </div>
     </div>
+  </div>
+
+  <!-- TAB : CALENDRIER -->
+  <div class="tab-content" id="tab-calendrier">
+    <div id="calendrierLoading" class="loading-screen">
+      <div class="spinner"></div>
+      <p>Chargement du calendrier…</p>
+    </div>
+    <div id="calendrierContent" style="display:none"></div>
   </div>
 
   <!-- TAB : MATCHS -->
@@ -474,7 +521,7 @@ async function init() {
   }
   try {
     CONFIG = await (await fetch('config.json')).json();
-    await Promise.all([ loadClassement(), loadMatchs(), loadPronostics() ]);
+    await Promise.all([ loadClassement(), loadMatchs(), loadPronostics(), loadCalendrier() ]);
     setupRealtime();
     // Dernière mise à jour admin = max updated_at des matchs_reels
     const lastUpdated = allMatchsReels.length
@@ -500,6 +547,7 @@ function switchTab(id, el) {
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
   if (id==='pronostics') renderPronosticsList();
+  if (id==='calendrier') renderCalendrier();
 }
 
 // ── Classement ────────────────────────────────────────
@@ -1043,12 +1091,9 @@ function renderMatchs(phase, btnEl) {
         .map(([code,s])=>({code,...s}));
     });
 
-    // Meilleurs 3es — uniquement depuis les groupes où les 3 matchs sont joués
-    const completedGroups = groups.filter(g =>
-      CONFIG.matchs_groupes[g].every(m => reels[m.id]?.joue)
-    );
-    const real3rds = completedGroups
-      .filter(g => standings[g]?.[2])
+    // Meilleurs 3es — depuis les groupes ayant au moins 1 match joué
+    const real3rds = groups
+      .filter(g => standings[g]?.[2] && standings[g][2].j > 0)
       .map(g => ({g, ...standings[g][2]}))
       .sort((a,b) => b.pts-a.pts || b.bd-a.bd || b.bp-a.bp);
     const best8groups = new Set(real3rds.slice(0,8).map(t=>t.g));
@@ -1440,6 +1485,147 @@ async function selectParticipant(pid, pseudo) {
   sectionsEl.innerHTML = html;
 }
 
+
+// ── Calendrier ────────────────────────────────────────
+// Mapping name → iso2
+const TEAM_NAME_ISO2 = {"Mexique":"mx","Afrique du Sud":"za","République de Corée":"kr","Tchéquie":"cz","Canada":"ca","Bosnie-et-Herzégovine":"ba","Qatar":"qa","Suisse":"ch","Brésil":"br","Maroc":"ma","Haïti":"ht","Écosse":"gb-sct","États-Unis":"us","Paraguay":"py","Australie":"au","Turquie":"tr","Allemagne":"de","Curaçao":"cw","Côte d'Ivoire":"ci","Équateur":"ec","Pays-Bas":"nl","Japon":"jp","Suède":"se","Tunisie":"tn","Belgique":"be","Égypte":"eg","RI Iran":"ir","Nouvelle-Zélande":"nz","Espagne":"es","Cap-Vert":"cv","Arabie saoudite":"sa","Uruguay":"uy","France":"fr","Sénégal":"sn","Irak":"iq","Norvège":"no","Argentine":"ar","Algérie":"dz","Autriche":"at","Jordanie":"jo","Portugal":"pt","RD Congo":"cd","Ouzbékistan":"uz","Colombie":"co","Angleterre":"gb-eng","Croatie":"hr","Ghana":"gh","Panamá":"pa"};
+
+// Mapping des codes variables → équipe résolue depuis matchs_reels
+// Sera rempli par loadCalendrierTeams()
+let RESOLVED_TEAMS = {};
+
+// Résout un nom d'équipe du JSON du calendrier
+function resolveCalTeam(name) {
+  if (!name) return { display: 'À déterminer', iso2: null };
+  
+  // Équipe normale
+  const iso2 = TEAM_NAME_ISO2[name];
+  if (iso2) return { display: name, iso2 };
+  
+  // Code variable : W_S16_1, L_SF_2, 2A, 1C, T3_X...
+  const resolved = RESOLVED_TEAMS[name];
+  if (resolved) return { display: resolved.name, iso2: resolved.iso2 };
+  
+  // Pas encore connu : afficher un label lisible
+  const label = translateVarCode(name);
+  return { display: label, iso2: null };
+}
+
+function translateVarCode(code) {
+  if (!code) return 'À déterminer';
+  if (/^1[A-L]$/.test(code)) return `1er Groupe ${code[1]}`;
+  if (/^2[A-L]$/.test(code)) return `2e Groupe ${code[1]}`;
+  if (/^T3/.test(code)) return `Meilleur 3e`;
+  if (code.startsWith('W_S16_')) return `Vainqueur 16e de finale ${code.replace('W_S16_','')}`;
+  if (code.startsWith('W_S8_'))  return `Vainqueur 8e de finale ${code.replace('W_S8_','')}`;
+  if (code.startsWith('W_QF_'))  return `Vainqueur Quart ${code.replace('W_QF_','')}`;
+  if (code.startsWith('W_SF_'))  return `Vainqueur Demi-finale ${code.replace('W_SF_','')}`;
+  if (code.startsWith('L_SF_'))  return `Perdant Demi-finale ${code.replace('L_SF_','')}`;
+  return code;
+}
+
+function calTeamFlag(iso2, size='20x15') {
+  if (iso2) return `<img class="cal-flag" src="https://flagcdn.com/${size}/${iso2}.png" alt="">`;
+  return `<span class="cal-placeholder-flag">?</span>`;
+}
+
+let SCHEDULE_DATA = null;
+
+async function loadCalendrier() {
+  try {
+    const res = await fetch('match-schedule.json');
+    SCHEDULE_DATA = await res.json();
+    await loadCalendrierTeams();
+    document.getElementById('calendrierLoading').style.display='none';
+    document.getElementById('calendrierContent').style.display='block';
+    renderCalendrier();
+  } catch(e) {
+    document.getElementById('calendrierLoading').innerHTML =
+      `<div style="color:var(--red);text-align:center">Erreur : ${e.message}</div>`;
+  }
+}
+
+// Résout les équipes des phases finales depuis matchs_reels (Supabase)
+async function loadCalendrierTeams() {
+  if (!allMatchsReels.length) return;
+  RESOLVED_TEAMS = {};
+  allMatchsReels.forEach(r => {
+    if (r.equipe_dom && r.equipe_ext) {
+      // Chercher dans CONFIG l'équipe correspondante pour obtenir le nom et iso2
+      const tDom = CONFIG.equipes?.find(e=>e.code===r.equipe_dom);
+      const tExt = CONFIG.equipes?.find(e=>e.code===r.equipe_ext);
+      // Résoudre les codes de position (1A, 2B...) et vainqueurs (W_S16_1...)
+      // depuis le bracket_eliminatoire
+      const m = Object.values(CONFIG.bracket_eliminatoire||{}).flat().find(bm=>bm.id===r.match_id);
+      if (m) {
+        if (tDom && m.dom_source) RESOLVED_TEAMS[m.dom_source] = { name: tDom.nom, iso2: tDom.iso2 };
+        if (tExt && m.ext_source) RESOLVED_TEAMS[m.ext_source] = { name: tExt.nom, iso2: tExt.iso2 };
+      }
+      // Si le match est joué, résoudre aussi le vainqueur/perdant
+      if (r.joue) {
+        const winner = r.score_dom > r.score_ext ? r.equipe_dom : r.equipe_ext;
+        const loser  = r.score_dom > r.score_ext ? r.equipe_ext : r.equipe_dom;
+        const tW = CONFIG.equipes?.find(e=>e.code===winner);
+        const tL = CONFIG.equipes?.find(e=>e.code===loser);
+        if (tW) RESOLVED_TEAMS['W_' + r.match_id] = { name: tW.nom, iso2: tW.iso2 };
+        if (tL) RESOLVED_TEAMS['L_' + r.match_id] = { name: tL.nom, iso2: tL.iso2 };
+      }
+    }
+    // Group stage: resolve 1A, 2B etc. from qualified teams
+    const gMatch = Object.entries(CONFIG.matchs_groupes||{})
+      .filter(([g])=>!g.startsWith('_'))
+      .flatMap(([,ms])=>ms)
+      .find(m=>m.id===r.match_id);
+    if (gMatch && r.equipe_dom) {
+      const tDom = CONFIG.equipes?.find(e=>e.code===r.equipe_dom);
+      const tExt = CONFIG.equipes?.find(e=>e.code===r.equipe_ext);
+      if (tDom) RESOLVED_TEAMS[gMatch.dom] = { name: tDom.nom, iso2: tDom.iso2 };
+      if (tExt) RESOLVED_TEAMS[gMatch.ext] = { name: tExt.nom, iso2: tExt.iso2 };
+    }
+  });
+}
+
+function renderCalendrier() {
+  if (!SCHEDULE_DATA) return;
+  const matches = SCHEDULE_DATA.matches || [];
+  const el = document.getElementById('calendrierContent');
+  if (!matches.length) { el.innerHTML='<div class="empty-state">Aucun match disponible.</div>'; return; }
+
+  // Grouper par date
+  const byDay = {};
+  const dayOrder = [];
+  matches.forEach(m => {
+    if (!byDay[m.date]) { byDay[m.date] = []; dayOrder.push(m.date); }
+    byDay[m.date].push(m);
+  });
+
+  let html = '';
+  dayOrder.forEach(day => {
+    html += `<div class="cal-day-header">${day}</div>`;
+    html += byDay[day].map(m => {
+      const home = resolveCalTeam(m.homeTeam.name);
+      const away = resolveCalTeam(m.awayTeam.name);
+      const meta = [m.phase, m.group ? `Groupe ${m.group}` : null, m.stadium]
+        .filter(Boolean).join(' · ');
+      return `<div class="cal-match">
+        <div class="cal-home">
+          <span class="cal-team-name">${home.display}</span>
+          ${calTeamFlag(home.iso2)}
+        </div>
+        <div class="cal-center">
+          <div class="cal-time">${m.time}</div>
+          <div class="cal-meta">${meta}</div>
+        </div>
+        <div class="cal-away">
+          ${calTeamFlag(away.iso2)}
+          <span class="cal-team-name">${away.display}</span>
+        </div>
+      </div>`;
+    }).join('');
+  });
+
+  el.innerHTML = html;
+}
 
 // ── Realtime ──────────────────────────────────────────
 function setupRealtime() {
