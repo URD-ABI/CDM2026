@@ -508,7 +508,7 @@ let activePhase     = 'all';
 // ── Init ──────────────────────────────────────────────
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
-  document.getElementById('themeBtn').textContent = isLight ? '🌑 Sombre' : '🌙 Sombre';
+  document.getElementById('themeBtn').textContent = isLight ? '🌑 Sombre' : '☀️ Clair';
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
 }
 
@@ -518,6 +518,8 @@ async function init() {
   if (savedTheme !== 'dark') {
     document.body.classList.add('light');
     setTimeout(()=>{ const b=document.getElementById('themeBtn'); if(b) b.textContent='🌑 Sombre'; },0);
+  } else {
+    setTimeout(()=>{ const b=document.getElementById('themeBtn'); if(b) b.textContent='☀️ Clair'; },0);
   }
   try {
     CONFIG = await (await fetch('config.json')).json();
@@ -1093,7 +1095,7 @@ function renderMatchs(phase, btnEl) {
 
     // Meilleurs 3es — depuis les groupes ayant au moins 1 match joué
     const real3rds = groups
-      .filter(g => standings[g]?.[2] && standings[g][2].j > 0)
+      .filter(g => standings[g]?.[2] && standings[g].some(t => t.j > 0))
       .map(g => ({g, ...standings[g][2]}))
       .sort((a,b) => b.pts-a.pts || b.bd-a.bd || b.bp-a.bp);
     const best8groups = new Set(real3rds.slice(0,8).map(t=>t.g));
@@ -1168,7 +1170,7 @@ function renderGroupCard(g, matchs, reels, standing, best8groups) {
   return `<div class="groupe-card">
     <div class="groupe-card-header">
       <span class="groupe-card-title">Groupe ${g}</span>
-      <span class="groupe-card-played">${played}/3 joués</span>
+      <span class="groupe-card-played">${played}/${matchs.length} joués</span>
     </div>
     <div class="groupe-matches">${matchRows}</div>
     <div class="groupe-standings">
@@ -1394,7 +1396,7 @@ async function selectParticipant(pid, pseudo) {
     html += `<div class="groupe-card">
       <div class="groupe-card-header">
         <span class="groupe-card-title">Groupe ${g}</span>
-        <span class="groupe-card-played">${playedReal}/3 joués</span>
+        <span class="groupe-card-played">${playedReal}/${matchs.length} joués</span>
       </div>
       <div class="groupe-matches">${matchRows}</div>
       <div class="groupe-standings">${standingRows||'<div style="color:var(--muted);font-size:.78rem;padding:.3rem 0">—</div>'}</div>
@@ -1488,7 +1490,7 @@ async function selectParticipant(pid, pseudo) {
 
 // ── Calendrier ────────────────────────────────────────
 // Mapping name → iso2
-const TEAM_NAME_ISO2 = {"Mexique":"mx","Afrique du Sud":"za","République de Corée":"kr","Tchéquie":"cz","Canada":"ca","Bosnie-et-Herzégovine":"ba","Qatar":"qa","Suisse":"ch","Brésil":"br","Maroc":"ma","Haïti":"ht","Écosse":"gb-sct","États-Unis":"us","Paraguay":"py","Australie":"au","Turquie":"tr","Allemagne":"de","Curaçao":"cw","Côte d'Ivoire":"ci","Équateur":"ec","Pays-Bas":"nl","Japon":"jp","Suède":"se","Tunisie":"tn","Belgique":"be","Égypte":"eg","RI Iran":"ir","Nouvelle-Zélande":"nz","Espagne":"es","Cap-Vert":"cv","Arabie saoudite":"sa","Uruguay":"uy","France":"fr","Sénégal":"sn","Irak":"iq","Norvège":"no","Argentine":"ar","Algérie":"dz","Autriche":"at","Jordanie":"jo","Portugal":"pt","RD Congo":"cd","Ouzbékistan":"uz","Colombie":"co","Angleterre":"gb-eng","Croatie":"hr","Ghana":"gh","Panamá":"pa"};
+const TEAM_NAME_ISO2 = {"Mexique":"mx","Afrique du Sud":"za","République de Corée":"kr","Tchéquie":"cz","Canada":"ca","Bosnie-et-Herzégovine":"ba","Qatar":"qa","Suisse":"ch","Brésil":"br","Maroc":"ma","Haïti":"ht","Écosse":"gb-sct","États-Unis":"us","Paraguay":"py","Australie":"au","Turquie":"tr","Allemagne":"de","Curaçao":"cw","Côte d'Ivoire":"ci","Côte d’Ivoire":"ci","Côte d’Ivoire":"ci","Équateur":"ec","Pays-Bas":"nl","Japon":"jp","Suède":"se","Tunisie":"tn","Belgique":"be","Égypte":"eg","RI Iran":"ir","Nouvelle-Zélande":"nz","Espagne":"es","Cap-Vert":"cv","Arabie saoudite":"sa","Uruguay":"uy","France":"fr","Sénégal":"sn","Irak":"iq","Norvège":"no","Argentine":"ar","Algérie":"dz","Autriche":"at","Jordanie":"jo","Portugal":"pt","RD Congo":"cd","Ouzbékistan":"uz","Colombie":"co","Angleterre":"gb-eng","Croatie":"hr","Ghana":"gh","Panamá":"pa"};
 
 // Mapping des codes variables → équipe résolue depuis matchs_reels
 // Sera rempli par loadCalendrierTeams()
