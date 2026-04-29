@@ -555,7 +555,7 @@ function switchTab(id, el) {
 // ── Classement ────────────────────────────────────────
 async function loadClassement() {
   const [ {data:parts}, {data:scores} ] = await Promise.all([
-    sb.from('participants').select('id,pseudo'),
+    sb.from('participants').select('id,pseudo,prenom'),
     sb.from('scores_calcules').select('*')
   ]);
 
@@ -582,7 +582,7 @@ function renderClassement() {
 
   // Joindre scores + pseudos, trier par total desc
   const rows = allScores
-    .map(s=>({ ...s, pseudo: pMap[s.participant_id]?.pseudo || '?' }))
+    .map(s=>({ ...s, pseudo: pMap[s.participant_id]?.pseudo || '?', prenom: pMap[s.participant_id]?.prenom || null }))
     .sort((a,b)=>b.total-a.total);
 
   const tbody = document.getElementById('classementBody');
@@ -1221,7 +1221,7 @@ let allPart_pronostics = [];
 let activePart = null;
 
 async function loadPronostics() {
-  const { data:parts } = await sb.from('participants').select('id,pseudo');
+  const { data:parts } = await sb.from('participants').select('id,pseudo,prenom');
   allPart_pronostics = parts || [];
   document.getElementById('pronosticsLoading').style.display='none';
   document.getElementById('pronosticsContent').style.display='block';
@@ -1237,6 +1237,7 @@ function renderPronosticsList() {
     const isActive = activePart===p.id;
     return `<div class="part-card ${isActive?'active':''}" onclick="selectParticipant('${p.id}','${p.pseudo}')">
       <div class="part-card-pseudo">${p.pseudo}</div>
+      ${p.prenom?`<div style="font-size:.78rem;color:var(--muted)">(${p.prenom})</div>`:''}
       ${s ? `<div class="part-card-pts">${s.total||0} pts</div>` : '<div class="part-card-pts" style="color:var(--muted)">—</div>'}
     </div>`;
   }).join('');

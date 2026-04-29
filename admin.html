@@ -814,7 +814,7 @@ function computeRealTiers(reelsMap, realQualifies) {
 // ── Stats tab ─────────────────────────────────────────
 async function loadStats() {
   const [{data:parts},{data:scores},{data:pg}] = await Promise.all([
-    sb.from('participants').select('id,pseudo,created_at'),
+    sb.from('participants').select('id,pseudo,prenom,created_at'),
     sb.from('scores_calcules').select('*'),
     sb.from('pronostics_groupes').select('participant_id'),
   ]);
@@ -835,21 +835,25 @@ async function loadStats() {
 
   const scoresMap = Object.fromEntries((scores||[]).map(s=>[s.participant_id,s]));
   document.getElementById('statsParticipants').innerHTML = `
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:.7rem">Clique dans le champ Prénom pour le modifier — sauvegarde automatique.</p>
     <table style="width:100%;border-collapse:collapse;font-size:.85rem">
       <thead><tr>
         <th style="text-align:left;padding:.4rem .6rem;color:var(--muted);border-bottom:1px solid var(--border)">Pseudo</th>
+        <th style="text-align:left;padding:.4rem .6rem;color:var(--muted);border-bottom:1px solid var(--border)">Prénom</th>
         <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);border-bottom:1px solid var(--border)">Pronostics G.</th>
-        <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);border-bottom:1px solid var(--border)">Inscrit le</th>
         <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);border-bottom:1px solid var(--border)">Score</th>
       </tr></thead>
       <tbody>${(parts||[]).map(p=>{
         const s=scoresMap[p.id]||{total:0};
         const c=pronos_count[p.id]||0;
-        const d=new Date(p.created_at).toLocaleDateString('fr-FR');
         return `<tr>
           <td style="padding:.5rem .6rem;border-bottom:1px solid var(--border);font-weight:600">${p.pseudo}</td>
+          <td style="padding:.5rem .6rem;border-bottom:1px solid var(--border)">
+            <input type="text" value="${p.prenom||''}" placeholder="Prénom..."
+              style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:.25rem .5rem;color:var(--text);font-family:'DM Sans';font-size:.82rem;width:120px"
+              onchange="savePrenom('${p.id}',this.value)">
+          </td>
           <td style="padding:.5rem .6rem;border-bottom:1px solid var(--border);text-align:right;color:${c===totalMatchs?'var(--green)':'var(--muted)'}">${c}/${totalMatchs}</td>
-          <td style="padding:.5rem .6rem;border-bottom:1px solid var(--border);text-align:right;color:var(--muted)">${d}</td>
           <td style="padding:.5rem .6rem;border-bottom:1px solid var(--border);text-align:right;font-family:'Bebas Neue';font-size:1.1rem;color:var(--gold)">${s.total||0}</td>
         </tr>`;
       }).join('')}</tbody>
@@ -857,6 +861,14 @@ async function loadStats() {
 }
 
 // ── Tab nav ───────────────────────────────────────────
+async function savePrenom(participantId, prenom) {
+  const { error } = await sb.from('participants')
+    .update({ prenom: prenom.trim() || null })
+    .eq('id', participantId);
+  if (error) toast('Erreur : '+error.message,'error');
+  else toast('✓ Prénom enregistré');
+}
+
 function switchTab(id, el) {
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));

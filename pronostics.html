@@ -427,6 +427,7 @@ body {
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="gotoStep(1)">← Retour</button>
       <span id="step2Progress" style="font-size:.8rem;color:var(--muted)"></span>
+      <button class="btn btn-secondary" id="savePartialBtn" onclick="savePartial()">💾 Enregistrer</button>
       <button class="btn btn-primary" onclick="gotoStep(3)">Suivant →</button>
     </div>
   </div>
@@ -448,6 +449,7 @@ body {
     </div>
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="gotoStep(2)">← Retour</button>
+      <button class="btn btn-secondary" onclick="savePartial()">💾 Enregistrer</button>
       <button class="btn btn-primary" onclick="validateStep3()">Suivant →</button>
     </div>
   </div>
@@ -464,6 +466,7 @@ body {
     </div>
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="gotoStep(3)">← Retour</button>
+      <button class="btn btn-secondary" onclick="savePartial()">💾 Enregistrer</button>
       <button class="btn btn-primary" onclick="gotoStep(5)">Suivant →</button>
     </div>
   </div>
@@ -476,6 +479,7 @@ body {
     </div>
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="gotoStep(4)">← Retour</button>
+      <button class="btn btn-secondary" onclick="savePartial()">💾 Enregistrer</button>
       <button class="btn btn-primary" onclick="gotoStep(6)">Suivant →</button>
     </div>
   </div>
@@ -491,6 +495,7 @@ body {
     </div>
     <div class="nav-btns">
       <button class="btn btn-secondary" onclick="gotoStep(5)">← Retour</button>
+      <button class="btn btn-secondary" onclick="savePartial()">💾 Enregistrer</button>
       <button class="btn btn-primary" onclick="gotoStep(7)">Suivant →</button>
     </div>
   </div>
@@ -642,7 +647,7 @@ function showStep(n) {
   }
 
   const labels = ['','Identification','Phase de groupes','Qualifiés & 3es','Bracket éliminatoire','Questions bonus','Matchs élim. réels','Récapitulatif'];
-  document.getElementById('stepLabel').textContent = `Étape ${n}/6 — ${labels[n]}`;
+  document.getElementById('stepLabel').textContent = `Étape ${n}/7 — ${labels[n]}`;
 
   const wrap = document.getElementById('progressWrap');
   const label = document.getElementById('stepLabel');
@@ -1471,6 +1476,65 @@ function renderReview() {
 }
 
 // ── SOUMISSION ────────────────────────────────────────────────
+// ── Sauvegarde partielle ─────────────────────────────────────
+async function savePartial() {
+  if (!participant?.id) { toast('Identifie-toi d'abord (étape 1)','error'); return; }
+  const btn = document.getElementById('savePartialBtn');
+  if (btn) { btn.disabled=true; btn.textContent='⏳…'; }
+
+  try {
+    const pid = participant.id;
+
+    // 1. Pronostics groupes
+    const pgRows = Object.entries(state.groupes)
+      .filter(([,v])=>v.resultat)
+      .map(([match_id,v])=>({participant_id:pid,match_id,resultat:v.resultat,score_dom:v.score_dom??null,score_ext:v.score_ext??null}));
+    if (pgRows.length) await sb.from('pronostics_groupes').upsert(pgRows,{onConflict:'participant_id,match_id'});
+
+    // 2. Qualifiés
+    const pqRows = Object.entries(state.qualifies)
+      .filter(([,v])=>v.equipe_1er&&v.equipe_2eme)
+      .map(([groupe_id,v])=>({participant_id:pid,groupe_id,equipe_1er:v.equipe_1er,equipe_2eme:v.equipe_2eme}));
+    if (pqRows.length) await sb.from('pronostics_qualifies').upsert(pqRows,{onConflict:'participant_id,groupe_id'});
+
+    // 3. Meilleurs tiers
+    if (state.tiers.length===8) {
+      await sb.from('pronostics_meilleurs_tiers').upsert(
+        {participant_id:pid,groupes:state.tiers},{onConflict:'participant_id'});
+    }
+
+    // 4. Bracket
+    const pbRows = Object.entries(state.bracket)
+      .filter(([,v])=>v)
+      .map(([slot_id,equipe])=>({participant_id:pid,slot_id,equipe}));
+    if (pbRows.length) await sb.from('pronostics_bracket').upsert(pbRows,{onConflict:'participant_id,slot_id'});
+
+    // 5. Élim réels
+    const peRows = Object.entries(state.elim)
+      .filter(([,v])=>v.resultat)
+      .map(([match_id,v])=>({participant_id:pid,match_id,resultat:v.resultat,score_dom:v.score_dom??null,score_ext:v.score_ext??null}));
+    if (peRows.length) await sb.from('pronostics_elim').upsert(peRows,{onConflict:'participant_id,match_id'});
+
+    // 6. Bonus
+    const pboRows = Object.entries(state.bonus)
+      .filter(([,v])=>v!=null)
+      .map(([question_id,v])=>{
+        const q=(CONFIG.questions_bonus||[]).find(q=>q.id===question_id);
+        const row={participant_id:pid,question_id};
+        if(q?.type==='entier') row.reponse_entier=parseInt(v);
+        else row.reponse_equipe=String(v);
+        return row;
+      });
+    if (pboRows.length) await sb.from('pronostics_bonus').upsert(pboRows,{onConflict:'participant_id,question_id'});
+
+    toast('✅ Pronostics enregistrés !','success');
+  } catch(e) {
+    toast('Erreur : '+e.message,'error');
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='💾 Enregistrer'; }
+  }
+}
+
 async function submitAll() {
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = '⏳ Enregistrement…';
