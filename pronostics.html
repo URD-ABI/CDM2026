@@ -1478,7 +1478,7 @@ function renderReview() {
 // ── SOUMISSION ────────────────────────────────────────────────
 // ── Sauvegarde partielle ─────────────────────────────────────
 async function savePartial() {
-  if (!participant?.id) { toast('Identifie-toi d'abord (étape 1)','error'); return; }
+  if (!participant?.id) { toast("Identifie-toi d'abord (étape 1)",'error'); return; }
   const btn = document.getElementById('savePartialBtn');
   if (btn) { btn.disabled=true; btn.textContent='⏳…'; }
 
