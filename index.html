@@ -355,6 +355,36 @@ body.light .cal-day-header { border-bottom-color:#d1d5db; }
 .support-btn:hover { filter:brightness(1.15); }
 .support-btn-gold { background:var(--gold); }
 
+/* ── Animations score exact ── */
+@keyframes confettiFall {
+  0%   { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
+}
+@keyframes goldPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(245,183,49,0); }
+  50%      { box-shadow:0 0 0 8px rgba(245,183,49,.3); }
+}
+@keyframes starPop {
+  0%   { transform:scale(0) rotate(-15deg); opacity:0; }
+  60%  { transform:scale(1.2) rotate(5deg);  opacity:1; }
+  100% { transform:scale(1)   rotate(0deg);  opacity:1; }
+}
+.confetti-container {
+  position:fixed; top:0; left:0; width:100%; height:0;
+  pointer-events:none; z-index:9999; overflow:visible;
+}
+.confetti-piece {
+  position:absolute; width:10px; height:10px; border-radius:2px;
+  animation:confettiFall linear forwards;
+}
+.detail-match.exact {
+  animation:goldPulse .8s ease 2;
+}
+.exact-star {
+  display:inline-block;
+  animation:starPop .4s cubic-bezier(.175,.885,.32,1.275) forwards;
+}
+
 /* ── Responsive ── */
 @media(max-width:600px) {
   .header-actions { position:static; transform:none; flex-direction:row; justify-content:center; margin-top:.8rem; }
@@ -363,12 +393,86 @@ body.light .cal-day-header { border-bottom-color:#d1d5db; }
   .groupes-grid { grid-template-columns:1fr; }
   .part-list { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
 }
+
+/* ── Chat flottant ── */
+.chat-widget {
+  position:fixed; bottom:1.5rem; right:1.5rem; z-index:1000;
+  display:flex; flex-direction:column; align-items:flex-end; gap:.5rem;
+}
+.chat-toggle {
+  width:52px; height:52px; border-radius:50%; border:none; cursor:pointer;
+  background:var(--gold); color:#000; font-size:1.4rem;
+  box-shadow:0 4px 16px rgba(0,0,0,.3); transition:transform .2s;
+  display:flex; align-items:center; justify-content:center;
+}
+.chat-toggle:hover { transform:scale(1.08); }
+.chat-badge {
+  position:absolute; top:-4px; right:-4px; background:var(--red);
+  color:#fff; border-radius:50%; width:18px; height:18px;
+  font-size:.65rem; font-weight:700; display:none;
+  align-items:center; justify-content:center;
+}
+.chat-panel {
+  width:320px; max-height:420px; display:none; flex-direction:column;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); box-shadow:0 8px 32px rgba(0,0,0,.3);
+  overflow:hidden;
+}
+.chat-panel.open { display:flex; }
+.chat-header {
+  padding:.75rem 1rem; background:var(--gold); color:#000;
+  font-family:'Bebas Neue'; font-size:1.1rem; letter-spacing:.08em;
+  display:flex; justify-content:space-between; align-items:center;
+  flex-shrink:0;
+}
+.chat-header button {
+  background:none; border:none; cursor:pointer; font-size:1rem;
+  color:#000; padding:0; line-height:1;
+}
+.chat-messages {
+  flex:1; overflow-y:auto; padding:.7rem;
+  display:flex; flex-direction:column; gap:.5rem;
+  min-height:0;
+}
+.chat-msg {
+  max-width:85%; padding:.45rem .7rem; border-radius:10px;
+  font-size:.82rem; line-height:1.4; word-break:break-word;
+}
+.chat-msg.own {
+  align-self:flex-end; background:var(--gold); color:#000;
+  border-bottom-right-radius:3px;
+}
+.chat-msg.other {
+  align-self:flex-start; background:var(--surface);
+  border:1px solid var(--border); border-bottom-left-radius:3px;
+}
+.chat-msg-meta {
+  font-size:.68rem; opacity:.6; margin-bottom:.15rem; font-weight:600;
+}
+.chat-input-row {
+  display:flex; gap:.4rem; padding:.6rem; border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+.chat-input {
+  flex:1; padding:.4rem .6rem; border-radius:7px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font-family:'DM Sans';
+  font-size:.85rem; outline:none;
+}
+.chat-input:focus { border-color:var(--gold); }
+.chat-send {
+  padding:.4rem .75rem; border-radius:7px; border:none;
+  background:var(--gold); color:#000; font-weight:700; cursor:pointer;
+  font-size:.85rem; transition:filter .2s;
+}
+.chat-send:hover { filter:brightness(1.1); }
+.chat-empty { color:var(--muted); font-size:.82rem; text-align:center; padding:1rem; }
+body.light .chat-msg.other { background:#f3f4f6; }
 </style>
 </head>
 <body>
 
 <header class="site-header">
-  <h1><a href="https://urd-abi.github.io/CDM2026/index.html" style="color:inherit;text-decoration:none">⚽ FIFA World Cup 2026</a></h1>
+  <h1><a href="https://urd-abi.github.io/CDM2026/index.html" style="color:inherit;text-decoration:none"><img src="Logo_ABI_foot.png" alt="URD ABI" style="height:2.2rem;vertical-align:middle;margin-right:.4rem;margin-bottom:.15rem"> FIFA World Cup 2026</a></h1>
   <p>Championnat du monde d'ABI des pronostiques</p>
   <div class="header-actions">
     <a href="pronostics.html" class="btn-pronostics">✏️ Mes pronostics</a>
@@ -525,6 +629,7 @@ async function init() {
     CONFIG = await (await fetch('config.json')).json();
     await Promise.all([ loadClassement(), loadMatchs(), loadPronostics(), loadCalendrier() ]);
     setupRealtime();
+    initChat();
     // Dernière mise à jour admin = max updated_at des matchs_reels
     const lastUpdated = allMatchsReels.length
       ? allMatchsReels.reduce((max, m) => m.updated_at > max ? m.updated_at : max, allMatchsReels[0].updated_at)
@@ -582,7 +687,7 @@ function renderClassement() {
 
   // Joindre scores + pseudos, trier par total desc
   const rows = allScores
-    .map(s=>({ ...s, pseudo: pMap[s.participant_id]?.pseudo || '?', prenom: pMap[s.participant_id]?.prenom || null }))
+    .map(s=>({ ...s, pseudo: pMap[s.participant_id]?.pseudo || '?', prenom: pMap[s.participant_id]?.prenom || null, photo_url: pMap[s.participant_id]?.photo_url || null }))
     .sort((a,b)=>b.total-a.total);
 
   const tbody = document.getElementById('classementBody');
@@ -1236,6 +1341,8 @@ function renderPronosticsList() {
     const s = scoresMap[p.id];
     const isActive = activePart===p.id;
     return `<div class="part-card ${isActive?'active':''}" onclick="selectParticipant('${p.id}','${p.pseudo}')">
+      ${p.photo_url?`<img src="${p.photo_url}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto .4rem;display:block">`:
+        `<div style="width:44px;height:44px;border-radius:50%;background:var(--border);margin:0 auto .4rem;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--muted)">${p.pseudo[0].toUpperCase()}</div>`}
       <div class="part-card-pseudo">${p.pseudo}</div>
       ${p.prenom?`<div style="font-size:.78rem;color:var(--muted)">(${p.prenom})</div>`:''}
       ${s ? `<div class="part-card-pts">${s.total||0} pts</div>` : '<div class="part-card-pts" style="color:var(--muted)">—</div>'}
@@ -1628,6 +1735,38 @@ function renderCalendrier() {
   });
 
   el.innerHTML = html;
+  triggerExactScoreEffects(el);
+}
+
+// ── Confetti animation ────────────────────────────────
+function launchConfetti(count=60) {
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  document.body.appendChild(container);
+  const colors = ['#f5b731','#00c55a','#e84545','#3b82f6','#f97316','#a855f7'];
+  for (let i=0; i<count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.cssText = [
+      `left:${Math.random()*100}%`,
+      `background:${colors[Math.floor(Math.random()*colors.length)]}`,
+      `width:${6+Math.random()*8}px`,
+      `height:${6+Math.random()*8}px`,
+      `border-radius:${Math.random()>0.5?'50%':'2px'}`,
+      `animation-duration:${1.5+Math.random()*2}s`,
+      `animation-delay:${Math.random()*0.8}s`,
+    ].join(';');
+    container.appendChild(piece);
+  }
+  setTimeout(()=>container.remove(), 4000);
+}
+
+// Déclenche confettis si score(s) exact(s) trouvé(s) dans un panneau
+function triggerExactScoreEffects(el) {
+  const exactRows = el.querySelectorAll('.detail-match.exact');
+  if (exactRows.length > 0) {
+    setTimeout(()=>launchConfetti(exactRows.length * 25), 400);
+  }
 }
 
 // ── Realtime ──────────────────────────────────────────
@@ -1654,7 +1793,132 @@ function setupRealtime() {
     .subscribe();
 }
 
+// ── Chat ──────────────────────────────────────────────
+let chatOpen = false;
+let chatPseudo = null;
+let chatSub = null;
+let chatUnread = 0;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chatPanel').classList.toggle('open', chatOpen);
+  if (chatOpen) {
+    chatUnread = 0;
+    updateChatBadge();
+    document.getElementById('chatInput').focus();
+    scrollChatToBottom();
+  }
+}
+
+function updateChatBadge() {
+  const badge = document.getElementById('chatBadge');
+  if (chatUnread > 0) {
+    badge.style.display='flex'; badge.textContent=chatUnread>9?'9+':chatUnread;
+  } else {
+    badge.style.display='none';
+  }
+}
+
+function scrollChatToBottom() {
+  const el = document.getElementById('chatMessages');
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+async function initChat() {
+  // Afficher le widget seulement si l'utilisateur est identifié via localStorage
+  const savedPseudo = localStorage.getItem('chat_pseudo');
+  if (savedPseudo) chatPseudo = savedPseudo;
+  document.getElementById('chatWidget').style.display='flex';
+  await loadChatHistory();
+  subscribeChatRealtime();
+}
+
+async function loadChatHistory() {
+  const { data } = await sb.from('chat_messages')
+    .select('*').order('created_at',{ascending:true}).limit(100);
+  renderChatMessages(data||[]);
+}
+
+function renderChatMessages(messages) {
+  const el = document.getElementById('chatMessages');
+  const empty = document.getElementById('chatEmpty');
+  if (!messages.length) { empty.style.display='block'; return; }
+  empty.style.display='none';
+  // Only render new messages (check by id)
+  const existingIds = new Set([...el.querySelectorAll('[data-id]')].map(e=>e.dataset.id));
+  messages.forEach(m => {
+    if (existingIds.has(String(m.id))) return;
+    const isOwn = m.pseudo === chatPseudo;
+    const time = new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + (isOwn?'own':'other');
+    div.dataset.id = m.id;
+    div.innerHTML = isOwn ? `${m.message}` 
+      : `<div class="chat-msg-meta">${m.pseudo}</div>${m.message}`;
+    div.title = time;
+    el.appendChild(div);
+  });
+  scrollChatToBottom();
+}
+
+function subscribeChatRealtime() {
+  if (chatSub) return;
+  chatSub = sb.channel('chat-live')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages'},payload=>{
+      renderChatMessages([payload.new]);
+      if (!chatOpen) {
+        chatUnread++;
+        updateChatBadge();
+      }
+    })
+    .subscribe();
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  // Demander pseudo si pas encore défini
+  if (!chatPseudo) {
+    const p = prompt('Entre ton pseudo pour le chat :');
+    if (!p?.trim()) return;
+    chatPseudo = p.trim();
+    localStorage.setItem('chat_pseudo', chatPseudo);
+  }
+
+  input.value = '';
+  const { error } = await sb.from('chat_messages').insert({
+    pseudo: chatPseudo, message: msg
+  });
+  if (error) { input.value = msg; alert('Erreur : '+error.message); }
+}
+
 init();
+
 </script>
+<!-- Chat flottant -->
+<div class="chat-widget" id="chatWidget" style="display:none">
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+      💬 Chat ABI
+      <button onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty" id="chatEmpty">Aucun message pour l'instant…</div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" type="text"
+        placeholder="Ton message…" maxlength="200"
+        onkeydown="if(event.key==='Enter')sendChatMessage()">
+      <button class="chat-send" onclick="sendChatMessage()">→</button>
+    </div>
+  </div>
+  <div style="position:relative">
+    <button class="chat-toggle" onclick="toggleChat()">💬</button>
+    <div class="chat-badge" id="chatBadge"></div>
+  </div>
+</div>
+
 </body>
 </html>
