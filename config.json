@@ -1344,7 +1344,7 @@
       "date_verrou": null
     },
     "C_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "C_J2": {
@@ -1356,7 +1356,7 @@
       "date_verrou": null
     },
     "D_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "D_J2": {
@@ -1368,7 +1368,7 @@
       "date_verrou": null
     },
     "E_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "E_J2": {
@@ -1380,7 +1380,7 @@
       "date_verrou": null
     },
     "F_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "F_J2": {
