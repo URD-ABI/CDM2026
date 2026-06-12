@@ -187,6 +187,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="nav-tab" onclick="switchTab('verrou',this)">🔒 Verrouillage</button>
     <button class="nav-tab" onclick="switchTab('points',this)">🧮 Points</button>
     <button class="nav-tab" onclick="switchTab('stats',this)">📊 Stats</button>
+    <button class="nav-tab" onclick="switchTab('bonus',this)">🎁 Bonus</button>
   </div>
 
   <div class="container">
@@ -241,6 +242,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div id="engineStatus" style="font-size:.85rem;color:var(--muted)"></div>
       </div>
       <div class="log-box" id="engineLog"><span class="log-info">En attente du lancement…</span></div>
+    </div>
+
+    <!-- TAB BONUS -->
+    <div class="tab-content" id="tab-bonus">
+      <div class="toolbar">
+        <span class="toolbar-title">Questions Bonus</span>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <span style="font-size:.8rem;color:var(--muted)">Modifie config.json et pousse sur GitHub pour appliquer</span>
+          <button class="btn btn-gold btn-sm" onclick="downloadBonusConfig()">⬇ Télécharger config.json</button>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin-bottom:1rem">
+        Valide les réponses correctes et verrouille les questions pour empêcher les participants de les modifier.
+        Après modification, <strong>télécharge et pousse le config.json</strong> sur GitHub, puis
+        <strong>relance le moteur de calcul</strong> pour attribuer les points.
+      </div>
+      <div id="bonusAdminList"></div>
     </div>
 
     <!-- TAB STATS -->
@@ -887,12 +905,103 @@ async function savePrenom(participantId, prenom) {
   else toast('✓ Prénom enregistré');
 }
 
+// ── Gestion des questions bonus ───────────────────────────────
+function renderBonusAdmin() {
+  const qs = (CONFIG.questions_bonus||[]).filter(q=>q.active);
+  if (!qs.length) {
+    document.getElementById('bonusAdminList').innerHTML =
+      '<div class="empty-state">Aucune question bonus active dans config.json.</div>';
+    return;
+  }
+
+  document.getElementById('bonusAdminList').innerHTML = qs.map(q=>{
+    const locked = q.verrouille || false;
+    const hasAnswer = q.reponse_correcte != null;
+
+    // Input pour la réponse correcte
+    let answerInput = '';
+    if (q.type === 'equipe') {
+      const opts = (CONFIG.equipes||[]).map(e=>
+        `<option value="${e.code}" ${String(q.reponse_correcte)===e.code?'selected':''}>${e.nom}</option>`
+      ).join('');
+      answerInput = `<select id="ans_${q.id}" ${locked?'disabled':''}
+        style="flex:1;padding:.4rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem">
+        <option value="">— Réponse correcte (équipe) —</option>${opts}
+      </select>`;
+    } else if (q.type === 'entier') {
+      answerInput = `<input type="number" id="ans_${q.id}" min="0" max="9999"
+        value="${q.reponse_correcte??''}" placeholder="Réponse correcte (nombre)" ${locked?'disabled':''}
+        style="flex:1;padding:.4rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem">`;
+    } else if (q.type === 'joueur') {
+      answerInput = `<input type="text" id="ans_${q.id}"
+        value="${q.reponse_correcte??''}" placeholder="Réponse correcte (joueur)" ${locked?'disabled':''}
+        style="flex:1;padding:.4rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem">`;
+    }
+
+    return `
+    <div class="card" style="margin-bottom:.8rem">
+      <div class="card-header" style="margin-bottom:.8rem">
+        <div>
+          <span class="card-title" style="font-size:1rem">${q.texte}</span>
+          <span style="font-size:.75rem;color:var(--muted);margin-left:.5rem">${q.points} pts · ${q.type}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:.8rem;color:${locked?'var(--gold)':'var(--muted)'}">
+            ${locked ? '🔒 Verrouillée' : '🔓 Ouverte'}
+          </span>
+          <div class="toggle-wrap" onclick="toggleBonusLock('${q.id}')">
+            <div class="toggle ${locked?'on':''}" id="btog_${q.id}"></div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:.8rem">${q.description||''}</p>
+      <div style="display:flex;gap:.6rem;align-items:center">
+        ${answerInput}
+        <button class="btn btn-primary btn-sm" ${locked?'disabled':''} onclick="saveBonusAnswer('${q.id}','${q.type}')">
+          ✓ Valider
+        </button>
+      </div>
+      ${hasAnswer ? `<div style="margin-top:.5rem;font-size:.8rem;color:var(--green)">
+        ✓ Réponse enregistrée : <strong>${q.reponse_correcte}</strong>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function saveBonusAnswer(qId, type) {
+  const input = document.getElementById('ans_'+qId);
+  const val = input?.value?.trim();
+  if (!val) { toast('Saisis une réponse correcte','error'); return; }
+
+  const q = CONFIG.questions_bonus.find(q=>q.id===qId);
+  if (!q) return;
+
+  q.reponse_correcte = type==='entier' ? parseInt(val) : val;
+  toast(`✓ Réponse "${val}" enregistrée pour "${q.texte}"`);
+  renderBonusAdmin();
+  warnConfigChange();
+}
+
+function toggleBonusLock(qId) {
+  const q = CONFIG.questions_bonus.find(q=>q.id===qId);
+  if (!q) return;
+  q.verrouille = !q.verrouille;
+  toast(q.verrouille ? `🔒 "${q.texte}" verrouillée` : `🔓 "${q.texte}" déverrouillée`);
+  renderBonusAdmin();
+  warnConfigChange();
+}
+
+function downloadBonusConfig() {
+  downloadConfig();
+}
+
 function switchTab(id, el) {
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
-  if (id==='stats') loadStats();
+  if (id==='stats')  loadStats();
+  if (id==='bonus')  renderBonusAdmin();
 }
 
 init();

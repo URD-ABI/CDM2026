@@ -303,14 +303,19 @@ body.light .cal-day-header { border-bottom-color:#d1d5db; }
 .gs-q.q3  { background:rgba(59,130,246,.15); color:var(--blue); }
 
 /* ── Tab Pronostics participants ── */
-.part-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:.6rem; margin-bottom:1.5rem; }
+.part-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:.6rem; margin-bottom:1.5rem; overflow:hidden; }
 .part-card {
   background:var(--card); border:1px solid var(--border); border-radius:8px;
   padding:.8rem 1rem; cursor:pointer; transition:all .2s; text-align:center;
+  min-width:0; overflow:hidden;
 }
 .part-card:hover { border-color:var(--muted); background:var(--surface); }
 .part-card.active { border-color:var(--gold); background:rgba(245,183,49,.06); }
-.part-card-pseudo { font-weight:600; font-size:.95rem; }
+.part-card-pseudo {
+  font-weight:600; font-size:.9rem;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:100%;
+}
 .part-card-pts { font-family:'Bebas Neue'; font-size:1.2rem; color:var(--gold); }
 .part-detail { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem; }
 .part-detail-title {

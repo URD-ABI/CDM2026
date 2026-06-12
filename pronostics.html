@@ -369,7 +369,7 @@ body {
     <img src="Logo_ABI_foot.png" alt="URD ABI" style="height:4.5rem;flex-shrink:0">
     <div style="text-align:left">
       <h1 style="margin:0;line-height:1"><a href="https://urd-abi.github.io/CDM2026/index.html" style="color:inherit;text-decoration:none">Pronostics CdM 2026</a></h1>
-      <p style="margin:.2rem 0 0">Championnat du monde d'ABI des pronostics</p>
+      <p style="margin:.2rem 0 0">Canada · États-Unis · Mexique · 11 juin – 19 juillet 2026</p>
     </div>
   </div>
   <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌑 Sombre</button>
@@ -1418,8 +1418,20 @@ function renderBonus() {
   const allTeams = CONFIG.equipes;
   const qs = (CONFIG.questions_bonus||[]).filter(q=>q.active);
   document.getElementById('bonusList').innerHTML = qs.map(q=>{
+    const locked = q.verrouille || false;
+    const existing = state.bonus[q.id];
     let input = '';
-    if (q.type==='equipe') {
+    if (locked) {
+      // Afficher la réponse soumise en lecture seule
+      let valDisplay = existing ?? '—';
+      if (q.type==='equipe' && existing) {
+        const t = allTeams.find(t=>t.code===existing);
+        valDisplay = t ? `${t.iso2?t.iso2.toUpperCase()+' – ':''} ${t.nom}` : existing;
+      }
+      input = `<div style="padding:.5rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:.9rem">
+        🔒 Verrouillée — Réponse : <strong style="color:var(--text)">${valDisplay}</strong>
+      </div>`;
+    } else if (q.type==='equipe') {
       const opts = allTeams.map(t=>`<option value="${t.code}" ${state.bonus[q.id]===t.code?'selected':''}>${t.iso2?t.iso2.toUpperCase()+' – ':''} ${t.nom}</option>`).join('');
       input = `<select onchange="setBonus('${q.id}','equipe',this.value)"><option value="">— Choisir une équipe —</option>${opts}</select>`;
     } else if (q.type==='entier') {
