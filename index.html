@@ -820,6 +820,11 @@ async function loadParticipantDetail(pid, pseudo, el) {
       const ext = CONFIG.equipes.find(e=>e.code===m.ext);
       const flagLine = `${flag(dom)} – ${flag(ext)}`;
 
+      if (!r?.joue) {
+        html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
+        return;
+      }
+
       if (!p) {
         html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
         return;
@@ -952,6 +957,10 @@ async function loadParticipantDetail(pid, pseudo, el) {
     matchs.forEach((m,i)=>{
       const b=pronos_b[m.id]; if(!b) return;
       const r=reels_map[m.id];
+      if (!r?.joue) {
+        html += `<div class="detail-match"><span class="match-teams">${translateSource(m.dom_source)} – ${translateSource(m.ext_source)}</span><span class="match-prono pending">—</span></div>`;
+        return;
+      }
       const tWinner=CONFIG.equipes.find(e=>e.code===b.equipe);
       // Équipes prédites du match (depuis bracket du joueur)
       const predDom = resolvePredictedTeam(m.dom_source, m.id);
@@ -1003,6 +1012,10 @@ async function loadParticipantDetail(pid, pseudo, el) {
       const dom = r?.equipe_dom ? CONFIG.equipes.find(e=>e.code===r.equipe_dom) : null;
       const ext = r?.equipe_ext ? CONFIG.equipes.find(e=>e.code===r.equipe_ext) : null;
       const flagLine = dom||ext ? `${flag(dom)||'?'} – ${flag(ext)||'?'}` : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
+      if (!r?.joue) {
+        html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
+        return;
+      }
       if (!p) {
         html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
         return;
