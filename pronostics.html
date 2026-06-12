@@ -582,6 +582,38 @@ function teamDisplay(t) {
   return teamFlag(t) + t.nom;
 }
 
+function getGroupMatchById(matchId) {
+  for (const matchs of Object.values(CONFIG.matchs_groupes || {})) {
+    if (!Array.isArray(matchs)) continue;
+    const match = matchs.find(m => m.id === matchId);
+    if (match) return match;
+  }
+  return null;
+}
+
+function getElimMatchById(matchId) {
+  for (const matchs of Object.values(CONFIG.bracket_eliminatoire || {})) {
+    if (!Array.isArray(matchs)) continue;
+    const match = matchs.find(m => m.id === matchId);
+    if (match) return match;
+  }
+  return null;
+}
+
+function isJourneeLocked(journeeId) {
+  return !!(CONFIG.phase_initiale_verrou?.verrouille || (journeeId && CONFIG.journees?.[journeeId]?.verrouille));
+}
+
+function isGroupMatchLocked(matchId) {
+  const match = getGroupMatchById(matchId);
+  return !!(match?.journee && isJourneeLocked(match.journee));
+}
+
+function isElimMatchLocked(matchId) {
+  const match = getElimMatchById(matchId);
+  return !!(match?.journee && isJourneeLocked(match.journee));
+}
+
 // ── Thème ─────────────────────────────────────────────────────
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
@@ -606,7 +638,7 @@ function initTheme() {
 async function init() {
   initTheme();
   try {
-    const res = await fetch('config.json');
+    const res = await fetch(`config.json?v=${Date.now()}`, { cache: 'no-store' });
     CONFIG = await res.json();
 
     // Charger les combinaisons meilleurs 3es
@@ -756,31 +788,33 @@ function renderGroupContent(g) {
     const dom = getTeamByCode(m.dom);
     const ext = getTeamByCode(m.ext);
     const j = m.journee.split('_')[1];
+    const locked = isGroupMatchLocked(m.id);
     return `
     <div class="match-row">
-      <div class="match-info">Journée ${j.replace('J','')} · ${m.id}</div>
+      <div class="match-info">Journée ${j.replace('J','')} · ${m.id}${locked ? ' 🔒' : ''}</div>
       <button class="team-btn home ${st.resultat==='H'?'selected':''}"
-        onclick="setResult('${m.id}','H','${g}')">
+        ${locked?'disabled':''} onclick="setResult('${m.id}','H','${g}')">
         ${dom ? teamDisplay(dom) : m.dom}
       </button>
       <button class="draw-btn ${st.resultat==='N'?'selected':''}"
-        onclick="setResult('${m.id}','N','${g}')">NUL</button>
+        ${locked?'disabled':''} onclick="setResult('${m.id}','N','${g}')">NUL</button>
       <button class="team-btn away ${st.resultat==='A'?'selected':''}"
-        onclick="setResult('${m.id}','A','${g}')">
+        ${locked?'disabled':''} onclick="setResult('${m.id}','A','${g}')">
         ${ext ? teamDisplay(ext) : m.ext}
       </button>
       <div class="score-inputs">
         <input type="number" min="0" max="20" placeholder="-" value="${st.score_dom??''}"
-          onchange="setScore('${m.id}','dom',this.value)" id="score_${m.id}_dom">
+          ${locked?'disabled':''} onchange="setScore('${m.id}','dom',this.value)" id="score_${m.id}_dom">
         <span class="score-sep">–</span>
         <input type="number" min="0" max="20" placeholder="-" value="${st.score_ext??''}"
-          onchange="setScore('${m.id}','ext',this.value)" id="score_${m.id}_ext">
+          ${locked?'disabled':''} onchange="setScore('${m.id}','ext',this.value)" id="score_${m.id}_ext">
       </div>
     </div>`;
   }).join('');
 }
 
 function setResult(matchId, res, groupe) {
+  if (isGroupMatchLocked(matchId)) return;
   if (!state.groupes[matchId]) state.groupes[matchId] = {};
   state.groupes[matchId].resultat = res;
   renderGroupContent(groupe);
@@ -793,6 +827,7 @@ function setResult(matchId, res, groupe) {
 }
 
 function setScore(matchId, side, val) {
+  if (isGroupMatchLocked(matchId)) return;
   if (!state.groupes[matchId]) state.groupes[matchId] = {};
   state.groupes[matchId]['score_'+side] = val===''?null:parseInt(val);
 }
@@ -1404,11 +1439,13 @@ async function renderElim() {
 }
 
 function setElimResult(matchId, res) {
+  if (isElimMatchLocked(matchId)) return;
   if (!state.elim[matchId]) state.elim[matchId] = {};
   state.elim[matchId].resultat = res;
   renderElim();
 }
 function setElimScore(matchId, side, val) {
+  if (isElimMatchLocked(matchId)) return;
   if (!state.elim[matchId]) state.elim[matchId] = {};
   state.elim[matchId]['score_'+side] = val===''?null:parseInt(val);
 }
@@ -1504,7 +1541,7 @@ async function savePartial() {
 
     // 1. Pronostics groupes
     const pgRows = Object.entries(state.groupes)
-      .filter(([,v])=>v.resultat)
+      .filter(([match_id,v])=>v.resultat && !isGroupMatchLocked(match_id))
       .map(([match_id,v])=>({participant_id:pid,match_id,resultat:v.resultat,score_dom:v.score_dom??null,score_ext:v.score_ext??null}));
     if (pgRows.length) await sb.from('pronostics_groupes').upsert(pgRows,{onConflict:'participant_id,match_id'});
 
@@ -1528,7 +1565,7 @@ async function savePartial() {
 
     // 5. Élim réels
     const peRows = Object.entries(state.elim)
-      .filter(([,v])=>v.resultat)
+      .filter(([match_id,v])=>v.resultat && !isElimMatchLocked(match_id))
       .map(([match_id,v])=>({participant_id:pid,match_id,resultat:v.resultat,score_dom:v.score_dom??null,score_ext:v.score_ext??null}));
     if (peRows.length) await sb.from('pronostics_elim').upsert(peRows,{onConflict:'participant_id,match_id'});
 
@@ -1561,7 +1598,7 @@ async function submitAll() {
 
     // 1. Pronostics groupes (upsert)
     const pgRows = Object.entries(state.groupes)
-      .filter(([,v])=>v.resultat)
+      .filter(([match_id,v])=>v.resultat && !isGroupMatchLocked(match_id))
       .map(([match_id,v])=>({ participant_id:pid, match_id, resultat:v.resultat, score_dom:v.score_dom??null, score_ext:v.score_ext??null }));
     if (pgRows.length) {
       const { error } = await sb.from('pronostics_groupes').upsert(pgRows, { onConflict:'participant_id,match_id' });
@@ -1597,7 +1634,7 @@ async function submitAll() {
 
     // 5. Pronostics élim réels (upsert)
     const peRows = Object.entries(state.elim)
-      .filter(([,v])=>v.resultat)
+      .filter(([match_id,v])=>v.resultat && !isElimMatchLocked(match_id))
       .map(([match_id,v])=>({ participant_id:pid, match_id, resultat:v.resultat, score_dom:v.score_dom??null, score_ext:v.score_ext??null }));
     if (peRows.length) {
       const { error } = await sb.from('pronostics_elim').upsert(peRows, { onConflict:'participant_id,match_id' });

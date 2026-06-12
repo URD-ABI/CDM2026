@@ -716,7 +716,7 @@ function renderClassement() {
     const rankClass = rank<=3 ? `rank-${rank}` : '';
 
     return `
-    <tr class="classement-row ${isExpanded?'expanded':''}" onclick="toggleDetail('${row.participant_id}','${row.pseudo}')">
+    <tr class="classement-row ${isExpanded?'expanded':''}" onclick="toggleDetail('${row.participant_id}')">
       <td><div class="rank ${rankClass}">${rank}</div></td>
       <td>
         <div class="pseudo-cell">
@@ -740,7 +740,7 @@ function renderClassement() {
   }).join('');
 }
 
-async function toggleDetail(pid, pseudo) {
+async function toggleDetail(pid) {
   // Si déjà ouvert : fermer
   if (expandedRows.has(pid)) {
     expandedRows.delete(pid);
@@ -776,14 +776,14 @@ async function toggleDetail(pid, pseudo) {
   }
 
   try {
-    await loadParticipantDetail(pid, pseudo, innerEl);
+    await loadParticipantDetail(pid, innerEl);
   } catch(e) {
     if (innerEl) innerEl.innerHTML = '<div style="color:var(--red);padding:1rem;font-size:.85rem">Erreur chargement : ' + e.message + '</div>';
     console.error('toggleDetail error:', e);
   }
 }
 
-async function loadParticipantDetail(pid, pseudo, el) {
+async function loadParticipantDetail(pid, el) {
   const [pg, pq, pt, pb, pbo, pe] = await Promise.all([
     sb.from('pronostics_groupes').select('*').eq('participant_id',pid),
     sb.from('pronostics_qualifies').select('*').eq('participant_id',pid),
@@ -1363,7 +1363,7 @@ function renderPronosticsList() {
   document.getElementById('partList').innerHTML = allPart_pronostics.map(p=>{
     const s = scoresMap[p.id];
     const isActive = activePart===p.id;
-    return `<div class="part-card ${isActive?'active':''}" onclick="selectParticipant('${p.id}','${p.pseudo}')">
+    return `<div class="part-card ${isActive?'active':''}" onclick="selectParticipant('${p.id}')">
       ${p.photo_url?`<img src="${p.photo_url}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto .4rem;display:block">`:
         `<div style="width:44px;height:44px;border-radius:50%;background:var(--border);margin:0 auto .4rem;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--muted)">${p.pseudo[0].toUpperCase()}</div>`}
       <div class="part-card-pseudo">${p.pseudo}</div>
@@ -1390,15 +1390,16 @@ function translateSource(src) {
   if (/^L_SF_/.test(src))  return `Perdant SF ${src.replace('L_SF_','')}`;
   return src;
 }
-async function selectParticipant(pid, pseudo) {
+async function selectParticipant(pid) {
   activePart = pid;
   renderPronosticsList();
 
   const detailEl  = document.getElementById('partDetail');
   const sectionsEl= document.getElementById('partSections');
   const titleEl   = document.getElementById('partDetailTitle');
+  const participant = allPart_pronostics.find(p => p.id === pid);
   detailEl.style.display = 'block';
-  titleEl.textContent = pseudo;
+  titleEl.textContent = participant?.pseudo || pid;
   sectionsEl.style.display='block';
   sectionsEl.innerHTML = '<div class="spinner" style="margin:1.5rem auto"></div>';
   detailEl.scrollIntoView({behavior:'smooth', block:'nearest'});

@@ -207,7 +207,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="tab-content" id="tab-verrou">
       <div class="toolbar">
         <span class="toolbar-title">Verrouillage des journées</span>
-        <div style="display:flex;gap:.6rem">
+        <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          <span id="lockConfigStatus" style="font-size:.8rem;color:var(--muted)">Aucune modification en attente</span>
+          <button class="btn btn-gold btn-sm" id="lockDownloadBtn" onclick="downloadConfig()" disabled>â¬‡ TÃ©lÃ©charger config.json</button>
           <button class="btn btn-secondary btn-sm" onclick="toggleGlobalLock(true)">🔒 Tout verrouiller</button>
           <button class="btn btn-secondary btn-sm" onclick="toggleGlobalLock(false)">🔓 Tout déverrouiller</button>
         </div>
@@ -294,6 +296,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let CONFIG       = null;
 let matchsReels  = {};   // match_id → row
 let activePhase  = 'groupes';
+let configDirty = false;
 let pendingScores = {}; // match_id → { score_dom, score_ext, joue }
 
 // ── Auth ─────────────────────────────────────────────
@@ -325,6 +328,7 @@ async function initApp() {
   renderScores('groupes');
   renderJournees();
   updatePhaseInitialeToggle();
+  updateConfigDirtyState();
   loadStats();
 }
 
@@ -534,6 +538,16 @@ function updatePhaseInitialeToggle() {
   if (lbl) lbl.textContent = locked ? 'Verrouillé' : 'Ouvert';
 }
 
+function updateConfigDirtyState() {
+  const status = document.getElementById('lockConfigStatus');
+  const btn = document.getElementById('lockDownloadBtn');
+  if (status) {
+    status.textContent = configDirty ? 'Modifications non exportÃ©es' : 'Aucune modification en attente';
+    status.style.color = configDirty ? 'var(--gold)' : 'var(--muted)';
+  }
+  if (btn) btn.disabled = !configDirty;
+}
+
 async function togglePhaseInitiale() {
   const cur = CONFIG.phase_initiale_verrou?.verrouille || false;
   CONFIG.phase_initiale_verrou.verrouille = !cur;
@@ -585,10 +599,12 @@ function toggleGlobalLock(lock) {
 
 let warnShown = false;
 function warnConfigChange() {
+  configDirty = true;
+  updateConfigDirtyState();
   if (warnShown) return; warnShown=true;
   toast('⚠️ Télécharge et re-pousse config.json pour appliquer les verrouillages','error');
   // Proposer le téléchargement du config.json mis à jour
-  setTimeout(()=>downloadConfig(), 500);
+  toast('âš ï¸ Modifications en attente. TÃ©lÃ©charge config.json puis pousse-le sur GitHub','error');
 }
 
 function downloadConfig() {
@@ -597,6 +613,40 @@ function downloadConfig() {
   a.href = URL.createObjectURL(blob);
   a.download = 'config.json';
   a.click();
+}
+
+// Redefinitions propres pour le mode "batch export" du config.json.
+function updateConfigDirtyState() {
+  const status = document.getElementById('lockConfigStatus');
+  const btn = document.getElementById('lockDownloadBtn');
+  if (status) {
+    status.textContent = configDirty ? 'Modifications non exportees' : 'Aucune modification en attente';
+    status.style.color = configDirty ? 'var(--gold)' : 'var(--muted)';
+  }
+  if (btn) {
+    btn.disabled = !configDirty;
+    btn.textContent = 'Telecharger config.json';
+  }
+}
+
+function warnConfigChange() {
+  configDirty = true;
+  updateConfigDirtyState();
+  if (warnShown) return;
+  warnShown = true;
+  toast('Modifications en attente. Telecharge config.json puis pousse-le sur GitHub','error');
+}
+
+function downloadConfig() {
+  const blob = new Blob([JSON.stringify(CONFIG,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'config.json';
+  a.click();
+  configDirty = false;
+  warnShown = false;
+  updateConfigDirtyState();
+  toast('config.json telecharge. Pense a le pousser sur GitHub');
 }
 
 // ── Moteur de calcul ─────────────────────────────────
