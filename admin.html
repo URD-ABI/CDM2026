@@ -650,6 +650,46 @@ function downloadConfig() {
 }
 
 // ── Moteur de calcul ─────────────────────────────────
+function compareClassementRows(a,b) {
+  const totalDiff = (b.total || 0) - (a.total || 0);
+  if (totalDiff !== 0) return totalDiff;
+
+  const correctDiff = (b.nb_resultats_ok || 0) - (a.nb_resultats_ok || 0);
+  if (correctDiff !== 0) return correctDiff;
+
+  const exactDiff = (b.nb_scores_exacts || 0) - (a.nb_scores_exacts || 0);
+  if (exactDiff !== 0) return exactDiff;
+
+  return (a.pseudo || '').localeCompare(b.pseudo || '', 'fr', { sensitivity:'base' });
+}
+
+function buildClassementPublicationRows(participants, scores, previousPublicationRows) {
+  const participantMap = Object.fromEntries((participants || []).map(p => [p.id, p]));
+  const previousMap = Object.fromEntries((previousPublicationRows || []).map(row => [row.participant_id, row]));
+  const rows = (scores || [])
+    .map(score => ({
+      ...score,
+      pseudo: participantMap[score.participant_id]?.pseudo || '?',
+    }))
+    .sort(compareClassementRows);
+
+  let currentRank = 1;
+  const publishedAt = new Date().toISOString();
+
+  return rows.map((row, index) => {
+    if (index > 0 && rows[index].total < rows[index - 1].total) currentRank = index + 1;
+    const previousRank = previousMap[row.participant_id]?.current_rank ?? currentRank;
+
+    return {
+      participant_id: row.participant_id,
+      current_rank: currentRank,
+      previous_rank: previousRank,
+      rank_delta: previousRank - currentRank,
+      published_at: publishedAt,
+    };
+  });
+}
+
 async function runEngine() {
   const btn = document.getElementById('engineBtn');
   btn.disabled=true; btn.textContent='⏳ Calcul en cours…';
@@ -661,14 +701,24 @@ async function runEngine() {
     progressEl.style.width=p+'%'; statusEl.textContent=msg;
   };
 
+  let previousPublicationRows = [];
+
   try {
     log('Chargement des données…','info');
     setProgress(5,'Chargement…');
 
     // 1. Charger participants
     const {data:participants} = await sb.from('participants').select('id,pseudo');
-    log(`${participants.length} participants chargés`,'info');
-    setProgress(15,'Participants chargés');
+    const previousPublicationResult = await sb
+      .from('classement_publication')
+      .select('participant_id,current_rank');
+    if (previousPublicationResult.error) throw previousPublicationResult.error;
+    previousPublicationRows = previousPublicationResult.data || [];
+    log(`${participants.length} participants charges`,'info');
+    setProgress(15,'Participants charges');
+    log(`${previousPublicationRows.length} positions publiees chargees`,'info');
+    setProgress(20,'Classement publie charge');
+
 
     // 2. Charger matchs réels
     const {data:mReels} = await sb.from('matchs_reels').select('*');
@@ -834,9 +884,20 @@ async function runEngine() {
     const {error} = await sb.from('scores_calcules').upsert(results,{onConflict:'participant_id'});
     if (error) throw error;
 
-    setProgress(100,'✓ Terminé');
-    log(`✓ ${results.length} scores mis à jour en base`,'ok');
-    toast(`✓ Points recalculés pour ${results.length} participants`);
+    log(results.length + ' scores mis a jour en base','ok');
+
+    setProgress(90,'Publication du classement');
+
+    const publicationRows = buildClassementPublicationRows(participants, results, previousPublicationRows);
+    log(`${publicationRows.length} deltas de classement calcules`,'info');
+    const publicationResult = await sb
+      .from('classement_publication')
+      .upsert(publicationRows,{onConflict:'participant_id'});
+    if (publicationResult.error) throw publicationResult.error;
+
+    setProgress(100,'Termine');
+    log('Publication du classement mise a jour','ok');
+    toast(`Points et evolution du classement publies pour ${results.length} participants`);
 
   } catch(e) {
     log('ERREUR : '+e.message,'err');
@@ -1058,3 +1119,4 @@ init();
 </script>
 </body>
 </html>
+

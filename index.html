@@ -135,6 +135,15 @@ body {
 .pseudo-cell { font-weight:600; font-size:.95rem; display:flex; align-items:center; gap:.6rem; }
 .pseudo-arrow { font-size:.7rem; color:var(--muted); transition:transform .2s; }
 .pseudo-arrow.open { transform:rotate(90deg); }
+.rank-delta {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:1.8rem; padding:.15rem .4rem; border-radius:999px;
+  border:1px solid var(--border); background:var(--surface);
+  font-size:.72rem; font-weight:700; line-height:1; flex-shrink:0;
+}
+.rank-delta.up { color:var(--green); border-color:rgba(0,197,90,.35); background:rgba(0,197,90,.08); }
+.rank-delta.down { color:var(--red); border-color:rgba(232,69,69,.35); background:rgba(232,69,69,.08); }
+.rank-delta.neutral { color:var(--muted); }
 
 /* Score total */
 .score-total {
@@ -615,6 +624,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let CONFIG = null;
 let allParticipants = [];
 let allScores       = [];
+let allClassementPublication = [];
 let allMatchsReels  = [];
 let expandedRows    = new Set();
 let activePhase     = 'all';
@@ -669,13 +679,18 @@ function switchTab(id, el) {
 
 // ── Classement ────────────────────────────────────────
 async function loadClassement() {
-  const [ {data:parts}, {data:scores} ] = await Promise.all([
+  const [ partsRes, scoresRes, publicationRes ] = await Promise.all([
     sb.from('participants').select('id,pseudo,prenom,photo_url'),
-    sb.from('scores_calcules').select('*')
+    sb.from('scores_calcules').select('*'),
+    sb.from('classement_publication').select('*')
   ]);
 
-  allParticipants = parts || [];
-  allScores       = scores || [];
+  if (partsRes.error) throw partsRes.error;
+  if (scoresRes.error) throw scoresRes.error;
+
+  allParticipants = partsRes.data || [];
+  allScores       = scoresRes.data || [];
+  allClassementPublication = publicationRes.error ? [] : (publicationRes.data || []);
 
   document.getElementById('classementLoading').style.display='none';
   document.getElementById('classementContent').style.display='block';
@@ -692,13 +707,33 @@ function buildStatsTags(row) {
          '<span class="sub-tag">Scores exacts <span>' + exact + '</span></span>';
 }
 
+function compareClassementRows(a,b) {
+  const totalDiff = (b.total || 0) - (a.total || 0);
+  if (totalDiff !== 0) return totalDiff;
+
+  const correctDiff = (b.nb_resultats_ok || 0) - (a.nb_resultats_ok || 0);
+  if (correctDiff !== 0) return correctDiff;
+
+  const exactDiff = (b.nb_scores_exacts || 0) - (a.nb_scores_exacts || 0);
+  if (exactDiff !== 0) return exactDiff;
+
+  return (a.pseudo || '').localeCompare(b.pseudo || '', 'fr', { sensitivity:'base' });
+}
+
+function formatRankDelta(rankDelta) {
+  if (rankDelta > 0) return '+' + rankDelta;
+  if (rankDelta < 0) return String(rankDelta);
+  return '=';
+}
+
 function renderClassement() {
   const pMap = Object.fromEntries(allParticipants.map(p=>[p.id,p]));
+  const publicationMap = Object.fromEntries(allClassementPublication.map(row=>[row.participant_id,row]));
 
   // Joindre scores + pseudos, trier par total desc
   const rows = allScores
     .map(s=>({ ...s, pseudo: pMap[s.participant_id]?.pseudo || '?', prenom: pMap[s.participant_id]?.prenom || null, photo_url: pMap[s.participant_id]?.photo_url || null }))
-    .sort((a,b)=>b.total-a.total);
+    .sort(compareClassementRows);
 
   const tbody = document.getElementById('classementBody');
 
@@ -714,6 +749,8 @@ function renderClassement() {
     const id = 'row_'+row.participant_id;
     const isExpanded = expandedRows.has(row.participant_id);
     const rankClass = rank<=3 ? `rank-${rank}` : '';
+    const rankDelta = publicationMap[row.participant_id]?.rank_delta ?? 0;
+    const rankDeltaClass = rankDelta > 0 ? 'up' : rankDelta < 0 ? 'down' : 'neutral';
 
     return `
     <tr class="classement-row ${isExpanded?'expanded':''}" onclick="toggleDetail('${row.participant_id}')">
@@ -721,7 +758,8 @@ function renderClassement() {
       <td>
         <div class="pseudo-cell">
           <span class="pseudo-arrow ${isExpanded?'open':''}">▶</span>
-          ${row.pseudo}
+          <span>${row.pseudo}</span>
+          <span class="rank-delta ${rankDeltaClass}">${formatRankDelta(rankDelta)}</span>
         </div>
         <div class="sub-scores" style="margin-top:.3rem">
           ${buildStatsTags(row)}
@@ -1188,6 +1226,15 @@ function buildPhaseFilter() {
   ).join('');
 }
 
+function buildBestThirdGroups(groups, standings) {
+  const rankedThirds = groups
+    .filter(groupId => standings[groupId]?.[2] && standings[groupId].some(team => team.j > 0))
+    .map(groupId => ({ groupId, ...standings[groupId][2] }))
+    .sort((a,b) => b.pts-a.pts || b.bd-a.bd || b.bp-a.bp);
+
+  return new Set(rankedThirds.slice(0,8).map(team => team.groupId));
+}
+
 function renderMatchs(phase, btnEl) {
   activePhase = phase;
   document.querySelectorAll('.phase-btn').forEach(b=>b.classList.remove('active'));
@@ -1222,11 +1269,7 @@ function renderMatchs(phase, btnEl) {
     });
 
     // Meilleurs 3es — depuis les groupes ayant au moins 1 match joué
-    const real3rds = groups
-      .filter(g => standings[g]?.[2] && standings[g].some(t => t.j > 0))
-      .map(g => ({g, ...standings[g][2]}))
-      .sort((a,b) => b.pts-a.pts || b.bd-a.bd || b.bp-a.bp);
-    const best8groups = new Set(real3rds.slice(0,8).map(t=>t.g));
+    const best8groups = buildBestThirdGroups(groups, standings);
 
     if (phase==='all') {
       // En vue "Tous", afficher groupes en premier puis le reste
@@ -1810,6 +1853,9 @@ function setupRealtime() {
     } else {
       document.getElementById('lastUpdate').textContent = 'Aucun score saisi';
     }
+    })
+    .on('postgres_changes', { event:'*', schema:'public', table:'classement_publication' }, async ()=>{
+      await loadClassement();
     })
     .on('postgres_changes', { event:'*', schema:'public', table:'matchs_reels' }, async ()=>{
       await loadMatchs();
