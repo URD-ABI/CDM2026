@@ -511,10 +511,13 @@ async function saveAllPending() {
   for (const id of ids) {
     const r       = matchsReels[id]||{};
     const pending = pendingScores[id]||{};
+    const groupMatch = Object.values(CONFIG.matchs_groupes || {})
+      .flat()
+      .find(m => m.id === id);
     const payload = {
       match_id:   id,
-      equipe_dom: r.equipe_dom||null,
-      equipe_ext: r.equipe_ext||null,
+      equipe_dom: pending.equipe_dom || r.equipe_dom || groupMatch?.dom || null,
+      equipe_ext: pending.equipe_ext || r.equipe_ext || groupMatch?.ext || null,
       score_dom:  pending.score_dom ?? r.score_dom ?? null,
       score_ext:  pending.score_ext ?? r.score_ext ?? null,
       joue:       pending.joue !== undefined ? pending.joue : (r.joue||false),
@@ -921,7 +924,11 @@ function computeRealQualifies(reelsMap) {
     CONFIG.groupes[g].equipes.forEach(code=>{ teams[code]={pts:0,bd:0,bp:0}; });
     matchs.forEach(m=>{
       const r=reelsMap[m.id]; if(!r?.joue) return;
-      const {score_dom:sd,score_ext:se,equipe_dom:ed,equipe_ext:ee}=r;
+      const sd = r.score_dom;
+      const se = r.score_ext;
+      const ed = r.equipe_dom || m.dom;
+      const ee = r.equipe_ext || m.ext;
+      if(!teams[ed]||!teams[ee]) return;
       if(sd>se){teams[ed].pts+=3;teams[ed].bp+=sd;teams[ed].bd+=(sd-se);teams[ee].bp+=se;teams[ee].bd-=(sd-se);}
       else if(sd<se){teams[ee].pts+=3;teams[ee].bp+=se;teams[ee].bd+=(se-sd);teams[ed].bp+=sd;teams[ed].bd-=(se-sd);}
       else{teams[ed].pts+=1;teams[ee].pts+=1;teams[ed].bp+=sd;teams[ee].bp+=se;}

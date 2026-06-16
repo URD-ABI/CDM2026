@@ -1254,7 +1254,10 @@ function renderMatchs(phase, btnEl) {
       CONFIG.groupes[g].equipes.forEach(c=>{ teams[c]={pts:0,j:0,g:0,n:0,d:0,bp:0,bc:0,bd:0}; });
       matchs.forEach(m=>{
         const r=reels[m.id]; if(!r?.joue) return;
-        const {score_dom:sd,score_ext:se,equipe_dom:ed,equipe_ext:ee}=r;
+        const sd = r.score_dom;
+        const se = r.score_ext;
+        const ed = r.equipe_dom || m.dom;
+        const ee = r.equipe_ext || m.ext;
         if(!teams[ed]||!teams[ee]) return;
         teams[ed].j++; teams[ee].j++;
         teams[ed].bp+=sd; teams[ed].bc+=se; teams[ed].bd+=(sd-se);
