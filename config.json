@@ -1416,7 +1416,7 @@
       "date_verrou": null
     },
     "I_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "I_J2": {
@@ -1428,7 +1428,7 @@
       "date_verrou": null
     },
     "J_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "J_J2": {
