@@ -726,6 +726,10 @@ function formatRankDelta(rankDelta) {
   return '=';
 }
 
+function isPublicPronoVisible(realMatch) {
+  return !!(realMatch?.joue || realMatch?.verrouille);
+}
+
 function renderClassement() {
   const pMap = Object.fromEntries(allParticipants.map(p=>[p.id,p]));
   const publicationMap = Object.fromEntries(allClassementPublication.map(row=>[row.participant_id,row]));
@@ -857,8 +861,9 @@ async function loadParticipantDetail(pid, el) {
       const dom = CONFIG.equipes.find(e=>e.code===m.dom);
       const ext = CONFIG.equipes.find(e=>e.code===m.ext);
       const flagLine = `${flag(dom)} – ${flag(ext)}`;
+      const isVisible = isPublicPronoVisible(r);
 
-      if (!r?.joue) {
+      if (!isVisible) {
         html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
         return;
       }
@@ -995,7 +1000,8 @@ async function loadParticipantDetail(pid, el) {
     matchs.forEach((m,i)=>{
       const b=pronos_b[m.id]; if(!b) return;
       const r=reels_map[m.id];
-      if (!r?.joue) {
+      const isVisible = isPublicPronoVisible(r);
+      if (!isVisible) {
         html += `<div class="detail-match"><span class="match-teams">${translateSource(m.dom_source)} – ${translateSource(m.ext_source)}</span><span class="match-prono pending">—</span></div>`;
         return;
       }
@@ -1045,12 +1051,13 @@ async function loadParticipantDetail(pid, el) {
     (CONFIG.bracket_eliminatoire[tour]||[]).forEach((m,i)=>{
       const p  = pronos_e[m.id];
       const r  = reels_map[m.id];
-      if (!r?.joue && !p) return; // masquer si pas joué et pas pronostiqué
+      const isVisible = isPublicPronoVisible(r);
+      if (!isVisible && !p) return; // masquer si non révélé et pas pronostiqué
       hasElim = true;
       const dom = r?.equipe_dom ? CONFIG.equipes.find(e=>e.code===r.equipe_dom) : null;
       const ext = r?.equipe_ext ? CONFIG.equipes.find(e=>e.code===r.equipe_ext) : null;
       const flagLine = dom||ext ? `${flag(dom)||'?'} – ${flag(ext)||'?'}` : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
-      if (!r?.joue) {
+      if (!isVisible) {
         html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
         return;
       }
@@ -1477,8 +1484,7 @@ async function selectParticipant(pid) {
     matchs.forEach(m=>{
       const p = pronos_g[m.id];
       const r = reels_map[m.id];
-      // Afficher le pronostic seulement si match joué
-      if (!r?.joue || !p) return;
+      if (!isPublicPronoVisible(r) || !p) return;
       const sd = p.score_dom??0, se = p.score_ext??0;
       const ed = m.dom, ee = m.ext;
       teams[ed].j++; teams[ee].j++;
@@ -1520,15 +1526,26 @@ async function selectParticipant(pid) {
       const p   = pronos_g[m.id];
       const dom = CONFIG.equipes.find(e=>e.code===m.dom);
       const ext = CONFIG.equipes.find(e=>e.code===m.ext);
+      const isVisible = isPublicPronoVisible(r);
 
-      if (!r?.joue) {
-        // Match pas encore joué → on cache le pronostic
+      if (!isVisible) {
         let statusHtml;
         if (r?.verrouille) statusHtml = `<div class="gm-score pending">🔒</div>`;
         else statusHtml = `<div class="gm-score pending">vs</div>`;
         return `<div class="groupe-match-row" style="opacity:.5">
           <div class="gm-team">${dom ? teamDisplay(dom) : m.dom}</div>
           ${statusHtml}
+          <div class="gm-team right">${ext ? teamDisplay(ext) : m.ext}</div>
+        </div>`;
+      }
+
+      if (!r?.joue) {
+        const neutralScore = p
+          ? `<div class="gm-score" style="font-size:.9rem">${p.score_dom??'?'}–${p.score_ext??'?'}</div>`
+          : `<div class="gm-score pending" style="font-size:.7rem">—</div>`;
+        return `<div class="groupe-match-row">
+          <div class="gm-team">${dom ? teamDisplay(dom) : m.dom}</div>
+          ${neutralScore}
           <div class="gm-team right">${ext ? teamDisplay(ext) : m.ext}</div>
         </div>`;
       }
@@ -1557,17 +1574,17 @@ async function selectParticipant(pid) {
     }).join('');
 
     // Classement calculé depuis les pronostics révélés
-    const anyMatchPlayed = matchs.some(m=>reels_map[m.id]?.joue && pronos_g[m.id]);
+    const anyMatchVisible = matchs.some(m=>isPublicPronoVisible(reels_map[m.id]) && pronos_g[m.id]);
     const standingRows = standing.map((t,i)=>{
       const team = CONFIG.equipes.find(e=>e.code===t.code);
-      const showBadge = anyMatchPlayed;
+      const showBadge = anyMatchVisible;
       const rankClass = showBadge&&i<2?'top':(showBadge&&i===2&&best8.has(g)?'third':'');
       const badge = showBadge&&i<2?'<span class="gs-q q12">Q</span>':(showBadge&&i===2&&best8.has(g)?'<span class="gs-q q3">3e</span>':'');
       return `<div class="gs-row">
         <div class="gs-rank ${rankClass}">${i+1}</div>
         <div class="gs-team">${team ? teamDisplay(team) : t.code} ${badge}</div>
-        <div class="gs-diff" style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${anyMatchPlayed?((t.bd>0?'+':'')+t.bd):'–'}</div>
-        <div class="gs-pts">${anyMatchPlayed?t.pts:'–'}</div>
+        <div class="gs-diff" style="color:${t.bd>0?'var(--green)':t.bd<0?'var(--red)':'var(--muted)'}">${anyMatchVisible?((t.bd>0?'+':'')+t.bd):'–'}</div>
+        <div class="gs-pts">${anyMatchVisible?t.pts:'–'}</div>
       </div>`;
     }).join('');
 
@@ -1593,9 +1610,9 @@ async function selectParticipant(pid) {
       const r   = reels_map[m.id];
       const ms  = CONFIG.bracket_eliminatoire[tour]||[];
       const lbl = `${brLabels[tour]}${ms.length>1?' '+(i+1):''}`;
+      const isVisible = isPublicPronoVisible(r);
 
-      // Masqué tant que le match n'est pas joué
-      if (!r?.joue) {
+      if (!isVisible) {
         let badgeHtml='', scoreHtml=`<div class="score pending">vs</div>`;
         if(r?.verrouille){ badgeHtml=`<div class="live-badge">VERROUILLÉ</div>`; }
         const dSrc = translateSource(m.dom_source);
@@ -1606,6 +1623,22 @@ async function selectParticipant(pid) {
           <div class="teams">
             <div class="team" style="font-size:.78rem;color:var(--muted)">${dSrc}</div>
             ${scoreHtml}
+            <div class="team right" style="font-size:.78rem;color:var(--muted)">${eSrc}</div>
+          </div>
+        </div>`;
+        return;
+      }
+
+      if (!r?.joue) {
+        const pronoTeam = b ? CONFIG.equipes.find(e=>e.code===b.equipe) : null;
+        const pronoLabel = pronoTeam ? `${pronoTeam.drapeau} ${pronoTeam.nom}` : (b?.equipe||'—');
+        const dSrc = translateSource(m.dom_source);
+        const eSrc = translateSource(m.ext_source);
+        html += `<div class="match-card">
+          <div class="group-label">${lbl} · ${pronoLabel}</div>
+          <div class="teams">
+            <div class="team" style="font-size:.78rem;color:var(--muted)">${dSrc}</div>
+            <div class="score pending">vs</div>
             <div class="team right" style="font-size:.78rem;color:var(--muted)">${eSrc}</div>
           </div>
         </div>`;
