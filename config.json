@@ -1440,7 +1440,7 @@
       "date_verrou": null
     },
     "K_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "K_J2": {
@@ -1452,7 +1452,7 @@
       "date_verrou": null
     },
     "L_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "L_J2": {
