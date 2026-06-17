@@ -726,8 +726,16 @@ function formatRankDelta(rankDelta) {
   return '=';
 }
 
-function isPublicPronoVisible(realMatch) {
-  return !!(realMatch?.joue || realMatch?.verrouille);
+function isPublicMatchLocked(matchDef, realMatch) {
+  return !!(
+    realMatch?.verrouille ||
+    CONFIG.phase_initiale_verrou?.verrouille ||
+    (matchDef?.journee && CONFIG.journees?.[matchDef.journee]?.verrouille)
+  );
+}
+
+function isPublicPronoVisible(matchDef, realMatch) {
+  return !!(realMatch?.joue || isPublicMatchLocked(matchDef, realMatch));
 }
 
 function renderClassement() {
@@ -861,7 +869,7 @@ async function loadParticipantDetail(pid, el) {
       const dom = CONFIG.equipes.find(e=>e.code===m.dom);
       const ext = CONFIG.equipes.find(e=>e.code===m.ext);
       const flagLine = `${flag(dom)} – ${flag(ext)}`;
-      const isVisible = isPublicPronoVisible(r);
+      const isVisible = isPublicPronoVisible(m, r);
 
       if (!isVisible) {
         html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
@@ -1000,7 +1008,7 @@ async function loadParticipantDetail(pid, el) {
     matchs.forEach((m,i)=>{
       const b=pronos_b[m.id]; if(!b) return;
       const r=reels_map[m.id];
-      const isVisible = isPublicPronoVisible(r);
+      const isVisible = isPublicPronoVisible(m, r);
       if (!isVisible) {
         html += `<div class="detail-match"><span class="match-teams">${translateSource(m.dom_source)} – ${translateSource(m.ext_source)}</span><span class="match-prono pending">—</span></div>`;
         return;
@@ -1051,7 +1059,7 @@ async function loadParticipantDetail(pid, el) {
     (CONFIG.bracket_eliminatoire[tour]||[]).forEach((m,i)=>{
       const p  = pronos_e[m.id];
       const r  = reels_map[m.id];
-      const isVisible = isPublicPronoVisible(r);
+      const isVisible = isPublicPronoVisible(m, r);
       if (!isVisible && !p) return; // masquer si non révélé et pas pronostiqué
       hasElim = true;
       const dom = r?.equipe_dom ? CONFIG.equipes.find(e=>e.code===r.equipe_dom) : null;
@@ -1484,7 +1492,7 @@ async function selectParticipant(pid) {
     matchs.forEach(m=>{
       const p = pronos_g[m.id];
       const r = reels_map[m.id];
-      if (!isPublicPronoVisible(r) || !p) return;
+      if (!isPublicPronoVisible(m, r) || !p) return;
       const sd = p.score_dom??0, se = p.score_ext??0;
       const ed = m.dom, ee = m.ext;
       teams[ed].j++; teams[ee].j++;
@@ -1526,7 +1534,7 @@ async function selectParticipant(pid) {
       const p   = pronos_g[m.id];
       const dom = CONFIG.equipes.find(e=>e.code===m.dom);
       const ext = CONFIG.equipes.find(e=>e.code===m.ext);
-      const isVisible = isPublicPronoVisible(r);
+      const isVisible = isPublicPronoVisible(m, r);
 
       if (!isVisible) {
         let statusHtml;
@@ -1574,7 +1582,7 @@ async function selectParticipant(pid) {
     }).join('');
 
     // Classement calculé depuis les pronostics révélés
-    const anyMatchVisible = matchs.some(m=>isPublicPronoVisible(reels_map[m.id]) && pronos_g[m.id]);
+    const anyMatchVisible = matchs.some(m=>isPublicPronoVisible(m, reels_map[m.id]) && pronos_g[m.id]);
     const standingRows = standing.map((t,i)=>{
       const team = CONFIG.equipes.find(e=>e.code===t.code);
       const showBadge = anyMatchVisible;
@@ -1610,7 +1618,7 @@ async function selectParticipant(pid) {
       const r   = reels_map[m.id];
       const ms  = CONFIG.bracket_eliminatoire[tour]||[];
       const lbl = `${brLabels[tour]}${ms.length>1?' '+(i+1):''}`;
-      const isVisible = isPublicPronoVisible(r);
+      const isVisible = isPublicPronoVisible(m, r);
 
       if (!isVisible) {
         let badgeHtml='', scoreHtml=`<div class="score pending">vs</div>`;
