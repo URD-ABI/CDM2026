@@ -345,10 +345,21 @@ function log(msg, type='info') {
 }
 function getTeam(code) { return CONFIG.equipes.find(e=>e.code===code); }
 function getLabel(code) { const t=getTeam(code); return t?`${t.drapeau} ${t.nom}`:code; }
+async function fetchAllRows(table, columns='*', pageSize=1000) {
+  const rows = [];
+  for (let from = 0; ; from += pageSize) {
+    const to = from + pageSize - 1;
+    const { data, error } = await sb.from(table).select(columns).range(from, to);
+    if (error) throw error;
+    rows.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+  return rows;
+}
 
 // ── Matchs réels ─────────────────────────────────────
 async function loadMatchsReels() {
-  const { data } = await sb.from('matchs_reels').select('*');
+  const data = await fetchAllRows('matchs_reels');
   matchsReels = {};
   (data||[]).forEach(r=>{ matchsReels[r.match_id]=r; });
 }
@@ -724,37 +735,37 @@ async function runEngine() {
 
 
     // 2. Charger matchs réels
-    const {data:mReels} = await sb.from('matchs_reels').select('*');
+    const mReels = await fetchAllRows('matchs_reels');
     const reelsMap = Object.fromEntries((mReels||[]).map(m=>[m.match_id,m]));
     log(`${(mReels||[]).length} matchs réels chargés`,'info');
     setProgress(25,'Matchs chargés');
 
     // 3. Charger tous les pronostics
     const [pg,pq,pt,pb,pbo,pe] = await Promise.all([
-      sb.from('pronostics_groupes').select('*'),
-      sb.from('pronostics_qualifies').select('*'),
-      sb.from('pronostics_meilleurs_tiers').select('*'),
-      sb.from('pronostics_bracket').select('*'),
-      sb.from('pronostics_bonus').select('*'),
-      sb.from('pronostics_elim').select('*'),
+      fetchAllRows('pronostics_groupes'),
+      fetchAllRows('pronostics_qualifies'),
+      fetchAllRows('pronostics_meilleurs_tiers'),
+      fetchAllRows('pronostics_bracket'),
+      fetchAllRows('pronostics_bonus'),
+      fetchAllRows('pronostics_elim'),
     ]);
     setProgress(40,'Pronostics chargés');
 
     // Indexer par participant
     const byPart = (rows,key='participant_id') => {
       const map={};
-      (rows.data||[]).forEach(r=>{ if(!map[r[key]])map[r[key]]=[]; map[r[key]].push(r); });
+      (rows||[]).forEach(r=>{ if(!map[r[key]])map[r[key]]=[]; map[r[key]].push(r); });
       return map;
     };
     const byPartMatch = (rows) => {
       const map={};
-      (rows.data||[]).forEach(r=>{ if(!map[r.participant_id])map[r.participant_id]={}; map[r.participant_id][r.match_id||r.groupe_id||r.question_id||r.slot_id]=r; });
+      (rows||[]).forEach(r=>{ if(!map[r.participant_id])map[r.participant_id]={}; map[r.participant_id][r.match_id||r.groupe_id||r.question_id||r.slot_id]=r; });
       return map;
     };
 
     const pgMap  = byPartMatch(pg);   // groupes matchs
     const pqMap  = byPartMatch(pq);   // qualifiés
-    const ptMap  = Object.fromEntries((pt.data||[]).map(r=>[r.participant_id,r.groupes||[]]));
+    const ptMap  = Object.fromEntries((pt||[]).map(r=>[r.participant_id,r.groupes||[]]));
     const pbMap  = byPartMatch(pb);   // bracket
     const pboMap = byPartMatch(pbo);  // bonus
     const peMap  = byPartMatch(pe);   // elim matchs
@@ -949,10 +960,10 @@ function computeRealTiers(reelsMap, realQualifies) {
 
 // ── Stats tab ─────────────────────────────────────────
 async function loadStats() {
-  const [{data:parts},{data:scores},{data:pg}] = await Promise.all([
+  const [{data:parts},{data:scores},pg] = await Promise.all([
     sb.from('participants').select('id,pseudo,prenom,photo_url,created_at'),
     sb.from('scores_calcules').select('*'),
-    sb.from('pronostics_groupes').select('participant_id'),
+    fetchAllRows('pronostics_groupes', 'participant_id'),
   ]);
 
   document.getElementById('statsLoading').style.display='none';
