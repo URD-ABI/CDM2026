@@ -720,6 +720,20 @@ function compareClassementRows(a,b) {
   return (a.pseudo || '').localeCompare(b.pseudo || '', 'fr', { sensitivity:'base' });
 }
 
+function computeClassementRanks(rows) {
+  let currentRank = 1;
+  return rows.map((row, index) => {
+    if (index === 0) return currentRank;
+    const prev = rows[index - 1];
+    const sameRank =
+      (row.total || 0) === (prev.total || 0) &&
+      (row.nb_resultats_ok || 0) === (prev.nb_resultats_ok || 0) &&
+      (row.nb_scores_exacts || 0) === (prev.nb_scores_exacts || 0);
+    if (!sameRank) currentRank = index + 1;
+    return currentRank;
+  });
+}
+
 function formatRankDelta(rankDelta) {
   if (rankDelta > 0) return '+' + rankDelta;
   if (rankDelta < 0) return String(rankDelta);
@@ -755,9 +769,9 @@ function renderClassement() {
   }
 
   // Gérer les ex-aequo
-  let rank=1;
+  const ranks = computeClassementRanks(rows);
   tbody.innerHTML = rows.map((row,i)=>{
-    if (i>0 && rows[i].total < rows[i-1].total) rank=i+1;
+    const rank = ranks[i];
     const id = 'row_'+row.participant_id;
     const isExpanded = expandedRows.has(row.participant_id);
     const rankClass = rank<=3 ? `rank-${rank}` : '';
