@@ -919,6 +919,13 @@ async function loadParticipantDetail(pid, el) {
   html += `</div>`;
 
   // Reconstruit q32 depuis les pronostics du participant (pour index.html)
+  function getPredictedBestThirdTeamCode(groupId, pronos_q) {
+    const q = pronos_q[groupId] || {};
+    const equipes = CONFIG.groupes[groupId]?.equipes || [];
+    const already = [q.equipe_1er, q.equipe_2eme].filter(Boolean);
+    return equipes.find(e => !already.includes(e)) || null;
+  }
+
   function buildQ32Snapshot(pq, tiers_list) {
     const q32 = [];
     const groups = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
@@ -928,10 +935,7 @@ async function loadParticipantDetail(pid, el) {
       if (q.equipe_2eme) q32.push({code:q.equipe_2eme, source:`2${g}`});
     }
     for (const g of (tiers_list||[])) {
-      const q = pq[g]||{};
-      const equipes = CONFIG.groupes[g]?.equipes||[];
-      const already = [q.equipe_1er, q.equipe_2eme].filter(Boolean);
-      const tiers = equipes.find(e=>!already.includes(e));
+      const tiers = getPredictedBestThirdTeamCode(g, pq);
       if (tiers) q32.push({code:tiers, source:`T3_${g}`});
     }
     return q32;
@@ -1182,21 +1186,8 @@ async function loadParticipantDetail(pid, el) {
       <span class="match-teams" style="color:var(--text);font-weight:600">3es</span>
       <span style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center">`;
     tiers.forEach(g=>{
-      const rq=realQ[g];
-      const matchs=CONFIG.matchs_groupes[g]||[];
-      const teams={};
-      CONFIG.groupes[g].equipes.forEach(c=>{teams[c]={pts:0,bd:0,bp:0};});
-      matchs.forEach(m=>{
-        const r=reels_map[m.id]; if(!r?.joue) return;
-        const sd=r.score_dom,se=r.score_ext,ed=r.equipe_dom||m.dom,ee=r.equipe_ext||m.ext;
-        if(!teams[ed]||!teams[ee]) return;
-        teams[ed].bp+=sd; teams[ed].bd+=(sd-se);
-        teams[ee].bp+=se; teams[ee].bd+=(se-sd);
-        if(sd>se)teams[ed].pts+=3; else if(sd<se)teams[ee].pts+=3; else{teams[ed].pts+=1;teams[ee].pts+=1;}
-      });
-      const ranked=Object.entries(teams).sort((a,b)=>b[1].pts-a[1].pts||b[1].bd-a[1].bd||b[1].bp-a[1].bp);
-      const tiersCode=ranked[2]?.[0];
-      const t3=tiersCode?CONFIG.equipes.find(e=>e.code===tiersCode):null;
+      const tiersCode = getPredictedBestThirdTeamCode(g, pronos_q);
+      const t3 = tiersCode ? CONFIG.equipes.find(e=>e.code===tiersCode) : null;
       const status=realTiers.length>0?(realTiers.includes(g)?'ok':'nok'):'pending';
       const pts_tiers=status==='ok'?pts_conf.meilleur_tiers_correct:0;
       html += `<span class="match-prono ${status}" title="Groupe ${g}">${flag(t3)||g}</span>`;
