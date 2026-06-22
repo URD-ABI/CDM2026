@@ -1372,7 +1372,7 @@
       "date_verrou": null
     },
     "E_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "E_J3": {
@@ -1384,7 +1384,7 @@
       "date_verrou": null
     },
     "F_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "F_J3": {
@@ -1396,7 +1396,7 @@
       "date_verrou": null
     },
     "G_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "G_J3": {
@@ -1408,7 +1408,7 @@
       "date_verrou": null
     },
     "H_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "H_J3": {
@@ -1420,7 +1420,7 @@
       "date_verrou": null
     },
     "I_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "I_J3": {
@@ -1432,7 +1432,7 @@
       "date_verrou": null
     },
     "J_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "J_J3": {
