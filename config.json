@@ -84,7 +84,7 @@
       "type": "joueur",
       "points": 5,
       "active": true,
-      "verrouille": true
+      "verrouille": false
     },
     {
       "id": "b8",
