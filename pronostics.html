@@ -616,8 +616,39 @@ function getElimMatchById(matchId) {
   return null;
 }
 
+function normalizeLockExceptionEntry(entry) {
+  if (Array.isArray(entry)) return { phase_initiale: false, journees: entry.filter(Boolean) };
+  if (entry && typeof entry === 'object') {
+    return {
+      phase_initiale: !!entry.phase_initiale,
+      journees: Array.isArray(entry.journees) ? entry.journees.filter(Boolean) : [],
+    };
+  }
+  return { phase_initiale: false, journees: [] };
+}
+
+function getParticipantLockException(currentParticipant=participant) {
+  const exceptions = CONFIG.exceptions_verrou || {};
+  const byPseudo = exceptions.pseudos?.[currentParticipant?.pseudo];
+  const byParticipantId = exceptions.participant_ids?.[currentParticipant?.id];
+  return normalizeLockExceptionEntry(byPseudo ?? byParticipantId);
+}
+
+function hasConfiguredLockExceptions() {
+  const exceptions = CONFIG.exceptions_verrou || {};
+  return Object.keys(exceptions.pseudos || {}).length > 0 || Object.keys(exceptions.participant_ids || {}).length > 0;
+}
+
+function canParticipantAccessLockedPronostics(currentParticipant=participant) {
+  const exception = getParticipantLockException(currentParticipant);
+  return !!(exception.phase_initiale || exception.journees.length);
+}
+
 function isJourneeLocked(journeeId) {
-  return !!(CONFIG.phase_initiale_verrou?.verrouille || (journeeId && CONFIG.journees?.[journeeId]?.verrouille));
+  const exception = getParticipantLockException();
+  if (journeeId && exception.journees.includes(journeeId)) return false;
+  if (CONFIG.phase_initiale_verrou?.verrouille && !exception.phase_initiale) return true;
+  return !!(journeeId && CONFIG.journees?.[journeeId]?.verrouille);
 }
 
 function isGroupMatchLocked(matchId) {
@@ -664,7 +695,7 @@ async function init() {
     } catch(e2) { BEST_THIRDS = {}; }
 
     // Vérifier verrouillage global
-    if (CONFIG.phase_initiale_verrou?.verrouille) {
+    if (CONFIG.phase_initiale_verrou?.verrouille && !hasConfiguredLockExceptions()) {
       document.getElementById('loadingScreen').style.display='none';
       document.getElementById('lockedScreen').style.display='block';
       return;
@@ -748,6 +779,12 @@ async function doLogin() {
     const { data: created, error } = await sb.from('participants').insert({ pseudo, pin_hash: pinHash }).select('id').single();
     if (error) { err.textContent='Erreur lors de la création du compte : '+error.message; err.style.display='block'; return; }
     participant = { id: created.id, pseudo };
+  }
+
+  if (CONFIG.phase_initiale_verrou?.verrouille && !canParticipantAccessLockedPronostics()) {
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('lockedScreen').style.display='block';
+    return;
   }
 
   gotoStep(2);

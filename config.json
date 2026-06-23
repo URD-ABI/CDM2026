@@ -1625,5 +1625,11 @@
     "verrouille": false,
     "date_verrou": "2026-06-11T21:30:00-06:00"
   },
+  "exceptions_verrou": {
+    "pseudos": {
+      "Catapulte": ["D_J1", "D_J2", "E_J1", "E_J2", "F_J1", "F_J2", "G_J1", "G_J2", "H_J1", "H_J2", "I_J1", "I_J2", "J_J1", "J_J2", "K_J1", "K_J2", "L_J1", "L_J2"]
+    },
+    "participant_ids": {}
+  },
   "admin_password": "PePeJ1Ns51"
 }
