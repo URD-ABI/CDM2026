@@ -345,6 +345,19 @@ function log(msg, type='info') {
 }
 function getTeam(code) { return CONFIG.equipes.find(e=>e.code===code); }
 function getLabel(code) { const t=getTeam(code); return t?`${t.drapeau} ${t.nom}`:code; }
+function getBonusPlayerOptions(question) {
+  if (question?.type !== 'joueur' || !Array.isArray(question.options)) return [];
+  return question.options.filter(opt => opt?.id && opt?.nom);
+}
+function getBonusAnswerLabel(question, rawValue) {
+  if (rawValue == null || rawValue === '') return '—';
+  if (question?.type === 'equipe') return getLabel(String(rawValue));
+  if (question?.type === 'joueur') {
+    const option = getBonusPlayerOptions(question).find(opt => String(opt.id) === String(rawValue));
+    return option?.nom || String(rawValue);
+  }
+  return String(rawValue);
+}
 async function fetchAllRows(table, columns='*', pageSize=1000) {
   const rows = [];
   for (let from = 0; ; from += pageSize) {
@@ -1046,6 +1059,7 @@ function renderBonusAdmin() {
   document.getElementById('bonusAdminList').innerHTML = qs.map(q=>{
     const locked = q.verrouille || false;
     const hasAnswer = q.reponse_correcte != null;
+    const playerOptions = getBonusPlayerOptions(q);
 
     // Input pour la réponse correcte
     let answerInput = '';
@@ -1061,6 +1075,14 @@ function renderBonusAdmin() {
       answerInput = `<input type="number" id="ans_${q.id}" min="0" max="9999"
         value="${q.reponse_correcte??''}" placeholder="Réponse correcte (nombre)" ${locked?'disabled':''}
         style="flex:1;padding:.4rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem">`;
+    } else if (q.type === 'joueur' && getBonusPlayerOptions(q).length) {
+      const opts = playerOptions.map(opt =>
+        `<option value="${opt.id}" ${String(q.reponse_correcte)===String(opt.id)?'selected':''}>${opt.nom}</option>`
+      ).join('');
+      answerInput = `<select id="ans_${q.id}" ${locked?'disabled':''}
+        style="flex:1;padding:.4rem .7rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem">
+        <option value="">— Réponse correcte (joueur) —</option>${opts}
+      </select>`;
     } else if (q.type === 'joueur') {
       answerInput = `<input type="text" id="ans_${q.id}"
         value="${q.reponse_correcte??''}" placeholder="Réponse correcte (joueur)" ${locked?'disabled':''}
@@ -1091,7 +1113,7 @@ function renderBonusAdmin() {
         </button>
       </div>
       ${hasAnswer ? `<div style="margin-top:.5rem;font-size:.8rem;color:var(--green)">
-        ✓ Réponse enregistrée : <strong>${q.reponse_correcte}</strong>
+        ✓ Réponse enregistrée : <strong>${getBonusAnswerLabel(q, q.reponse_correcte)}</strong>
       </div>` : ''}
     </div>`;
   }).join('');
@@ -1106,7 +1128,7 @@ function saveBonusAnswer(qId, type) {
   if (!q) return;
 
   q.reponse_correcte = type==='entier' ? parseInt(val) : val;
-  toast(`✓ Réponse "${val}" enregistrée pour "${q.texte}"`);
+  toast(`✓ Réponse "${getBonusAnswerLabel(q, q.reponse_correcte)}" enregistrée pour "${q.texte}"`);
   renderBonusAdmin();
   warnConfigChange();
 }

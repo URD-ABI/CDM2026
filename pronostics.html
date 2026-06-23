@@ -581,6 +581,22 @@ function teamDisplay(t) {
   if (!t) return '';
   return teamFlag(t) + t.nom;
 }
+function getBonusPlayerOptions(question) {
+  if (question?.type !== 'joueur' || !Array.isArray(question.options)) return [];
+  return question.options.filter(opt => opt?.id && opt?.nom);
+}
+function getBonusAnswerLabel(question, rawValue) {
+  if (rawValue == null || rawValue === '') return '—';
+  if (question?.type === 'equipe') {
+    const team = getTeamByCode(String(rawValue));
+    return team ? teamDisplay(team) : String(rawValue);
+  }
+  if (question?.type === 'joueur') {
+    const option = getBonusPlayerOptions(question).find(opt => String(opt.id) === String(rawValue));
+    return option?.nom || String(rawValue);
+  }
+  return String(rawValue);
+}
 
 function getGroupMatchById(matchId) {
   for (const matchs of Object.values(CONFIG.matchs_groupes || {})) {
@@ -1457,14 +1473,11 @@ function renderBonus() {
   document.getElementById('bonusList').innerHTML = qs.map(q=>{
     const locked = q.verrouille || false;
     const existing = state.bonus[q.id];
+    const playerOptions = getBonusPlayerOptions(q);
     let input = '';
     if (locked) {
       // Afficher la réponse soumise en lecture seule
-      let valDisplay = existing ?? '—';
-      if (q.type==='equipe' && existing) {
-        const t = allTeams.find(t=>t.code===existing);
-        valDisplay = t ? `${t.iso2?t.iso2.toUpperCase()+' – ':''} ${t.nom}` : existing;
-      }
+      const valDisplay = getBonusAnswerLabel(q, existing);
       input = `<div style="padding:.5rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:.9rem">
         🔒 Verrouillée — Réponse : <strong style="color:var(--text)">${valDisplay}</strong>
       </div>`;
@@ -1473,6 +1486,9 @@ function renderBonus() {
       input = `<select onchange="setBonus('${q.id}','equipe',this.value)"><option value="">— Choisir une équipe —</option>${opts}</select>`;
     } else if (q.type==='entier') {
       input = `<input type="number" min="0" max="9999" value="${state.bonus[q.id]??''}" placeholder="Entrer un nombre" onchange="setBonus('${q.id}','entier',this.value)">`;
+    } else if (q.type==='joueur' && getBonusPlayerOptions(q).length) {
+      const opts = playerOptions.map(opt=>`<option value="${opt.id}" ${state.bonus[q.id]===opt.id?'selected':''}>${opt.nom}</option>`).join('');
+      input = `<select onchange="setBonus('${q.id}','joueur',this.value)"><option value="">— Choisir un joueur —</option>${opts}</select>`;
     } else if (q.type==='joueur') {
       input = `<input type="text" value="${state.bonus[q.id]??''}" placeholder="Nom du joueur" oninput="setBonus('${q.id}','joueur',this.value)" style="padding:.5rem .8rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans';font-size:.9rem;width:100%">`;
     }

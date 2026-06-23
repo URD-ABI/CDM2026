@@ -1202,9 +1202,8 @@ async function loadParticipantDetail(pid, el) {
     html += `<div class="detail-section"><h4>Questions Bonus</h4>`;
     (CONFIG.questions_bonus||[]).filter(q=>q.active).forEach(q=>{
       const b=pronos_bo[q.id];
-      const val=b?(b.reponse_equipe||b.reponse_entier||'?'):'—';
-      const team=b?.reponse_equipe?CONFIG.equipes.find(e=>e.code===b.reponse_equipe):null;
-      const displayVal=team?`${flag(team)} ${team.nom}`:String(val);
+      const rawValue = b ? (b.reponse_equipe ?? b.reponse_entier ?? '?') : null;
+      const displayVal = getBonusAnswerLabel(q, rawValue);
       const hasAnswer=q.reponse_correcte!=null;
       const ok=hasAnswer&&String(q.reponse_correcte)===(b?.reponse_equipe||String(b?.reponse_entier||''));
       html += `<div class="detail-match">
@@ -1411,6 +1410,22 @@ function getTeamLabel(code) {
 
 // ── Onglet Pronostics participants ────────────────────
 let allPronos = {};       // pid → { groupes, qualifies, tiers, bracket, bonus }
+function getBonusPlayerOptions(question) {
+  if (question?.type !== 'joueur' || !Array.isArray(question.options)) return [];
+  return question.options.filter(opt => opt?.id && opt?.nom);
+}
+function getBonusAnswerLabel(question, rawValue) {
+  if (rawValue == null || rawValue === '') return '—';
+  if (question?.type === 'equipe') {
+    const team = CONFIG.equipes.find(e=>e.code===String(rawValue));
+    return team ? teamDisplay(team) : String(rawValue);
+  }
+  if (question?.type === 'joueur') {
+    const option = getBonusPlayerOptions(question).find(opt => String(opt.id) === String(rawValue));
+    return option?.nom || String(rawValue);
+  }
+  return String(rawValue);
+}
 let allPart_pronostics = [];
 let activePart = null;
 
@@ -1690,9 +1705,8 @@ async function selectParticipant(pid) {
     html += `<div class="groupes-grid">`;
     activeBonus.forEach(q=>{
       const b   = pronos_bo[q.id];
-      const val = b ? (b.reponse_equipe||b.reponse_entier||'?') : '—';
-      const team = b?.reponse_equipe ? CONFIG.equipes.find(e=>e.code===b.reponse_equipe) : null;
-      const displayVal = team ? `${team.drapeau} ${team.nom}` : String(val);
+      const rawValue = b ? (b.reponse_equipe ?? b.reponse_entier ?? '?') : null;
+      const displayVal = getBonusAnswerLabel(q, rawValue);
       const hasAnswer  = q.reponse_correcte != null;
       const ok = hasAnswer && String(q.reponse_correcte)===(b?.reponse_equipe||String(b?.reponse_entier||''));
       html += `<div class="groupe-card">
