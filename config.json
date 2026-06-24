@@ -68,43 +68,154 @@
       "active": true,
       "verrouille": false,
       "options": [
-        { "id": "mbappe", "nom": "Kylian Mbappé" },
-        { "id": "dembele", "nom": "Ousmane Dembélé" },
-        { "id": "doue", "nom": "Désiré Doué" },
-        { "id": "olise", "nom": "Michael Olise" },
-        { "id": "ito", "nom": "Junya Ito" },
-        { "id": "nakamura", "nom": "Keito Nakamura" },
-        { "id": "kamada", "nom": "Daichi Kamada" },
-        { "id": "ueda", "nom": "Ayase Ueda" },
-        { "id": "gakpo", "nom": "Cody Gakpo" },
-        { "id": "depay", "nom": "Memphis Depay" },
-        { "id": "summerville", "nom": "Crysencio Summerville" },
-        { "id": "brobbey", "nom": "Brian Brobbey" },
-        { "id": "pulisic", "nom": "Christian Pulisic" },
-        { "id": "balogun", "nom": "Folarin Balogun" },
-        { "id": "havertz", "nom": "Kai Havertz" },
-        { "id": "undav", "nom": "Deniz Undav" },
-        { "id": "oyarzabal", "nom": "Mikel Oyarzabal" },
-        { "id": "yamal", "nom": "Lamine Yamal" },
-        { "id": "david", "nom": "Jonathan David" },
-        { "id": "salibari", "nom": "Ismael Salibari" },
-        { "id": "hakimi", "nom": "Achraf Hakimi" },
-        { "id": "ronaldo", "nom": "Cristiano Ronaldo" },
-        { "id": "vitinha", "nom": "Vitor Machado Ferreira Vitinha" },
-        { "id": "leao", "nom": "Rafael Leao" },
-        { "id": "manzambi", "nom": "Johan Manzambi" },
-        { "id": "ayari", "nom": "Yasin Ayari" },
-        { "id": "messi", "nom": "Lionel Messi" },
-        { "id": "lautaro", "nom": "Lautaro Martinez" },
-        { "id": "mahrez", "nom": "Riyad Mahrez" },
-        { "id": "haaland", "nom": "Erling Haaland" },
-        { "id": "kane", "nom": "Harry Kane" },
-        { "id": "saka", "nom": "Bukayo Saka" },
-        { "id": "bellingham", "nom": "Jude Bellingham" },
-        { "id": "vinicius", "nom": "Vinicius Jr." },
-        { "id": "raphinha", "nom": "Raphinha" },
-        { "id": "neymar", "nom": "Neymar Jr." },
-        { "id": "autre", "nom": "Autre joueur" }
+        {
+          "id": "mbappe",
+          "nom": "Kylian Mbappé"
+        },
+        {
+          "id": "dembele",
+          "nom": "Ousmane Dembélé"
+        },
+        {
+          "id": "doue",
+          "nom": "Désiré Doué"
+        },
+        {
+          "id": "olise",
+          "nom": "Michael Olise"
+        },
+        {
+          "id": "ito",
+          "nom": "Junya Ito"
+        },
+        {
+          "id": "nakamura",
+          "nom": "Keito Nakamura"
+        },
+        {
+          "id": "kamada",
+          "nom": "Daichi Kamada"
+        },
+        {
+          "id": "ueda",
+          "nom": "Ayase Ueda"
+        },
+        {
+          "id": "gakpo",
+          "nom": "Cody Gakpo"
+        },
+        {
+          "id": "depay",
+          "nom": "Memphis Depay"
+        },
+        {
+          "id": "summerville",
+          "nom": "Crysencio Summerville"
+        },
+        {
+          "id": "brobbey",
+          "nom": "Brian Brobbey"
+        },
+        {
+          "id": "pulisic",
+          "nom": "Christian Pulisic"
+        },
+        {
+          "id": "balogun",
+          "nom": "Folarin Balogun"
+        },
+        {
+          "id": "havertz",
+          "nom": "Kai Havertz"
+        },
+        {
+          "id": "undav",
+          "nom": "Deniz Undav"
+        },
+        {
+          "id": "oyarzabal",
+          "nom": "Mikel Oyarzabal"
+        },
+        {
+          "id": "yamal",
+          "nom": "Lamine Yamal"
+        },
+        {
+          "id": "david",
+          "nom": "Jonathan David"
+        },
+        {
+          "id": "salibari",
+          "nom": "Ismael Salibari"
+        },
+        {
+          "id": "hakimi",
+          "nom": "Achraf Hakimi"
+        },
+        {
+          "id": "ronaldo",
+          "nom": "Cristiano Ronaldo"
+        },
+        {
+          "id": "vitinha",
+          "nom": "Vitor Machado Ferreira Vitinha"
+        },
+        {
+          "id": "leao",
+          "nom": "Rafael Leao"
+        },
+        {
+          "id": "manzambi",
+          "nom": "Johan Manzambi"
+        },
+        {
+          "id": "ayari",
+          "nom": "Yasin Ayari"
+        },
+        {
+          "id": "messi",
+          "nom": "Lionel Messi"
+        },
+        {
+          "id": "lautaro",
+          "nom": "Lautaro Martinez"
+        },
+        {
+          "id": "mahrez",
+          "nom": "Riyad Mahrez"
+        },
+        {
+          "id": "haaland",
+          "nom": "Erling Haaland"
+        },
+        {
+          "id": "kane",
+          "nom": "Harry Kane"
+        },
+        {
+          "id": "saka",
+          "nom": "Bukayo Saka"
+        },
+        {
+          "id": "bellingham",
+          "nom": "Jude Bellingham"
+        },
+        {
+          "id": "vinicius",
+          "nom": "Vinicius Jr."
+        },
+        {
+          "id": "raphinha",
+          "nom": "Raphinha"
+        },
+        {
+          "id": "neymar",
+          "nom": "Neymar Jr."
+        },
+        {
+          "id": "autre",
+          "nom": "Autre joueur"
+        }
       ]
     },
     {
@@ -116,19 +227,58 @@
       "active": true,
       "verrouille": false,
       "options": [
-        { "id": "pickford", "nom": "Jordan Pickford" },
-        { "id": "neuer", "nom": "Manuel Neuer" },
-        { "id": "courtois", "nom": "Thibaut Courtois" },
-        { "id": "becker", "nom": "Alisson Becker" },
-        { "id": "maignan", "nom": "Mike Maignan" },
-        { "id": "bono", "nom": "Bono" },
-        { "id": "vozinha", "nom": "Vozinha" },
-        { "id": "martinez", "nom": "Emiliano Martinez" },
-        { "id": "zidane", "nom": "Luca Zidane" },
-        { "id": "costa", "nom": "Diogo Costa" },
-        { "id": "raya", "nom": "David Raya" },
-        { "id": "suzuki", "nom": "Zion Suzuki" },
-        { "id": "autre", "nom": "Autre joueur" }
+        {
+          "id": "pickford",
+          "nom": "Jordan Pickford"
+        },
+        {
+          "id": "neuer",
+          "nom": "Manuel Neuer"
+        },
+        {
+          "id": "courtois",
+          "nom": "Thibaut Courtois"
+        },
+        {
+          "id": "becker",
+          "nom": "Alisson Becker"
+        },
+        {
+          "id": "maignan",
+          "nom": "Mike Maignan"
+        },
+        {
+          "id": "bono",
+          "nom": "Bono"
+        },
+        {
+          "id": "vozinha",
+          "nom": "Vozinha"
+        },
+        {
+          "id": "martinez",
+          "nom": "Emiliano Martinez"
+        },
+        {
+          "id": "zidane",
+          "nom": "Luca Zidane"
+        },
+        {
+          "id": "costa",
+          "nom": "Diogo Costa"
+        },
+        {
+          "id": "raya",
+          "nom": "David Raya"
+        },
+        {
+          "id": "suzuki",
+          "nom": "Zion Suzuki"
+        },
+        {
+          "id": "autre",
+          "nom": "Autre joueur"
+        }
       ]
     },
     {
@@ -140,43 +290,154 @@
       "active": true,
       "verrouille": false,
       "options": [
-        { "id": "mbappe", "nom": "Kylian Mbappé" },
-        { "id": "dembele", "nom": "Ousmane Dembélé" },
-        { "id": "doue", "nom": "Désiré Doué" },
-        { "id": "olise", "nom": "Michael Olise" },
-        { "id": "ito", "nom": "Junya Ito" },
-        { "id": "nakamura", "nom": "Keito Nakamura" },
-        { "id": "kamada", "nom": "Daichi Kamada" },
-        { "id": "ueda", "nom": "Ayase Ueda" },
-        { "id": "gakpo", "nom": "Cody Gakpo" },
-        { "id": "depay", "nom": "Memphis Depay" },
-        { "id": "summerville", "nom": "Crysencio Summerville" },
-        { "id": "brobbey", "nom": "Brian Brobbey" },
-        { "id": "pulisic", "nom": "Christian Pulisic" },
-        { "id": "balogun", "nom": "Folarin Balogun" },
-        { "id": "havertz", "nom": "Kai Havertz" },
-        { "id": "undav", "nom": "Deniz Undav" },
-        { "id": "oyarzabal", "nom": "Mikel Oyarzabal" },
-        { "id": "yamal", "nom": "Lamine Yamal" },
-        { "id": "david", "nom": "Jonathan David" },
-        { "id": "salibari", "nom": "Ismael Salibari" },
-        { "id": "hakimi", "nom": "Achraf Hakimi" },
-        { "id": "ronaldo", "nom": "Cristiano Ronaldo" },
-        { "id": "vitinha", "nom": "Vitor Machado Ferreira Vitinha" },
-        { "id": "leao", "nom": "Rafael Leao" },
-        { "id": "manzambi", "nom": "Johan Manzambi" },
-        { "id": "ayari", "nom": "Yasin Ayari" },
-        { "id": "messi", "nom": "Lionel Messi" },
-        { "id": "lautaro", "nom": "Lautaro Martinez" },
-        { "id": "mahrez", "nom": "Riyad Mahrez" },
-        { "id": "haaland", "nom": "Erling Haaland" },
-        { "id": "kane", "nom": "Harry Kane" },
-        { "id": "saka", "nom": "Bukayo Saka" },
-        { "id": "bellingham", "nom": "Jude Bellingham" },
-        { "id": "vinicius", "nom": "Vinicius Jr." },
-        { "id": "raphinha", "nom": "Raphinha" },
-        { "id": "neymar", "nom": "Neymar Jr." },
-        { "id": "autre", "nom": "Autre joueur" }
+        {
+          "id": "mbappe",
+          "nom": "Kylian Mbappé"
+        },
+        {
+          "id": "dembele",
+          "nom": "Ousmane Dembélé"
+        },
+        {
+          "id": "doue",
+          "nom": "Désiré Doué"
+        },
+        {
+          "id": "olise",
+          "nom": "Michael Olise"
+        },
+        {
+          "id": "ito",
+          "nom": "Junya Ito"
+        },
+        {
+          "id": "nakamura",
+          "nom": "Keito Nakamura"
+        },
+        {
+          "id": "kamada",
+          "nom": "Daichi Kamada"
+        },
+        {
+          "id": "ueda",
+          "nom": "Ayase Ueda"
+        },
+        {
+          "id": "gakpo",
+          "nom": "Cody Gakpo"
+        },
+        {
+          "id": "depay",
+          "nom": "Memphis Depay"
+        },
+        {
+          "id": "summerville",
+          "nom": "Crysencio Summerville"
+        },
+        {
+          "id": "brobbey",
+          "nom": "Brian Brobbey"
+        },
+        {
+          "id": "pulisic",
+          "nom": "Christian Pulisic"
+        },
+        {
+          "id": "balogun",
+          "nom": "Folarin Balogun"
+        },
+        {
+          "id": "havertz",
+          "nom": "Kai Havertz"
+        },
+        {
+          "id": "undav",
+          "nom": "Deniz Undav"
+        },
+        {
+          "id": "oyarzabal",
+          "nom": "Mikel Oyarzabal"
+        },
+        {
+          "id": "yamal",
+          "nom": "Lamine Yamal"
+        },
+        {
+          "id": "david",
+          "nom": "Jonathan David"
+        },
+        {
+          "id": "salibari",
+          "nom": "Ismael Salibari"
+        },
+        {
+          "id": "hakimi",
+          "nom": "Achraf Hakimi"
+        },
+        {
+          "id": "ronaldo",
+          "nom": "Cristiano Ronaldo"
+        },
+        {
+          "id": "vitinha",
+          "nom": "Vitor Machado Ferreira Vitinha"
+        },
+        {
+          "id": "leao",
+          "nom": "Rafael Leao"
+        },
+        {
+          "id": "manzambi",
+          "nom": "Johan Manzambi"
+        },
+        {
+          "id": "ayari",
+          "nom": "Yasin Ayari"
+        },
+        {
+          "id": "messi",
+          "nom": "Lionel Messi"
+        },
+        {
+          "id": "lautaro",
+          "nom": "Lautaro Martinez"
+        },
+        {
+          "id": "mahrez",
+          "nom": "Riyad Mahrez"
+        },
+        {
+          "id": "haaland",
+          "nom": "Erling Haaland"
+        },
+        {
+          "id": "kane",
+          "nom": "Harry Kane"
+        },
+        {
+          "id": "saka",
+          "nom": "Bukayo Saka"
+        },
+        {
+          "id": "bellingham",
+          "nom": "Jude Bellingham"
+        },
+        {
+          "id": "vinicius",
+          "nom": "Vinicius Jr."
+        },
+        {
+          "id": "raphinha",
+          "nom": "Raphinha"
+        },
+        {
+          "id": "neymar",
+          "nom": "Neymar Jr."
+        },
+        {
+          "id": "autre",
+          "nom": "Autre joueur"
+        }
       ]
     },
     {
@@ -1421,7 +1682,7 @@
       "date_verrou": null
     },
     "A_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "B_J1": {
@@ -1433,7 +1694,7 @@
       "date_verrou": null
     },
     "B_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "C_J1": {
@@ -1445,7 +1706,7 @@
       "date_verrou": null
     },
     "C_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "D_J1": {
@@ -1626,9 +1887,7 @@
     "date_verrou": "2026-06-11T21:30:00-06:00"
   },
   "exceptions_verrou": {
-    "pseudos": {
-      "Catapulte": ["D_J1", "D_J2", "E_J1", "E_J2", "F_J1", "F_J2", "G_J1", "G_J2", "H_J1", "H_J2", "I_J1", "I_J2", "J_J1", "J_J2", "K_J1", "K_J2", "L_J1", "L_J2"]
-    },
+    "pseudos": {},
     "participant_ids": {}
   },
   "admin_password": "PePeJ1Ns51"
