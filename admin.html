@@ -690,6 +690,31 @@ function compareClassementRows(a,b) {
   return (a.pseudo || '').localeCompare(b.pseudo || '', 'fr', { sensitivity:'base' });
 }
 
+function scoreQualifiedPredictions(prediction, reality, pointsConfig) {
+  const actualRemaining = [reality?.premier, reality?.deuxieme].filter(Boolean);
+  const predicted = [prediction?.equipe_1er, prediction?.equipe_2eme];
+  const slotPoints = [pointsConfig.qualifie_1er || 0, pointsConfig.qualifie_2eme || 0];
+  const statuses = ['nok', 'nok'];
+  const points = [0, 0];
+
+  predicted.forEach((teamCode, index) => {
+    if (!teamCode) return;
+    const matchIndex = actualRemaining.indexOf(teamCode);
+    if (matchIndex === -1) return;
+    actualRemaining.splice(matchIndex, 1);
+    statuses[index] = 'ok';
+    points[index] = slotPoints[index];
+  });
+
+  return {
+    pts1: points[0],
+    pts2: points[1],
+    status1: statuses[0],
+    status2: statuses[1],
+    total: points[0] + points[1],
+  };
+}
+
 function buildClassementPublicationRows(participants, scores, previousPublicationRows) {
   const participantMap = Object.fromEntries((participants || []).map(p => [p.id, p]));
   const previousMap = Object.fromEntries((previousPublicationRows || []).map(row => [row.participant_id, row]));
@@ -824,8 +849,7 @@ async function runEngine() {
         const p = pronos_q[g];
         const r = realQualifies[g];
         if (!p||!r) return;
-        if (p.equipe_1er===r.premier)   pts_q += pts.qualifie_1er;
-        if (p.equipe_2eme===r.deuxieme) pts_q += pts.qualifie_2eme;
+        pts_q += scoreQualifiedPredictions(p, r, pts).total;
       });
       // Meilleurs tiers (si tous les groupes ont terminé)
       const allGroupsDone = Object.keys(CONFIG.groupes).filter(k=>!k.startsWith('_'))

@@ -720,6 +720,31 @@ function compareClassementRows(a,b) {
   return (a.pseudo || '').localeCompare(b.pseudo || '', 'fr', { sensitivity:'base' });
 }
 
+function scoreQualifiedPredictions(prediction, reality, pointsConfig) {
+  const actualRemaining = [reality?.premier, reality?.deuxieme].filter(Boolean);
+  const predicted = [prediction?.equipe_1er, prediction?.equipe_2eme];
+  const slotPoints = [pointsConfig.qualifie_1er || 0, pointsConfig.qualifie_2eme || 0];
+  const statuses = ['nok', 'nok'];
+  const points = [0, 0];
+
+  predicted.forEach((teamCode, index) => {
+    if (!teamCode) return;
+    const matchIndex = actualRemaining.indexOf(teamCode);
+    if (matchIndex === -1) return;
+    actualRemaining.splice(matchIndex, 1);
+    statuses[index] = 'ok';
+    points[index] = slotPoints[index];
+  });
+
+  return {
+    pts1: points[0],
+    pts2: points[1],
+    status1: statuses[0],
+    status2: statuses[1],
+    total: points[0] + points[1],
+  };
+}
+
 function computeClassementRanks(rows) {
   let currentRank = 1;
   return rows.map((row, index) => {
@@ -1171,10 +1196,11 @@ async function loadParticipantDetail(pid, el) {
     const rq=realQ[g];
     let pts1=0,pts2=0,status1='pending',status2='pending';
     if (rq) {
-      status1 = q.equipe_1er===rq.premier?'ok':'nok';
-      status2 = q.equipe_2eme===rq.deuxieme?'ok':'nok';
-      if(status1==='ok') pts1=pts_conf.qualifie_1er;
-      if(status2==='ok') pts2=pts_conf.qualifie_2eme;
+      const qualifiedScore = scoreQualifiedPredictions(q, rq, pts_conf);
+      status1 = qualifiedScore.status1;
+      status2 = qualifiedScore.status2;
+      pts1 = qualifiedScore.pts1;
+      pts2 = qualifiedScore.pts2;
     }
     html += `<div class="detail-match">
       <span class="match-teams" style="font-weight:600;color:var(--text)">Grp ${g}</span>
