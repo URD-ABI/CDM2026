@@ -1718,7 +1718,7 @@
       "date_verrou": null
     },
     "D_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "E_J1": {
@@ -1730,7 +1730,7 @@
       "date_verrou": null
     },
     "E_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "F_J1": {
@@ -1742,7 +1742,7 @@
       "date_verrou": null
     },
     "F_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "G_J1": {
@@ -1887,9 +1887,7 @@
     "date_verrou": "2026-06-11T21:30:00-06:00"
   },
   "exceptions_verrou": {
-    "pseudos": {
-      "Fannouille" :["C_J3"]
-    },
+    "pseudos": {},
     "participant_ids": {}
   },
   "admin_password": "PePeJ1Ns51"
