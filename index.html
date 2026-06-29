@@ -241,10 +241,15 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
   padding-bottom:.5rem;
 }
 .bracket-layout {
-  min-width:1680px;
+  --bracket-unit: 24px;
+  --bracket-card-height: 56px;
+  --bracket-column-width: 142px;
+  --bracket-final-width: 170px;
+  --bracket-link-gap: 10px;
+  min-width:1320px;
   display:grid;
-  grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) minmax(180px,1fr) minmax(180px,1fr) 240px minmax(180px,1fr) minmax(180px,1fr) minmax(180px,1fr) minmax(180px,1fr);
-  gap:1rem;
+  grid-template-columns:var(--bracket-column-width) var(--bracket-column-width) var(--bracket-column-width) var(--bracket-column-width) var(--bracket-final-width) var(--bracket-column-width) var(--bracket-column-width) var(--bracket-column-width) var(--bracket-column-width);
+  gap:14px;
   align-items:start;
 }
 .bracket-round {
@@ -257,119 +262,128 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
   font-size:1rem;
   letter-spacing:.08em;
   color:var(--muted);
-  margin-bottom:.75rem;
+  margin-bottom:.45rem;
   text-align:center;
+}
+.bracket-round-grid {
+  display:grid;
+  grid-template-rows:repeat(15, var(--bracket-unit));
+  row-gap:0;
+  min-height:calc(var(--bracket-unit) * 15);
 }
 .bracket-pair {
   position:relative;
   display:flex;
   flex-direction:column;
-  gap:.8rem;
+  justify-content:space-between;
+  gap:0;
 }
 .bracket-match-wrap {
   position:relative;
+  display:flex;
+  align-items:center;
+  min-height:var(--bracket-card-height);
 }
 .bracket-round.side-left .bracket-match-wrap::after,
 .bracket-round.side-right .bracket-match-wrap::before {
   content:'';
   position:absolute;
   top:50%;
-  width:1rem;
+  width:var(--bracket-link-gap);
   border-top:2px solid var(--border);
 }
-.bracket-round.side-left .bracket-match-wrap::after { right:-1rem; }
-.bracket-round.side-right .bracket-match-wrap::before { left:-1rem; }
-.bracket-pair.has-connector::after,
-.bracket-pair.has-connector::before {
+.bracket-round.side-left .bracket-match-wrap::after { right:calc(var(--bracket-link-gap) * -1); }
+.bracket-round.side-right .bracket-match-wrap::before { left:calc(var(--bracket-link-gap) * -1); }
+.bracket-pair.has-connector::before,
+.bracket-pair.has-connector::after {
   content:'';
   position:absolute;
-  top:25%;
-  height:50%;
-  width:1rem;
 }
-.bracket-round.side-left .bracket-pair.has-connector::after {
-  right:-1rem;
+.bracket-round.side-left .bracket-pair.has-connector::before,
+.bracket-round.side-right .bracket-pair.has-connector::before {
+  top:calc(var(--bracket-card-height) / 2);
+  bottom:calc(var(--bracket-card-height) / 2);
+}
+.bracket-round.side-left .bracket-pair.has-connector::before {
+  right:calc(var(--bracket-link-gap) * -1);
   border-right:2px solid var(--border);
-  border-top:2px solid var(--border);
-  border-bottom:2px solid var(--border);
 }
 .bracket-round.side-right .bracket-pair.has-connector::before {
-  left:-1rem;
+  left:calc(var(--bracket-link-gap) * -1);
   border-left:2px solid var(--border);
+}
+.bracket-round.side-left .bracket-pair.has-connector::after,
+.bracket-round.side-right .bracket-pair.has-connector::after {
+  top:50%;
+  width:var(--bracket-link-gap);
   border-top:2px solid var(--border);
-  border-bottom:2px solid var(--border);
+}
+.bracket-round.side-left .bracket-pair.has-connector::after {
+  right:calc(var(--bracket-link-gap) * -1);
+}
+.bracket-round.side-right .bracket-pair.has-connector::after {
+  left:calc(var(--bracket-link-gap) * -1);
 }
 .bracket-match-card {
   background:var(--card);
   border:1px solid var(--border);
   border-radius:8px;
-  padding:.65rem .75rem;
-  min-height:82px;
+  padding:.36rem .5rem;
+  min-height:var(--bracket-card-height);
+  width:100%;
+  box-sizing:border-box;
 }
 .bracket-match-card.played { border-color:rgba(245,183,49,.35); }
 .bracket-match-card.locked { border-color:rgba(0,197,90,.28); }
 .bracket-match-meta {
-  font-size:.68rem;
+  font-size:.6rem;
   color:var(--muted);
   text-transform:uppercase;
   letter-spacing:.06em;
-  margin-bottom:.45rem;
+  margin-bottom:.25rem;
 }
 .bracket-team-row {
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:.6rem;
-  font-size:.82rem;
-  padding:.14rem 0;
+  gap:.35rem;
+  font-size:.72rem;
+  padding:.08rem 0;
 }
 .bracket-team-row + .bracket-team-row {
   border-top:1px solid rgba(255,255,255,.06);
-  margin-top:.12rem;
-  padding-top:.3rem;
+  margin-top:.06rem;
+  padding-top:.16rem;
 }
 .bracket-team-label {
   flex:1;
   min-width:0;
   font-weight:600;
+  white-space:nowrap;
 }
 .bracket-team-score {
   font-family:'Bebas Neue';
-  font-size:1rem;
+  font-size:.95rem;
   letter-spacing:.05em;
   color:var(--gold);
   flex-shrink:0;
-}
-.bracket-match-status {
-  margin-top:.42rem;
-  font-size:.72rem;
-  color:var(--muted);
-  text-align:center;
 }
 .bracket-finals {
   display:flex;
   flex-direction:column;
   align-items:stretch;
-  padding-top:12rem;
-  gap:3rem;
+  padding-top:8.1rem;
+  gap:2.2rem;
 }
 .bracket-final-block,
 .bracket-third-block {
   display:flex;
   flex-direction:column;
 }
-.bracket-third-block { margin-top:5rem; }
-.bracket-round.round-s16 { padding-top:0; }
-.bracket-round.round-s8 { padding-top:4.2rem; }
-.bracket-round.round-qf { padding-top:11.4rem; }
-.bracket-round.round-sf { padding-top:19.2rem; }
-.bracket-round.round-s16 .bracket-pair { margin-bottom:1.7rem; }
-.bracket-round.round-s8 .bracket-pair { margin-bottom:6.25rem; }
-.bracket-round.round-qf .bracket-pair { margin-bottom:20.5rem; }
-.bracket-round.round-sf .bracket-pair { margin-bottom:0; }
+.bracket-third-block { margin-top:3rem; }
 
 @media (max-width: 900px) {
-  .bracket-layout { min-width:1480px; }
+  .bracket-layout { min-width:1220px; }
 }
 
 /* ── Alertes ── */
@@ -1578,15 +1592,27 @@ function renderMatchsGroupes(reels) {
   return `<div class="groupes-grid">` + groups.map(g => renderGroupCard(g, CONFIG.matchs_groupes[g], reels, standings[g], best8groups)).join('') + `</div>`;
 }
 
-function getResolvedElimLabel(source, matchData, reels, explicitCode) {
+function getResolvedElimTag(source, matchData, reels, explicitCode) {
   const code = explicitCode || resolveRealElimSourceCode(source, matchData, reels);
-  return code ? getTeamLabel(code) : translateSource(source);
+  if (!code) return translateSource(source);
+  const team = CONFIG.equipes.find(entry => entry.code === code);
+  return team ? `${teamFlag(team)} ${team.code}` : code;
+}
+
+function getBracketPairGridPlacement(roundKey, pairIndex) {
+  const placements = {
+    s16: [{ start: 1, span: 3 }, { start: 5, span: 3 }, { start: 9, span: 3 }, { start: 13, span: 3 }],
+    s8: [{ start: 2, span: 5 }, { start: 10, span: 5 }],
+    qf: [{ start: 4, span: 9 }],
+    sf: [{ start: 8, span: 1 }],
+  };
+  return placements[roundKey]?.[pairIndex] || { start: 1, span: 1 };
 }
 
 function renderBracketMatchCard(matchData, reels, roundLabel) {
   const real = reels[matchData.id];
-  const domLabel = getResolvedElimLabel(matchData.dom_source, matchData, reels, real?.equipe_dom);
-  const extLabel = getResolvedElimLabel(matchData.ext_source, matchData, reels, real?.equipe_ext);
+  const domLabel = getResolvedElimTag(matchData.dom_source, matchData, reels, real?.equipe_dom);
+  const extLabel = getResolvedElimTag(matchData.ext_source, matchData, reels, real?.equipe_ext);
   const statusClass = real?.joue ? 'played' : real?.verrouille ? 'locked' : 'pending';
   const meta = `${roundLabel} · ${matchData.id}`;
 
@@ -1600,7 +1626,6 @@ function renderBracketMatchCard(matchData, reels, roundLabel) {
       <span class="bracket-team-label">${extLabel}</span>
       ${real?.joue ? `<span class="bracket-team-score">${real.score_ext}</span>` : ''}
     </div>
-    ${!real?.joue ? `<div class="bracket-match-status">${real?.verrouille ? 'Verrouillé' : 'À venir'}</div>` : ''}
   </div>`;
 }
 
@@ -1613,8 +1638,9 @@ function renderBracketRoundColumn(title, matches, side, roundKey, roundLabel, re
 
   return `<div class="bracket-round side-${side} round-${roundKey}">
     <div class="bracket-round-title">${title}</div>
+    <div class="bracket-round-grid">
     ${pairs.map(pair => `
-      <div class="bracket-pair ${pair.length === 2 ? 'has-connector' : ''}">
+      <div class="bracket-pair ${pair.length === 2 ? 'has-connector' : ''}" style="grid-row:${getBracketPairGridPlacement(roundKey, pairs.indexOf(pair)).start} / span ${getBracketPairGridPlacement(roundKey, pairs.indexOf(pair)).span}">
         ${pair.map(match => `
           <div class="bracket-match-wrap">
             ${renderBracketMatchCard(match, reels, roundLabel)}
@@ -1622,6 +1648,7 @@ function renderBracketRoundColumn(title, matches, side, roundKey, roundLabel, re
         `).join('')}
       </div>
     `).join('')}
+    </div>
   </div>`;
 }
 
