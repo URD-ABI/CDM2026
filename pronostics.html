@@ -1615,12 +1615,8 @@ async function renderElim() {
       if (!isRealElimMatchReady(m, reelsMap)) return;
 
       // Résoudre les labels des équipes
-      const domCode = resolveElimTeamCode(m.dom_source, reelsMap, m);
-      const extCode = resolveElimTeamCode(m.ext_source, reelsMap, m);
-      const domTeam = domCode ? getTeamByCode(domCode) : null;
-      const extTeam = extCode ? getTeamByCode(extCode) : null;
-      const domLabel = domTeam ? teamFlag(domTeam) : '?';
-      const extLabel = extTeam ? teamFlag(extTeam) : '?';
+      const domLabel = resolveElimLabel(m.dom_source, reelsMap, m);
+      const extLabel = resolveElimLabel(m.ext_source, reelsMap, m);
 
       html += `
       <div class="match-row" style="margin-bottom:.5rem">
