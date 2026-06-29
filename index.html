@@ -180,14 +180,17 @@ body {
 }
 .detail-match:last-child { border-bottom:none; }
 .detail-match.ok    { background:rgba(0,197,90,.12); }
+.detail-match.near  { background:rgba(59,130,246,.12); }
 .detail-match.nok   { background:rgba(232,69,69,.10); }
 .detail-match.exact { background:rgba(245,183,49,.15); }
 body:not(.light) .detail-match.ok    { background:rgba(0,197,90,.22); }
+body:not(.light) .detail-match.near  { background:rgba(59,130,246,.22); }
 body:not(.light) .detail-match.nok   { background:rgba(232,69,69,.22); }
 body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
 .match-teams { color:var(--muted); flex:1; }
 .match-prono { font-weight:600; color:var(--text); }
 .match-prono.pending { color:var(--muted); }
+.match-prono.near { color:var(--blue); }
 .pts-badge {
   font-family:'Bebas Neue'; font-size:.9rem;
   color:var(--gold); letter-spacing:.04em; min-width:28px; text-align:right;
@@ -1343,13 +1346,17 @@ async function loadParticipantDetail(pid, el) {
     (CONFIG.questions_bonus||[]).filter(q=>q.active).forEach(q=>{
       const b=pronos_bo[q.id];
       const rawValue = b ? (b.reponse_equipe ?? b.reponse_entier ?? '?') : null;
+      const answerValue = b?.reponse_equipe ?? b?.reponse_entier ?? '';
       const displayVal = getBonusAnswerLabel(q, rawValue);
       const hasAnswer = hasConfiguredBonusAnswer(q);
-      const ok = hasAnswer && isBonusAnswerCorrect(q, b?.reponse_equipe ?? b?.reponse_entier ?? '');
-      html += `<div class="detail-match">
+      const exact = hasAnswer && isBonusAnswerCorrect(q, answerValue);
+      const awardedPoints = hasAnswer ? getBonusAwardedPoints(q, answerValue) : 0;
+      const near = hasAnswer && !exact && awardedPoints === 1;
+      const status = hasAnswer ? (exact ? 'ok' : near ? 'near' : 'nok') : 'pending';
+      html += `<div class="detail-match ${status}">
         <span class="match-teams">${q.texte}</span>
-        <span class="match-prono ${hasAnswer?(ok?'ok':'nok'):'pending'}">${displayVal}</span>
-        ${hasAnswer&&ok?`<span class="pts-badge">+${q.points}</span>`:''}
+        <span class="match-prono ${status}">${displayVal}</span>
+        ${awardedPoints>0?`<span class="pts-badge">+${awardedPoints}</span>`:''}
       </div>`;
     });
     html += `</div>`;
@@ -1588,6 +1595,26 @@ function hasConfiguredBonusAnswer(question) {
 function isBonusAnswerCorrect(question, rawValue) {
   if (rawValue == null || rawValue === '') return false;
   return getBonusAcceptedAnswers(question).includes(String(rawValue));
+}
+function getBonusNearMissTolerance(question) {
+  if (question?.type !== 'entier') return null;
+  if (question?.id === 'b3' || question?.id === 'b8' || question?.id === 'b9') return 2;
+  if (question?.id === 'b4' || question?.id === 'b10') return 10;
+  return null;
+}
+function isBonusAnswerNearlyCorrect(question, rawValue) {
+  if (isBonusAnswerCorrect(question, rawValue)) return false;
+  const tolerance = getBonusNearMissTolerance(question);
+  if (tolerance == null || rawValue == null || rawValue === '') return false;
+  const actual = Number(rawValue);
+  const expected = Number(question?.reponse_correcte);
+  if (!Number.isFinite(actual) || !Number.isFinite(expected)) return false;
+  return Math.abs(actual - expected) <= tolerance;
+}
+function getBonusAwardedPoints(question, rawValue) {
+  if (isBonusAnswerCorrect(question, rawValue)) return Number(question?.points) || 0;
+  if (isBonusAnswerNearlyCorrect(question, rawValue)) return 1;
+  return 0;
 }
 function getBonusCorrectAnswerDisplay(question) {
   const answers = getBonusAcceptedAnswers(question);
@@ -1990,15 +2017,24 @@ async function selectParticipant(pid) {
     activeBonus.forEach(q=>{
       const b   = pronos_bo[q.id];
       const rawValue = b ? (b.reponse_equipe ?? b.reponse_entier ?? '?') : null;
+      const answerValue = b?.reponse_equipe ?? b?.reponse_entier ?? '';
       const displayVal = getBonusAnswerLabel(q, rawValue);
       const hasAnswer  = hasConfiguredBonusAnswer(q);
-      const ok = hasAnswer && isBonusAnswerCorrect(q, b?.reponse_equipe ?? b?.reponse_entier ?? '');
+      const exact = hasAnswer && isBonusAnswerCorrect(q, answerValue);
+      const awardedPoints = hasAnswer ? getBonusAwardedPoints(q, answerValue) : 0;
+      const near = hasAnswer && !exact && awardedPoints === 1;
+      const badgeHtml = !hasAnswer ? '' : exact
+        ? '<span style="color:var(--green);font-size:.8rem">+'+q.points+' pts</span>'
+        : near
+          ? '<span style="color:var(--blue);font-size:.8rem">+1 pt</span>'
+          : '<span style="color:var(--red);font-size:.8rem">✗</span>';
+      const valueColor = !hasAnswer ? 'var(--text)' : exact ? 'var(--green)' : near ? 'var(--blue)' : 'var(--red)';
       html += `<div class="groupe-card">
         <div class="groupe-card-header">
           <span class="groupe-card-title" style="font-size:.95rem">${q.texte}</span>
-          ${hasAnswer?(ok?'<span style="color:var(--green);font-size:.8rem">+'+q.points+' pts</span>':'<span style="color:var(--red);font-size:.8rem">✗</span>'):''}
+          ${badgeHtml}
         </div>
-        <div style="padding:.7rem 1rem;font-size:.9rem;color:${hasAnswer?(ok?'var(--green)':'var(--red)'):'var(--text)'}">
+        <div style="padding:.7rem 1rem;font-size:.9rem;color:${valueColor}">
           ${b ? displayVal : '<span style="color:var(--muted)">Non répondu</span>'}
         </div>
       </div>`;
@@ -2018,16 +2054,23 @@ const TEAM_NAME_ISO2 = {"Mexique":"mx","Afrique du Sud":"za","République de Cor
 // Sera rempli par loadCalendrierTeams()
 let RESOLVED_TEAMS = {};
 
+function normalizeCalendarVariableCode(code) {
+  if (!code) return code;
+  if (/^3[A-L]+$/.test(code)) return `T3_${code.slice(1)}`;
+  return code;
+}
+
 // Résout un nom d'équipe du JSON du calendrier
 function resolveCalTeam(name) {
   if (!name) return { display: 'À déterminer', iso2: null };
+  const normalizedName = normalizeCalendarVariableCode(name);
   
   // Équipe normale
   const iso2 = TEAM_NAME_ISO2[name];
   if (iso2) return { display: name, iso2 };
   
   // Code variable : W_S16_1, L_SF_2, 2A, 1C, T3_X...
-  const resolved = RESOLVED_TEAMS[name];
+  const resolved = RESOLVED_TEAMS[normalizedName];
   if (resolved) return { display: resolved.name, iso2: resolved.iso2 };
   
   // Pas encore connu : afficher un label lisible
@@ -2039,6 +2082,7 @@ function translateVarCode(code) {
   if (!code) return 'À déterminer';
   if (/^1[A-L]$/.test(code)) return `1er Groupe ${code[1]}`;
   if (/^2[A-L]$/.test(code)) return `2e Groupe ${code[1]}`;
+  if (/^3[A-L]+$/.test(code)) return `Meilleur 3e (${code.slice(1).split('').join('/')})`;
   if (/^T3/.test(code)) return `Meilleur 3e`;
   if (code.startsWith('W_S16_')) return `Vainqueur 16e de finale ${code.replace('W_S16_','')}`;
   if (code.startsWith('W_S8_'))  return `Vainqueur 8e de finale ${code.replace('W_S8_','')}`;

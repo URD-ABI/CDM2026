@@ -381,6 +381,26 @@ function isBonusAnswerCorrect(question, rawValue) {
   if (rawValue == null || rawValue === '') return false;
   return getBonusAcceptedAnswers(question).includes(String(rawValue));
 }
+function getBonusNearMissTolerance(question) {
+  if (question?.type !== 'entier') return null;
+  if (question?.id === 'b3' || question?.id === 'b8' || question?.id === 'b9') return 2;
+  if (question?.id === 'b4' || question?.id === 'b10') return 10;
+  return null;
+}
+function isBonusAnswerNearlyCorrect(question, rawValue) {
+  if (isBonusAnswerCorrect(question, rawValue)) return false;
+  const tolerance = getBonusNearMissTolerance(question);
+  if (tolerance == null || rawValue == null || rawValue === '') return false;
+  const actual = Number(rawValue);
+  const expected = Number(question?.reponse_correcte);
+  if (!Number.isFinite(actual) || !Number.isFinite(expected)) return false;
+  return Math.abs(actual - expected) <= tolerance;
+}
+function getBonusAwardedPoints(question, rawValue) {
+  if (isBonusAnswerCorrect(question, rawValue)) return Number(question?.points) || 0;
+  if (isBonusAnswerNearlyCorrect(question, rawValue)) return 1;
+  return 0;
+}
 function getBonusCorrectAnswerDisplay(question) {
   const answers = getBonusAcceptedAnswers(question);
   if (!answers.length) return '—';
@@ -927,7 +947,7 @@ async function runEngine() {
         const p = pronos_bo[q.id];
         if (!p) return;
         const rep = p.reponse_equipe || String(p.reponse_entier||'');
-        if (isBonusAnswerCorrect(q, rep)) pts_bo += q.points;
+        pts_bo += getBonusAwardedPoints(q, rep);
       });
 
       const total = pts_g+pts_q+pts_br+pts_elim+pts_bo;
