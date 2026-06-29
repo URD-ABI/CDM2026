@@ -1606,6 +1606,32 @@ function getResolvedElimTag(source, matchData, reels, explicitCode) {
   return team ? `${teamFlag(team)} ${team.code}` : code;
 }
 
+function orderBracketMatchesByDependencies(matches, nextRoundMatches) {
+  if (!Array.isArray(matches) || !matches.length) return [];
+  if (!Array.isArray(nextRoundMatches) || !nextRoundMatches.length) return [...matches];
+
+  const byId = new Map(matches.map(match => [match.id, match]));
+  const ordered = [];
+  const seen = new Set();
+
+  nextRoundMatches.forEach(nextMatch => {
+    [nextMatch?.dom_source, nextMatch?.ext_source].forEach(source => {
+      if (typeof source !== 'string' || (!source.startsWith('W_') && !source.startsWith('L_'))) return;
+      const dependencyId = source.slice(2);
+      const dependencyMatch = byId.get(dependencyId);
+      if (!dependencyMatch || seen.has(dependencyId)) return;
+      seen.add(dependencyId);
+      ordered.push(dependencyMatch);
+    });
+  });
+
+  matches.forEach(match => {
+    if (!seen.has(match.id)) ordered.push(match);
+  });
+
+  return ordered;
+}
+
 function getBracketPairGridPlacement(roundKey, pairIndex) {
   const placements = {
     s16: [{ start: 1, span: 44 }, { start: 53, span: 44 }, { start: 105, span: 44 }, { start: 157, span: 44 }],
@@ -1666,18 +1692,22 @@ function renderMatchsBracket(reels) {
   const sf = CONFIG.bracket_eliminatoire.SF || [];
   const finale = CONFIG.bracket_eliminatoire.F || [];
   const thirdPlace = CONFIG.bracket_eliminatoire.P3 || [];
+  const orderedSf = orderBracketMatchesByDependencies(sf, finale);
+  const orderedQf = orderBracketMatchesByDependencies(qf, orderedSf);
+  const orderedS8 = orderBracketMatchesByDependencies(s8, orderedQf);
+  const orderedS16 = orderBracketMatchesByDependencies(s16, orderedS8);
 
   const left = {
-    s16: s16.slice(0, 8),
-    s8: s8.slice(0, 4),
-    qf: qf.slice(0, 2),
-    sf: sf.slice(0, 1),
+    s16: orderedS16.slice(0, 8),
+    s8: orderedS8.slice(0, 4),
+    qf: orderedQf.slice(0, 2),
+    sf: orderedSf.slice(0, 1),
   };
   const right = {
-    sf: sf.slice(1, 2),
-    qf: qf.slice(2, 4),
-    s8: s8.slice(4, 8),
-    s16: s16.slice(8, 16),
+    sf: orderedSf.slice(1, 2),
+    qf: orderedQf.slice(2, 4),
+    s8: orderedS8.slice(4, 8),
+    s16: orderedS16.slice(8, 16),
   };
 
   return `<div class="bracket-scroller">
