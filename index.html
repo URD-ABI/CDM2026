@@ -234,6 +234,143 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
   color:var(--muted); transition:all .15s;
 }
 .phase-btn.active { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+.matchs-subtabs { margin-bottom:1rem; }
+
+.bracket-scroller {
+  overflow-x:auto;
+  padding-bottom:.5rem;
+}
+.bracket-layout {
+  min-width:1680px;
+  display:grid;
+  grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) minmax(180px,1fr) minmax(180px,1fr) 240px minmax(180px,1fr) minmax(180px,1fr) minmax(180px,1fr) minmax(180px,1fr);
+  gap:1rem;
+  align-items:start;
+}
+.bracket-round {
+  display:flex;
+  flex-direction:column;
+}
+.bracket-round-title,
+.bracket-finals-title {
+  font-family:'Bebas Neue';
+  font-size:1rem;
+  letter-spacing:.08em;
+  color:var(--muted);
+  margin-bottom:.75rem;
+  text-align:center;
+}
+.bracket-pair {
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:.8rem;
+}
+.bracket-match-wrap {
+  position:relative;
+}
+.bracket-round.side-left .bracket-match-wrap::after,
+.bracket-round.side-right .bracket-match-wrap::before {
+  content:'';
+  position:absolute;
+  top:50%;
+  width:1rem;
+  border-top:2px solid var(--border);
+}
+.bracket-round.side-left .bracket-match-wrap::after { right:-1rem; }
+.bracket-round.side-right .bracket-match-wrap::before { left:-1rem; }
+.bracket-pair.has-connector::after,
+.bracket-pair.has-connector::before {
+  content:'';
+  position:absolute;
+  top:25%;
+  height:50%;
+  width:1rem;
+}
+.bracket-round.side-left .bracket-pair.has-connector::after {
+  right:-1rem;
+  border-right:2px solid var(--border);
+  border-top:2px solid var(--border);
+  border-bottom:2px solid var(--border);
+}
+.bracket-round.side-right .bracket-pair.has-connector::before {
+  left:-1rem;
+  border-left:2px solid var(--border);
+  border-top:2px solid var(--border);
+  border-bottom:2px solid var(--border);
+}
+.bracket-match-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:.65rem .75rem;
+  min-height:82px;
+}
+.bracket-match-card.played { border-color:rgba(245,183,49,.35); }
+.bracket-match-card.locked { border-color:rgba(0,197,90,.28); }
+.bracket-match-meta {
+  font-size:.68rem;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-bottom:.45rem;
+}
+.bracket-team-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.6rem;
+  font-size:.82rem;
+  padding:.14rem 0;
+}
+.bracket-team-row + .bracket-team-row {
+  border-top:1px solid rgba(255,255,255,.06);
+  margin-top:.12rem;
+  padding-top:.3rem;
+}
+.bracket-team-label {
+  flex:1;
+  min-width:0;
+  font-weight:600;
+}
+.bracket-team-score {
+  font-family:'Bebas Neue';
+  font-size:1rem;
+  letter-spacing:.05em;
+  color:var(--gold);
+  flex-shrink:0;
+}
+.bracket-match-status {
+  margin-top:.42rem;
+  font-size:.72rem;
+  color:var(--muted);
+  text-align:center;
+}
+.bracket-finals {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  padding-top:12rem;
+  gap:3rem;
+}
+.bracket-final-block,
+.bracket-third-block {
+  display:flex;
+  flex-direction:column;
+}
+.bracket-third-block { margin-top:5rem; }
+.bracket-round.round-s16 { padding-top:0; }
+.bracket-round.round-s8 { padding-top:4.2rem; }
+.bracket-round.round-qf { padding-top:11.4rem; }
+.bracket-round.round-sf { padding-top:19.2rem; }
+.bracket-round.round-s16 .bracket-pair { margin-bottom:1.7rem; }
+.bracket-round.round-s8 .bracket-pair { margin-bottom:6.25rem; }
+.bracket-round.round-qf .bracket-pair { margin-bottom:20.5rem; }
+.bracket-round.round-sf .bracket-pair { margin-bottom:0; }
+
+@media (max-width: 900px) {
+  .bracket-layout { min-width:1480px; }
+}
 
 /* ── Alertes ── */
 .empty-state { text-align:center; color:var(--muted); padding:3rem 1rem; font-size:.9rem; }
@@ -561,7 +698,7 @@ body.light .chat-msg.other { background:#f3f4f6; }
       <p>Chargement des matchs…</p>
     </div>
     <div id="matchsContent" style="display:none">
-      <div class="phase-filter" id="phaseFilter"></div>
+      <div class="phase-filter matchs-subtabs" id="matchsSubtabs"></div>
       <div id="matchsGrid"></div>
     </div>
   </div>
@@ -631,7 +768,7 @@ let allClassementPublication = [];
 let allMatchsReels  = [];
 let BEST_THIRDS     = {};
 let expandedRows    = new Set();
-let activePhase     = 'all';
+let activeMatchsView = 'groupes';
 
 // ── Init ──────────────────────────────────────────────
 function toggleTheme() {
@@ -1374,26 +1511,21 @@ async function loadMatchs() {
 
   document.getElementById('matchsLoading').style.display='none';
   document.getElementById('matchsContent').style.display='block';
-  buildPhaseFilter();
-  renderMatchs('all');
+  buildMatchsSubtabs();
+  renderMatchsView(activeMatchsView);
   if (SCHEDULE_DATA) {
     await loadCalendrierTeams();
     renderCalendrier();
   }
 }
 
-function buildPhaseFilter() {
-  const phases = [
-    { id:'all',      label:'Tous' },
-    { id:'groupes',  label:'Groupes' },
-    { id:'seizièmes',label:'Seizièmes' },
-    { id:'huitièmes',label:'Huitièmes' },
-    { id:'QF',       label:'Quarts' },
-    { id:'SF',       label:'Demies' },
-    { id:'final',    label:'Finale & 3e' },
+function buildMatchsSubtabs() {
+  const views = [
+    { id:'groupes', label:'Groupes' },
+    { id:'tableau', label:'Tableau' },
   ];
-  document.getElementById('phaseFilter').innerHTML = phases.map(p=>
-    `<button class="phase-btn ${activePhase===p.id?'active':''}" onclick="renderMatchs('${p.id}',this)">${p.label}</button>`
+  document.getElementById('matchsSubtabs').innerHTML = views.map(view=>
+    `<button class="phase-btn ${activeMatchsView===view.id?'active':''}" onclick="renderMatchsView('${view.id}',this)">${view.label}</button>`
   ).join('');
 }
 
@@ -1406,73 +1538,136 @@ function buildBestThirdGroups(groups, standings) {
   return new Set(rankedThirds.slice(0,8).map(team => team.groupId));
 }
 
-function renderMatchs(phase, btnEl) {
-  activePhase = phase;
+function renderMatchsView(view, btnEl) {
+  activeMatchsView = view;
   document.querySelectorAll('.phase-btn').forEach(b=>b.classList.remove('active'));
   btnEl?.classList.add('active');
 
   const reels = Object.fromEntries(allMatchsReels.map(m=>[m.match_id,m]));
   const grid = document.getElementById('matchsGrid');
+  grid.innerHTML = view === 'tableau' ? renderMatchsBracket(reels) : renderMatchsGroupes(reels);
+}
 
-  // Phase de groupes → vue avec classement par groupe
-  if (phase==='all' || phase==='groupes') {
-    const groups = Object.keys(CONFIG.matchs_groupes).filter(g=>!g.startsWith('_'));
-    // Calculer classements réels depuis matchs_reels
-    const standings = {};
-    groups.forEach(g => {
-      const matchs = CONFIG.matchs_groupes[g];
-      const teams = {};
-      CONFIG.groupes[g].equipes.forEach(c=>{ teams[c]={pts:0,j:0,g:0,n:0,d:0,bp:0,bc:0,bd:0}; });
-      matchs.forEach(m=>{
-        const r=reels[m.id]; if(!r?.joue) return;
-        const sd = r.score_dom;
-        const se = r.score_ext;
-        const ed = r.equipe_dom || m.dom;
-        const ee = r.equipe_ext || m.ext;
-        if(!teams[ed]||!teams[ee]) return;
-        teams[ed].j++; teams[ee].j++;
-        teams[ed].bp+=sd; teams[ed].bc+=se; teams[ed].bd+=(sd-se);
-        teams[ee].bp+=se; teams[ee].bc+=sd; teams[ee].bd+=(se-sd);
-        if(sd>se){teams[ed].pts+=3;teams[ed].g++;teams[ee].d++;}
-        else if(sd<se){teams[ee].pts+=3;teams[ee].g++;teams[ed].d++;}
-        else{teams[ed].pts+=1;teams[ed].n++;teams[ee].pts+=1;teams[ee].n++;}
-      });
-      standings[g]=Object.entries(teams)
-        .sort((a,b)=>b[1].pts-a[1].pts||b[1].bd-a[1].bd||b[1].bp-a[1].bp)
-        .map(([code,s])=>({code,...s}));
+function renderMatchsGroupes(reels) {
+  const groups = Object.keys(CONFIG.matchs_groupes).filter(g=>!g.startsWith('_'));
+  const standings = {};
+  groups.forEach(g => {
+    const matchs = CONFIG.matchs_groupes[g];
+    const teams = {};
+    CONFIG.groupes[g].equipes.forEach(c=>{ teams[c]={pts:0,j:0,g:0,n:0,d:0,bp:0,bc:0,bd:0}; });
+    matchs.forEach(m=>{
+      const r=reels[m.id]; if(!r?.joue) return;
+      const sd = r.score_dom;
+      const se = r.score_ext;
+      const ed = r.equipe_dom || m.dom;
+      const ee = r.equipe_ext || m.ext;
+      if(!teams[ed]||!teams[ee]) return;
+      teams[ed].j++; teams[ee].j++;
+      teams[ed].bp+=sd; teams[ed].bc+=se; teams[ed].bd+=(sd-se);
+      teams[ee].bp+=se; teams[ee].bc+=sd; teams[ee].bd+=(se-sd);
+      if(sd>se){teams[ed].pts+=3;teams[ed].g++;teams[ee].d++;}
+      else if(sd<se){teams[ee].pts+=3;teams[ee].g++;teams[ed].d++;}
+      else{teams[ed].pts+=1;teams[ed].n++;teams[ee].pts+=1;teams[ee].n++;}
     });
+    standings[g]=Object.entries(teams)
+      .sort((a,b)=>b[1].pts-a[1].pts||b[1].bd-a[1].bd||b[1].bp-a[1].bp)
+      .map(([code,s])=>({code,...s}));
+  });
 
-    // Meilleurs 3es — depuis les groupes ayant au moins 1 match joué
-    const best8groups = buildBestThirdGroups(groups, standings);
+  const best8groups = buildBestThirdGroups(groups, standings);
+  return `<div class="groupes-grid">` + groups.map(g => renderGroupCard(g, CONFIG.matchs_groupes[g], reels, standings[g], best8groups)).join('') + `</div>`;
+}
 
-    if (phase==='all') {
-      // En vue "Tous", afficher groupes en premier puis le reste
-      let html = `<div class="groupes-grid" style="margin-bottom:1.2rem">` + groups.map(g => renderGroupCard(g, CONFIG.matchs_groupes[g], reels, standings[g], best8groups)).join('') + `</div>`;
-      // Ajouter les élim en dessous
-      const eliminatoires = ['seizièmes','huitièmes','QF','SF','P3','F'];
-      const elimMatchs = [];
-      eliminatoires.forEach(tour=>(CONFIG.bracket_eliminatoire[tour]||[]).forEach(m=>elimMatchs.push({...m,phase:tour})));
-      if (elimMatchs.length) {
-        html += `<div style="font-family:'Bebas Neue';font-size:1.1rem;letter-spacing:.1em;color:var(--muted);margin-bottom:.8rem">Phase éliminatoire</div>`;
-        html += `<div class="matchs-grid">` + elimMatchs.map(m=>renderElimCard(m,reels)).join('') + `</div>`;
-      }
-      grid.innerHTML = html;
-    } else {
-      grid.innerHTML = `<div class="groupes-grid">` + groups.map(g => renderGroupCard(g, CONFIG.matchs_groupes[g], reels, standings[g], best8groups)).join('') + `</div>`;
-    }
-    return;
+function getResolvedElimLabel(source, matchData, reels, explicitCode) {
+  const code = explicitCode || resolveRealElimSourceCode(source, matchData, reels);
+  return code ? getTeamLabel(code) : translateSource(source);
+}
+
+function renderBracketMatchCard(matchData, reels, roundLabel) {
+  const real = reels[matchData.id];
+  const domLabel = getResolvedElimLabel(matchData.dom_source, matchData, reels, real?.equipe_dom);
+  const extLabel = getResolvedElimLabel(matchData.ext_source, matchData, reels, real?.equipe_ext);
+  const statusClass = real?.joue ? 'played' : real?.verrouille ? 'locked' : 'pending';
+  const meta = `${roundLabel} · ${matchData.id}`;
+
+  return `<div class="bracket-match-card ${statusClass}">
+    <div class="bracket-match-meta">${meta}</div>
+    <div class="bracket-team-row">
+      <span class="bracket-team-label">${domLabel}</span>
+      ${real?.joue ? `<span class="bracket-team-score">${real.score_dom}</span>` : ''}
+    </div>
+    <div class="bracket-team-row">
+      <span class="bracket-team-label">${extLabel}</span>
+      ${real?.joue ? `<span class="bracket-team-score">${real.score_ext}</span>` : ''}
+    </div>
+    ${!real?.joue ? `<div class="bracket-match-status">${real?.verrouille ? 'Verrouillé' : 'À venir'}</div>` : ''}
+  </div>`;
+}
+
+function renderBracketRoundColumn(title, matches, side, roundKey, roundLabel, reels) {
+  const pairSize = matches.length > 1 ? 2 : 1;
+  const pairs = [];
+  for (let index = 0; index < matches.length; index += pairSize) {
+    pairs.push(matches.slice(index, index + pairSize));
   }
 
-  // Phase éliminatoire → vue en cartes simples
-  const eliminatoires = ['seizièmes','huitièmes','QF','SF','P3','F'];
-  let matchsList = [];
-  eliminatoires.forEach(tour=>{
-    if (phase===tour||(phase==='final'&&(tour==='P3'||tour==='F'))) {
-      (CONFIG.bracket_eliminatoire[tour]||[]).forEach(m=>matchsList.push({...m,phase:tour}));
-    }
-  });
-  if (!matchsList.length) { grid.innerHTML='<div class="empty-state">Aucun match pour cette phase.</div>'; return; }
-  grid.innerHTML = `<div class="matchs-grid">` + matchsList.map(m=>renderElimCard(m,reels)).join('') + `</div>`;
+  return `<div class="bracket-round side-${side} round-${roundKey}">
+    <div class="bracket-round-title">${title}</div>
+    ${pairs.map(pair => `
+      <div class="bracket-pair ${pair.length === 2 ? 'has-connector' : ''}">
+        ${pair.map(match => `
+          <div class="bracket-match-wrap">
+            ${renderBracketMatchCard(match, reels, roundLabel)}
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function renderMatchsBracket(reels) {
+  const s16 = CONFIG.bracket_eliminatoire.seizièmes || [];
+  const s8 = CONFIG.bracket_eliminatoire.huitièmes || [];
+  const qf = CONFIG.bracket_eliminatoire.QF || [];
+  const sf = CONFIG.bracket_eliminatoire.SF || [];
+  const finale = CONFIG.bracket_eliminatoire.F || [];
+  const thirdPlace = CONFIG.bracket_eliminatoire.P3 || [];
+
+  const left = {
+    s16: s16.slice(0, 8),
+    s8: s8.slice(0, 4),
+    qf: qf.slice(0, 2),
+    sf: sf.slice(0, 1),
+  };
+  const right = {
+    sf: sf.slice(1, 2),
+    qf: qf.slice(2, 4),
+    s8: s8.slice(4, 8),
+    s16: s16.slice(8, 16),
+  };
+
+  return `<div class="bracket-scroller">
+    <div class="bracket-layout">
+      ${renderBracketRoundColumn('Seizièmes', left.s16, 'left', 's16', 'S16', reels)}
+      ${renderBracketRoundColumn('Huitièmes', left.s8, 'left', 's8', 'S8', reels)}
+      ${renderBracketRoundColumn('Quarts', left.qf, 'left', 'qf', 'QF', reels)}
+      ${renderBracketRoundColumn('Demies', left.sf, 'left', 'sf', 'SF', reels)}
+      <div class="bracket-finals">
+        <div class="bracket-final-block">
+          <div class="bracket-finals-title">Finale</div>
+          ${(finale[0]) ? renderBracketMatchCard(finale[0], reels, 'Finale') : '<div class="empty-state" style="padding:1rem">Finale à déterminer</div>'}
+        </div>
+        <div class="bracket-third-block">
+          <div class="bracket-finals-title">3e place</div>
+          ${(thirdPlace[0]) ? renderBracketMatchCard(thirdPlace[0], reels, 'P3') : '<div class="empty-state" style="padding:1rem">3e place à déterminer</div>'}
+        </div>
+      </div>
+      ${renderBracketRoundColumn('Demies', right.sf, 'right', 'sf', 'SF', reels)}
+      ${renderBracketRoundColumn('Quarts', right.qf, 'right', 'qf', 'QF', reels)}
+      ${renderBracketRoundColumn('Huitièmes', right.s8, 'right', 's8', 'S8', reels)}
+      ${renderBracketRoundColumn('Seizièmes', right.s16, 'right', 's16', 'S16', reels)}
+    </div>
+  </div>`;
 }
 
 function renderGroupCard(g, matchs, reels, standing, best8groups) {
