@@ -30,7 +30,12 @@
       "type": "equipe",
       "points": 2,
       "active": true,
-      "verrouille": true
+      "verrouille": true,
+      "reponses_correctes": [
+        "GER",
+        "NED",
+        "FRA"
+      ]
     },
     {
       "id": "b2",
@@ -39,7 +44,11 @@
       "type": "equipe",
       "points": 2,
       "active": true,
-      "verrouille": true
+      "verrouille": true,
+      "reponses_correctes": [
+        "MEX",
+        "ESP"
+      ]
     },
     {
       "id": "b3",
@@ -48,7 +57,8 @@
       "type": "entier",
       "points": 2,
       "active": true,
-      "verrouille": true
+      "verrouille": true,
+      "reponse_correcte": 16
     },
     {
       "id": "b4",
@@ -57,7 +67,8 @@
       "type": "entier",
       "points": 3,
       "active": true,
-      "verrouille": true
+      "verrouille": true,
+      "reponse_correcte": 215
     },
     {
       "id": "b5",
