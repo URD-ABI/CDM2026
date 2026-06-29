@@ -656,7 +656,8 @@ async function init() {
     } catch(_) {
       BEST_THIRDS = {};
     }
-    await Promise.all([ loadClassement(), loadMatchs(), loadPronostics(), loadCalendrier() ]);
+    await Promise.all([ loadClassement(), loadMatchs(), loadPronostics() ]);
+    await loadCalendrier();
     setupRealtime();
     initChat();
     // Dernière mise à jour admin = max updated_at des matchs_reels
@@ -1375,6 +1376,10 @@ async function loadMatchs() {
   document.getElementById('matchsContent').style.display='block';
   buildPhaseFilter();
   renderMatchs('all');
+  if (SCHEDULE_DATA) {
+    await loadCalendrierTeams();
+    renderCalendrier();
+  }
 }
 
 function buildPhaseFilter() {
