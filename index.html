@@ -814,16 +814,17 @@ function renderDetailElimMatchesSection({ CONFIG, brTours, pronos_e, reels_map, 
       const r = reels_map[m.id];
       const isVisible = isPublicPronoVisible(m, r);
       const isScoreVisible = isDetailElimScoreVisible(m, r);
-      if (!isVisible && !p) return;
-
-      hasElim = true;
-      const label = formatBracketDetailMatchLabel(tour, i);
       const dom = r?.equipe_dom ? CONFIG.equipes.find(e => e.code === r.equipe_dom) : null;
       const ext = r?.equipe_ext ? CONFIG.equipes.find(e => e.code === r.equipe_ext) : null;
       const predictedDomCode = typeof resolveSourceCode === 'function' ? resolveSourceCode(m.dom_source, m, reels_map) : null;
       const predictedExtCode = typeof resolveSourceCode === 'function' ? resolveSourceCode(m.ext_source, m, reels_map) : null;
       const predictedDom = predictedDomCode ? CONFIG.equipes.find(e => e.code === predictedDomCode) : null;
       const predictedExt = predictedExtCode ? CONFIG.equipes.find(e => e.code === predictedExtCode) : null;
+      const hasResolvedTeams = !!((dom || predictedDom) && (ext || predictedExt));
+      if ((!isVisible && !p) || !hasResolvedTeams) return;
+
+      hasElim = true;
+      const label = formatBracketDetailMatchLabel(tour, i);
       const teamsText = dom || ext
         ? `${flag(dom) || '?'} – ${flag(ext) || '?'}`
         : (predictedDom || predictedExt)
