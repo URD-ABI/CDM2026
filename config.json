@@ -461,7 +461,7 @@
     {
       "id": "b10",
       "texte": "Nombre total de buts marqués dans le tournoi",
-      "description": "Combien de buts au total seront marqués lors de la coupe du monde ?",
+      "description": "Combien de buts au total seront marqués lors de la coupe du monde 2026 ?",
       "type": "entier",
       "points": 4,
       "active": true,
