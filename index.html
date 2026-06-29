@@ -382,18 +382,23 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
   flex-direction:column;
 }
 .bracket-trophy {
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 10px);
+  transform:translateX(-50%);
   display:flex;
   justify-content:center;
-  margin:0 auto .6rem;
+  margin:0;
+  pointer-events:none;
 }
 .bracket-trophy img {
   display:block;
-  width:72px;
+  width:92px;
   max-width:100%;
   height:auto;
   object-fit:contain;
 }
-.bracket-final-block { grid-row:92 / span 18; }
+.bracket-final-block { position:relative; grid-row:92 / span 18; }
 .bracket-third-block { grid-row:133 / span 18; }
 
 @media (max-width: 900px) {
