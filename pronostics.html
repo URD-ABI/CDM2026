@@ -1624,9 +1624,6 @@ async function renderElim() {
       const st = state.elim[m.id] || {};
       const labelTour = `${labels[tour]}${matchs.length>1?' '+(i+1):''}`;
 
-      // Masquer si verrouillé et pas encore pronostiqué
-      if (locked && !st.resultat) return;
-
       // Résoudre les labels des équipes
       const domLabel = resolveElimLabel(m.dom_source, reelsMap, m);
       const extLabel = resolveElimLabel(m.ext_source, reelsMap, m);
