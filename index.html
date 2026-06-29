@@ -626,6 +626,7 @@ let allParticipants = [];
 let allScores       = [];
 let allClassementPublication = [];
 let allMatchsReels  = [];
+let BEST_THIRDS     = {};
 let expandedRows    = new Set();
 let activePhase     = 'all';
 
@@ -647,6 +648,11 @@ async function init() {
   }
   try {
     CONFIG = await (await fetch('config.json')).json();
+    try {
+      BEST_THIRDS = await (await fetch('best-thirds-combinations.json')).json();
+    } catch(_) {
+      BEST_THIRDS = {};
+    }
     await Promise.all([ loadClassement(), loadMatchs(), loadPronostics(), loadCalendrier() ]);
     setupRealtime();
     initChat();
@@ -814,8 +820,8 @@ function renderDetailElimMatchesSection({ CONFIG, brTours, pronos_e, reels_map, 
       const label = formatBracketDetailMatchLabel(tour, i);
       const dom = r?.equipe_dom ? CONFIG.equipes.find(e => e.code === r.equipe_dom) : null;
       const ext = r?.equipe_ext ? CONFIG.equipes.find(e => e.code === r.equipe_ext) : null;
-      const predictedDomLabel = typeof resolveSourceLabel === 'function' ? resolveSourceLabel(m.dom_source, m) : null;
-      const predictedExtLabel = typeof resolveSourceLabel === 'function' ? resolveSourceLabel(m.ext_source, m) : null;
+      const predictedDomLabel = typeof resolveSourceLabel === 'function' ? resolveSourceLabel(m.dom_source, m, reels_map) : null;
+      const predictedExtLabel = typeof resolveSourceLabel === 'function' ? resolveSourceLabel(m.ext_source, m, reels_map) : null;
       const teamsText = dom || ext
         ? `${flag(dom) || '?'} – ${flag(ext) || '?'}`
         : (predictedDomLabel || predictedExtLabel)
@@ -1240,7 +1246,7 @@ async function loadParticipantDetail(pid, el) {
     reels_map,
     pts_conf,
     flag,
-    resolveSourceLabel: resolveDetailElimSourceLabel,
+    resolveSourceLabel: resolveRealElimSourceLabel,
   });
 
   // ── 4. Qualifiés & 3es : flags + pts ─────────────────────────────
@@ -1584,6 +1590,123 @@ function getBonusCorrectAnswerDisplay(question) {
   const answers = getBonusAcceptedAnswers(question);
   if (!answers.length) return '—';
   return answers.map(answer => getBonusAnswerLabel(question, answer)).join(', ');
+}
+
+function computeRealGroupOutcomes(reelsMap) {
+  const outcomes = {};
+  Object.entries(CONFIG.matchs_groupes || {})
+    .filter(([groupId]) => !groupId.startsWith('_'))
+    .forEach(([groupId, matchs]) => {
+      const allPlayed = (matchs || []).every(match => reelsMap[match.id]?.joue);
+      if (!allPlayed) return;
+
+      const teams = {};
+      (CONFIG.groupes[groupId]?.equipes || []).forEach(code => {
+        teams[code] = { pts: 0, bd: 0, bp: 0 };
+      });
+
+      matchs.forEach(match => {
+        const real = reelsMap[match.id];
+        if (!real?.joue) return;
+        const home = real.equipe_dom || match.dom;
+        const away = real.equipe_ext || match.ext;
+        if (!teams[home] || !teams[away]) return;
+        const sd = real.score_dom;
+        const se = real.score_ext;
+        teams[home].bp += sd;
+        teams[home].bd += (sd - se);
+        teams[away].bp += se;
+        teams[away].bd += (se - sd);
+        if (sd > se) teams[home].pts += 3;
+        else if (sd < se) teams[away].pts += 3;
+        else {
+          teams[home].pts += 1;
+          teams[away].pts += 1;
+        }
+      });
+
+      const ranked = Object.entries(teams)
+        .sort((a,b)=>b[1].pts-a[1].pts||b[1].bd-a[1].bd||b[1].bp-a[1].bp)
+        .map(([code, stats]) => ({ code, ...stats }));
+
+      outcomes[groupId] = {
+        premier: ranked[0]?.code || null,
+        deuxieme: ranked[1]?.code || null,
+        troisieme: ranked[2]?.code || null,
+        troisieme_stats: ranked[2] || null,
+      };
+    });
+  return outcomes;
+}
+
+function computeRealBestThirdGroups(realGroupOutcomes) {
+  return Object.entries(realGroupOutcomes)
+    .filter(([, outcome]) => outcome?.troisieme && outcome?.troisieme_stats)
+    .map(([groupId, outcome]) => ({ groupId, ...outcome.troisieme_stats }))
+    .sort((a,b)=>b.pts-a.pts||b.bd-a.bd||b.bp-a.bp)
+    .map(entry => entry.groupId);
+}
+
+function resolveRealBestThirdCode(matchData, realGroupOutcomes, bestThirdGroups) {
+  if (!matchData?.ext_source?.startsWith('T3_')) return null;
+  const comboKey = [...(bestThirdGroups || [])].sort().join(',');
+  const combo = BEST_THIRDS?.[comboKey];
+  const source = combo?.[matchData.dom_source];
+  const groupId = source?.[1];
+  return groupId ? (realGroupOutcomes[groupId]?.troisieme || null) : null;
+}
+
+function resolveRealElimSourceLabel(src, matchData, reelsMap) {
+  if (!src) return '?';
+  const realGroupOutcomes = computeRealGroupOutcomes(reelsMap);
+  const bestThirdGroups = computeRealBestThirdGroups(realGroupOutcomes);
+
+  if (matchData) {
+    const actualMatch = reelsMap[matchData.id];
+    if (actualMatch?.equipe_dom && matchData.dom_source === src) {
+      return getTeamLabel(actualMatch.equipe_dom);
+    }
+    if (actualMatch?.equipe_ext && matchData.ext_source === src) {
+      return getTeamLabel(actualMatch.equipe_ext);
+    }
+  }
+
+  if (/^[12][A-L]$/.test(src)) {
+    const groupId = src[1];
+    const outcome = realGroupOutcomes[groupId];
+    const resolvedCode = src[0] === '1' ? outcome?.premier : outcome?.deuxieme;
+    return resolvedCode ? getTeamLabel(resolvedCode) : translateSource(src);
+  }
+
+  if (src.startsWith('T3_')) {
+    const exactThirdCode = resolveRealBestThirdCode(matchData, realGroupOutcomes, bestThirdGroups);
+    return exactThirdCode ? getTeamLabel(exactThirdCode) : translateSource(src);
+  }
+
+  if (src.startsWith('W_')) {
+    const matchId = src.slice(2);
+    const real = reelsMap[matchId];
+    if (real?.equipe_dom && real.equipe_ext) {
+      if (real.joue) {
+        const winner = real.score_dom > real.score_ext ? real.equipe_dom : real.equipe_ext;
+        return getTeamLabel(winner);
+      }
+      return `${getTeamLabel(real.equipe_dom)} / ${getTeamLabel(real.equipe_ext)}`;
+    }
+    return translateSource(src);
+  }
+
+  if (src.startsWith('L_')) {
+    const matchId = src.slice(2);
+    const real = reelsMap[matchId];
+    if (real?.joue && real.equipe_dom && real.equipe_ext) {
+      const loser = real.score_dom < real.score_ext ? real.equipe_dom : real.equipe_ext;
+      return getTeamLabel(loser);
+    }
+    return translateSource(src);
+  }
+
+  return translateSource(src);
 }
 let allPart_pronostics = [];
 let activePart = null;

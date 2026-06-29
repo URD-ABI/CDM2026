@@ -1471,6 +1471,137 @@ function resolveDisplayedElimLabel(src, matchData, q32, reelsMap) {
   return resolveElimLabel(src, reelsMap);
 }
 
+function computeRealGroupOutcomes(reelsMap) {
+  const outcomes = {};
+  Object.entries(CONFIG.matchs_groupes || {})
+    .filter(([groupId]) => !groupId.startsWith('_'))
+    .forEach(([groupId, matchs]) => {
+      const allPlayed = (matchs || []).every(match => reelsMap[match.id]?.joue);
+      if (!allPlayed) return;
+
+      const teams = {};
+      (CONFIG.groupes[groupId]?.equipes || []).forEach(code => {
+        teams[code] = { pts: 0, bd: 0, bp: 0 };
+      });
+
+      matchs.forEach(match => {
+        const real = reelsMap[match.id];
+        if (!real?.joue) return;
+        const home = real.equipe_dom || match.dom;
+        const away = real.equipe_ext || match.ext;
+        if (!teams[home] || !teams[away]) return;
+        const sd = real.score_dom;
+        const se = real.score_ext;
+        teams[home].bp += sd;
+        teams[home].bd += (sd - se);
+        teams[away].bp += se;
+        teams[away].bd += (se - sd);
+        if (sd > se) teams[home].pts += 3;
+        else if (sd < se) teams[away].pts += 3;
+        else {
+          teams[home].pts += 1;
+          teams[away].pts += 1;
+        }
+      });
+
+      const ranked = Object.entries(teams)
+        .sort((a,b)=>b[1].pts-a[1].pts||b[1].bd-a[1].bd||b[1].bp-a[1].bp)
+        .map(([code, stats]) => ({ code, ...stats }));
+
+      outcomes[groupId] = {
+        premier: ranked[0]?.code || null,
+        deuxieme: ranked[1]?.code || null,
+        troisieme: ranked[2]?.code || null,
+        troisieme_stats: ranked[2] || null,
+      };
+    });
+  return outcomes;
+}
+
+function computeRealBestThirdGroups(realGroupOutcomes) {
+  return Object.entries(realGroupOutcomes)
+    .filter(([, outcome]) => outcome?.troisieme && outcome?.troisieme_stats)
+    .map(([groupId, outcome]) => ({ groupId, ...outcome.troisieme_stats }))
+    .sort((a,b)=>b.pts-a.pts||b.bd-a.bd||b.bp-a.bp)
+    .map(entry => entry.groupId);
+}
+
+function resolveRealBestThirdCode(matchData, realGroupOutcomes, bestThirdGroups) {
+  if (!matchData?.ext_source?.startsWith('T3_')) return null;
+  const comboKey = [...(bestThirdGroups || [])].sort().join(',');
+  const combo = BEST_THIRDS?.[comboKey];
+  const source = combo?.[matchData.dom_source];
+  const groupId = source?.[1];
+  return groupId ? (realGroupOutcomes[groupId]?.troisieme || null) : null;
+}
+
+function resolveElimLabel(src, reelsMap, matchData) {
+  if (!src) return '?';
+  const realGroupOutcomes = computeRealGroupOutcomes(reelsMap);
+  const bestThirdGroups = computeRealBestThirdGroups(realGroupOutcomes);
+
+  if (matchData) {
+    const actualMatch = reelsMap[matchData.id];
+    if (actualMatch?.equipe_dom && matchData.dom_source === src) {
+      const team = getTeamByCode(actualMatch.equipe_dom);
+      return team ? teamDisplay(team) : src;
+    }
+    if (actualMatch?.equipe_ext && matchData.ext_source === src) {
+      const team = getTeamByCode(actualMatch.equipe_ext);
+      return team ? teamDisplay(team) : src;
+    }
+  }
+
+  if (/^[12][A-L]$/.test(src)) {
+    const groupId = src[1];
+    const outcome = realGroupOutcomes[groupId];
+    const resolvedCode = src[0] === '1' ? outcome?.premier : outcome?.deuxieme;
+    if (resolvedCode) {
+      const team = getTeamByCode(resolvedCode);
+      return team ? teamDisplay(team) : src;
+    }
+    return src;
+  }
+
+  if (src.startsWith('T3_')) {
+    const exactThirdCode = resolveRealBestThirdCode(matchData, realGroupOutcomes, bestThirdGroups);
+    if (exactThirdCode) {
+      const team = getTeamByCode(exactThirdCode);
+      return team ? teamDisplay(team) : src;
+    }
+    return src;
+  }
+
+  if (src.startsWith('W_')) {
+    const matchId = src.slice(2);
+    const real = reelsMap[matchId];
+    if (real?.equipe_dom && real.equipe_ext) {
+      if (real.joue) {
+        const winner = real.score_dom > real.score_ext ? real.equipe_dom : real.equipe_ext;
+        const team = getTeamByCode(winner);
+        return team ? teamDisplay(team) : src;
+      }
+      const home = getTeamByCode(real.equipe_dom);
+      const away = getTeamByCode(real.equipe_ext);
+      return (home ? teamDisplay(home) : real.equipe_dom) + ' / ' + (away ? teamDisplay(away) : real.equipe_ext);
+    }
+    return src;
+  }
+
+  if (src.startsWith('L_')) {
+    const matchId = src.slice(2);
+    const real = reelsMap[matchId];
+    if (real?.joue && real.equipe_dom && real.equipe_ext) {
+      const loser = real.score_dom < real.score_ext ? real.equipe_dom : real.equipe_ext;
+      const team = getTeamByCode(loser);
+      return team ? teamDisplay(team) : src;
+    }
+    return src;
+  }
+
+  return src;
+}
+
 async function renderElim() {
   const tours = ['seizièmes','huitièmes','QF','SF','P3','F'];
   const labels = {seizièmes:'Seizième',huitièmes:'Huitième',QF:'Quart',SF:'Demi-finale',P3:'3e place',F:'Finale'};
@@ -1496,8 +1627,8 @@ async function renderElim() {
       if (locked && !st.resultat) return;
 
       // Résoudre les labels des équipes
-      const domLabel = resolveDisplayedElimLabel(m.dom_source, m, q32, reelsMap);
-      const extLabel = resolveDisplayedElimLabel(m.ext_source, m, q32, reelsMap);
+      const domLabel = resolveElimLabel(m.dom_source, reelsMap, m);
+      const extLabel = resolveElimLabel(m.ext_source, reelsMap, m);
 
       html += `
       <div class="match-row" style="margin-bottom:.5rem">
