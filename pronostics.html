@@ -1523,6 +1523,7 @@ function computeRealBestThirdGroups(realGroupOutcomes) {
     .filter(([, outcome]) => outcome?.troisieme && outcome?.troisieme_stats)
     .map(([groupId, outcome]) => ({ groupId, ...outcome.troisieme_stats }))
     .sort((a,b)=>b.pts-a.pts||b.bd-a.bd||b.bp-a.bp)
+    .slice(0,8)
     .map(entry => entry.groupId);
 }
 
