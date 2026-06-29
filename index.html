@@ -381,6 +381,18 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
   display:flex;
   flex-direction:column;
 }
+.bracket-trophy {
+  display:flex;
+  justify-content:center;
+  margin:0 auto .6rem;
+}
+.bracket-trophy img {
+  display:block;
+  width:72px;
+  max-width:100%;
+  height:auto;
+  object-fit:contain;
+}
 .bracket-final-block { grid-row:92 / span 18; }
 .bracket-third-block { grid-row:133 / span 18; }
 
@@ -1718,6 +1730,7 @@ function renderMatchsBracket(reels) {
       ${renderBracketRoundColumn('Demies', left.sf, 'left', 'sf', 'SF', reels)}
       <div class="bracket-finals">
         <div class="bracket-final-block">
+          <div class="bracket-trophy"><img src="world_cup.png" alt="Coupe du Monde"></div>
           <div class="bracket-finals-title">Finale</div>
           ${(finale[0]) ? renderBracketMatchCard(finale[0], reels, 'Finale') : '<div class="empty-state" style="padding:1rem">Finale à déterminer</div>'}
         </div>
