@@ -1432,10 +1432,50 @@ function resolveElimLabel(src, reelsMap) {
   return src;
 }
 
+function resolvePredictedElimSourceCode(src, matchData, q32) {
+  if (!src) return null;
+
+  if (/^[12][A-L]$/.test(src)) {
+    return resolveSource(src, q32)?.code || null;
+  }
+
+  if (src.startsWith('T3_')) {
+    if (matchData?.ext_source === src) {
+      const exact = resolveT3ForSlot(matchData.dom_source, q32);
+      if (exact) return exact;
+    }
+    return resolveSource(src, q32)?.code || null;
+  }
+
+  if (src.startsWith('W_')) {
+    return state.bracket[src.slice(2)] || null;
+  }
+
+  if (src.startsWith('L_')) {
+    const matchId = src.slice(2);
+    const sfMatch = CONFIG.bracket_eliminatoire.SF?.find(m => m.id === matchId);
+    if (!sfMatch) return null;
+    const winner = state.bracket[matchId];
+    const domCode = resolvePredictedElimSourceCode(sfMatch.dom_source, sfMatch, q32);
+    const extCode = resolvePredictedElimSourceCode(sfMatch.ext_source, sfMatch, q32);
+    if (winner && domCode && extCode) return winner === domCode ? extCode : domCode;
+    return null;
+  }
+
+  return null;
+}
+
+function resolveDisplayedElimLabel(src, matchData, q32, reelsMap) {
+  const predictedCode = resolvePredictedElimSourceCode(src, matchData, q32);
+  if (predictedCode) return getTeamLabel(predictedCode);
+  return resolveElimLabel(src, reelsMap);
+}
+
 async function renderElim() {
   const tours = ['seizièmes','huitièmes','QF','SF','P3','F'];
   const labels = {seizièmes:'Seizième',huitièmes:'Huitième',QF:'Quart',SF:'Demi-finale',P3:'3e place',F:'Finale'};
   let html = '';
+  const q32 = buildQualified32();
 
   // Charger matchs_reels depuis Supabase pour avoir les équipes réelles
   let reelsMap = {};
@@ -1456,8 +1496,8 @@ async function renderElim() {
       if (locked && !st.resultat) return;
 
       // Résoudre les labels des équipes
-      const domLabel = resolveElimLabel(m.dom_source, reelsMap);
-      const extLabel = resolveElimLabel(m.ext_source, reelsMap);
+      const domLabel = resolveDisplayedElimLabel(m.dom_source, m, q32, reelsMap);
+      const extLabel = resolveDisplayedElimLabel(m.ext_source, m, q32, reelsMap);
 
       html += `
       <div class="match-row" style="margin-bottom:.5rem">

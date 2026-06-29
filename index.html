@@ -777,6 +777,85 @@ function isPublicPronoVisible(matchDef, realMatch) {
   return !!(realMatch?.joue || isPublicMatchLocked(matchDef, realMatch));
 }
 
+function isBracketDetailVisible(matchDef, realMatch, allGroupsDone) {
+  return !!(allGroupsDone || isPublicPronoVisible(matchDef, realMatch));
+}
+
+function isDetailElimScoreVisible(matchDef, realMatch) {
+  return isPublicMatchLocked(matchDef, realMatch);
+}
+
+function formatBracketDetailMatchLabel(tour, index) {
+  const labels = {
+    seizièmes: 'S16',
+    huitièmes: 'S8',
+    QF: 'QF',
+    SF: 'SF',
+    P3: '3e place',
+    F: 'Finale',
+  };
+  const prefix = labels[tour] || tour;
+  return (tour === 'P3' || tour === 'F') ? prefix : `${prefix} ${index + 1}`;
+}
+
+function renderDetailElimMatchesSection({ CONFIG, brTours, pronos_e, reels_map, pts_conf, flag, resolveSourceLabel }) {
+  let html = `<div class="detail-section"><h4>Matchs Élim. Réels</h4>`;
+  let hasElim = false;
+
+  brTours.forEach(tour => {
+    (CONFIG.bracket_eliminatoire[tour] || []).forEach((m, i) => {
+      const p = pronos_e[m.id];
+      const r = reels_map[m.id];
+      const isVisible = isPublicPronoVisible(m, r);
+      const isScoreVisible = isDetailElimScoreVisible(m, r);
+      if (!isVisible && !p) return;
+
+      hasElim = true;
+      const label = formatBracketDetailMatchLabel(tour, i);
+      const dom = r?.equipe_dom ? CONFIG.equipes.find(e => e.code === r.equipe_dom) : null;
+      const ext = r?.equipe_ext ? CONFIG.equipes.find(e => e.code === r.equipe_ext) : null;
+      const predictedDomLabel = typeof resolveSourceLabel === 'function' ? resolveSourceLabel(m.dom_source, m) : null;
+      const predictedExtLabel = typeof resolveSourceLabel === 'function' ? resolveSourceLabel(m.ext_source, m) : null;
+      const teamsText = dom || ext
+        ? `${flag(dom) || '?'} – ${flag(ext) || '?'}`
+        : (predictedDomLabel || predictedExtLabel)
+          ? `${predictedDomLabel || (m.dom_source || '?')} – ${predictedExtLabel || (m.ext_source || '?')}`
+        : `${m.dom_source || '?'} – ${m.ext_source || '?'}`;
+      const flagLine = `${label} · ${teamsText}`;
+
+      if (!isScoreVisible || !p) {
+        html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
+        return;
+      }
+
+      const score = (p.score_dom != null && p.score_ext != null) ? `${p.score_dom}–${p.score_ext}` : '?–?';
+      let pts = 0;
+      let status = 'pending';
+      if (r?.joue) {
+        const real_res = r.score_dom > r.score_ext ? 'H' : r.score_dom < r.score_ext ? 'A' : 'N';
+        if (p.resultat === real_res) {
+          pts += pts_conf.elim_resultat_correct;
+          if (p.score_dom === r.score_dom && p.score_ext === r.score_ext) pts += pts_conf.elim_score_exact_bonus;
+          status = 'ok';
+        } else {
+          status = 'nok';
+        }
+      }
+      const isExactElim = status === 'ok' && p.score_dom === r?.score_dom && p.score_ext === r?.score_ext;
+      const rowClassElim = isExactElim ? 'exact' : status;
+      html += `<div class="detail-match ${rowClassElim}">
+        <span class="match-teams">${flagLine}</span>
+        <span class="match-prono">${score}</span>
+        ${r?.joue ? `<span class="pts-badge">+${pts}</span>` : ''}
+      </div>`;
+    });
+  });
+
+  if (!hasElim) html += `<div style="color:var(--muted);font-size:.82rem">Aucun match éliminatoire joué pour l'instant.</div>`;
+  html += `</div>`;
+  return html;
+}
+
 function renderClassement() {
   const pMap = Object.fromEntries(allParticipants.map(p=>[p.id,p]));
   const publicationMap = Object.fromEntries(allClassementPublication.map(row=>[row.participant_id,row]));
@@ -891,6 +970,7 @@ async function loadParticipantDetail(pid, el) {
   const reels_map = Object.fromEntries(allMatchsReels.map(m=>[m.match_id,m]));
   const pts_conf  = CONFIG.points;
   const groups    = Object.keys(CONFIG.groupes).filter(g=>!g.startsWith('_'));
+  const allGroupsDone = groups.every(g => (CONFIG.matchs_groupes[g] || []).every(m => reels_map[m.id]?.joue));
 
   // Helper : flag image only
   const flag = t => t?.iso2 ? `<img src="https://flagcdn.com/20x15/${t.iso2}.png" style="vertical-align:middle;border-radius:1px">` : '';
@@ -908,7 +988,7 @@ async function loadParticipantDetail(pid, el) {
       const dom = CONFIG.equipes.find(e=>e.code===m.dom);
       const ext = CONFIG.equipes.find(e=>e.code===m.ext);
       const flagLine = `${flag(dom)} – ${flag(ext)}`;
-      const isVisible = isPublicPronoVisible(m, r);
+      const isVisible = isBracketDetailVisible(m, r, allGroupsDone);
 
       if (!isVisible) {
         html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
@@ -1072,15 +1152,45 @@ async function loadParticipantDetail(pid, el) {
     return null; // non résolvable si 1X a gagné
   }
 
+  const q32snap = buildQ32Snapshot(pronos_q, pt.data?.groupes||[]);
+  function formatResolvedTeamLabel(team) {
+    if (!team) return null;
+    return `${flag(team)} ${team.nom}`.trim();
+  }
+  function resolveDetailElimSourceLabel(src, matchData) {
+    if (!src) return '?';
+    const direct = resolvePredictedTeam(src, matchData?.id);
+    if (direct) return formatResolvedTeamLabel(direct);
+
+    if (src.startsWith('T3_')) {
+      if (matchData?.ext_source === src) {
+        const exactThird = resolveT3FromBracket(matchData);
+        if (exactThird) return formatResolvedTeamLabel(exactThird);
+      }
+      const eligibleGroups = src.replace('T3_', '').split('');
+      const predictedThird = q32snap.find(q =>
+        q.source.startsWith('T3_') &&
+        eligibleGroups.includes(q.source.replace('T3_', ''))
+      );
+      if (predictedThird) {
+        const team = CONFIG.equipes.find(e => e.code === predictedThird.code);
+        if (team) return formatResolvedTeamLabel(team);
+      }
+    }
+
+    return translateSource(src);
+  }
+
   html += `<div class="detail-section"><h4>Bracket Éliminatoire</h4>`;
   brTours.forEach(tour=>{
     const matchs=CONFIG.bracket_eliminatoire[tour]||[];
     matchs.forEach((m,i)=>{
       const b=pronos_b[m.id]; if(!b) return;
       const r=reels_map[m.id];
-      const isVisible = isPublicPronoVisible(m, r);
+      const isVisible = isBracketDetailVisible(m, r, allGroupsDone);
+      const matchLabel = formatBracketDetailMatchLabel(tour, i);
       if (!isVisible) {
-        html += `<div class="detail-match"><span class="match-teams">${translateSource(m.dom_source)} – ${translateSource(m.ext_source)}</span><span class="match-prono pending">—</span></div>`;
+        html += `<div class="detail-match"><span class="match-teams">${matchLabel} · ${translateSource(m.dom_source)} – ${translateSource(m.ext_source)}</span><span class="match-prono pending">—</span></div>`;
         return;
       }
       const tWinner=CONFIG.equipes.find(e=>e.code===b.equipe);
@@ -1114,7 +1224,7 @@ async function loadParticipantDetail(pid, el) {
         }
       }
       html += `<div class="detail-match ${status}">
-        <span class="match-teams">${matchFlags}</span>
+        <span class="match-teams">${matchLabel} · ${matchFlags}</span>
         <span class="match-prono">${flag(tWinner)||b.equipe}</span>
         ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
       </div>`;
@@ -1123,47 +1233,15 @@ async function loadParticipantDetail(pid, el) {
   html += `</div>`;
 
   // ── 3. Matchs Élim. Réels ─────────────────────────────────────────
-  html += `<div class="detail-section"><h4>Matchs Élim. Réels</h4>`;
-  let hasElim = false;
-  brTours.forEach(tour=>{
-    (CONFIG.bracket_eliminatoire[tour]||[]).forEach((m,i)=>{
-      const p  = pronos_e[m.id];
-      const r  = reels_map[m.id];
-      const isVisible = isPublicPronoVisible(m, r);
-      if (!isVisible && !p) return; // masquer si non révélé et pas pronostiqué
-      hasElim = true;
-      const dom = r?.equipe_dom ? CONFIG.equipes.find(e=>e.code===r.equipe_dom) : null;
-      const ext = r?.equipe_ext ? CONFIG.equipes.find(e=>e.code===r.equipe_ext) : null;
-      const flagLine = dom||ext ? `${flag(dom)||'?'} – ${flag(ext)||'?'}` : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
-      if (!isVisible) {
-        html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
-        return;
-      }
-      if (!p) {
-        html += `<div class="detail-match"><span class="match-teams">${flagLine}</span><span class="match-prono pending">—</span></div>`;
-        return;
-      }
-      const score = (p.score_dom!=null&&p.score_ext!=null)?`${p.score_dom}–${p.score_ext}`:'?–?';
-      let pts=0, status='pending';
-      if (r?.joue) {
-        const real_res=r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
-        if(p.resultat===real_res){
-          pts+=pts_conf.elim_resultat_correct;
-          if(p.score_dom===r.score_dom&&p.score_ext===r.score_ext) pts+=pts_conf.elim_score_exact_bonus;
-          status='ok';
-        } else status='nok';
-      }
-      const isExactElim = status==='ok' && p.score_dom===r?.score_dom && p.score_ext===r?.score_ext;
-      const rowClassElim = isExactElim ? 'exact' : status;
-      html += `<div class="detail-match ${rowClassElim}">
-        <span class="match-teams">${flagLine}</span>
-        <span class="match-prono">${score}</span>
-        ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
-      </div>`;
-    });
+  html += renderDetailElimMatchesSection({
+    CONFIG,
+    brTours,
+    pronos_e,
+    reels_map,
+    pts_conf,
+    flag,
+    resolveSourceLabel: resolveDetailElimSourceLabel,
   });
-  if (!hasElim) html += `<div style="color:var(--muted);font-size:.82rem">Aucun match éliminatoire joué pour l'instant.</div>`;
-  html += `</div>`;
 
   // ── 4. Qualifiés & 3es : flags + pts ─────────────────────────────
   html += `<div class="detail-section"><h4>Qualifiés & 3es</h4>`;
@@ -1257,8 +1335,8 @@ async function loadParticipantDetail(pid, el) {
       const b=pronos_bo[q.id];
       const rawValue = b ? (b.reponse_equipe ?? b.reponse_entier ?? '?') : null;
       const displayVal = getBonusAnswerLabel(q, rawValue);
-      const hasAnswer=q.reponse_correcte!=null;
-      const ok=hasAnswer&&String(q.reponse_correcte)===(b?.reponse_equipe||String(b?.reponse_entier||''));
+      const hasAnswer = hasConfiguredBonusAnswer(q);
+      const ok = hasAnswer && isBonusAnswerCorrect(q, b?.reponse_equipe ?? b?.reponse_entier ?? '');
       html += `<div class="detail-match">
         <span class="match-teams">${q.texte}</span>
         <span class="match-prono ${hasAnswer?(ok?'ok':'nok'):'pending'}">${displayVal}</span>
@@ -1478,6 +1556,34 @@ function getBonusAnswerLabel(question, rawValue) {
     return option?.nom || String(rawValue);
   }
   return String(rawValue);
+}
+function supportsMultipleBonusAnswers(question) {
+  return question?.type === 'equipe' && (question?.id === 'b1' || question?.id === 'b2');
+}
+function getBonusAcceptedAnswers(question) {
+  if (supportsMultipleBonusAnswers(question)) {
+    if (Array.isArray(question?.reponses_correctes)) {
+      return question.reponses_correctes.filter(v => v != null && v !== '').map(String);
+    }
+    if (question?.reponse_correcte != null && question.reponse_correcte !== '') {
+      return [String(question.reponse_correcte)];
+    }
+    return [];
+  }
+  if (question?.reponse_correcte == null || question.reponse_correcte === '') return [];
+  return [String(question.reponse_correcte)];
+}
+function hasConfiguredBonusAnswer(question) {
+  return getBonusAcceptedAnswers(question).length > 0;
+}
+function isBonusAnswerCorrect(question, rawValue) {
+  if (rawValue == null || rawValue === '') return false;
+  return getBonusAcceptedAnswers(question).includes(String(rawValue));
+}
+function getBonusCorrectAnswerDisplay(question) {
+  const answers = getBonusAcceptedAnswers(question);
+  if (!answers.length) return '—';
+  return answers.map(answer => getBonusAnswerLabel(question, answer)).join(', ');
 }
 let allPart_pronostics = [];
 let activePart = null;
@@ -1760,8 +1866,8 @@ async function selectParticipant(pid) {
       const b   = pronos_bo[q.id];
       const rawValue = b ? (b.reponse_equipe ?? b.reponse_entier ?? '?') : null;
       const displayVal = getBonusAnswerLabel(q, rawValue);
-      const hasAnswer  = q.reponse_correcte != null;
-      const ok = hasAnswer && String(q.reponse_correcte)===(b?.reponse_equipe||String(b?.reponse_entier||''));
+      const hasAnswer  = hasConfiguredBonusAnswer(q);
+      const ok = hasAnswer && isBonusAnswerCorrect(q, b?.reponse_equipe ?? b?.reponse_entier ?? '');
       html += `<div class="groupe-card">
         <div class="groupe-card-header">
           <span class="groupe-card-title" style="font-size:.95rem">${q.texte}</span>
