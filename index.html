@@ -96,6 +96,7 @@ body {
 
 /* ── Container ── */
 .container { max-width:960px; margin:0 auto; padding:1.2rem 1rem 4rem; }
+.container.wide-matchs { max-width:min(1680px, calc(100vw - 2rem)); }
 .tab-content { display:none; }
 .tab-content.active { display:block; animation:fadeIn .25s ease; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
@@ -235,21 +236,23 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
 }
 .phase-btn.active { background:var(--green-dim); border-color:var(--green); color:var(--green); }
 .matchs-subtabs { margin-bottom:1rem; }
+#matchsGrid { width:100%; }
 
 .bracket-scroller {
-  overflow-x:hidden;
+  overflow-x:auto;
+  overflow-y:auto;
   width:100%;
-  padding-bottom:.5rem;
+  padding:0 0 1rem;
 }
 .bracket-layout {
-  --bracket-unit: 30px;
-  --bracket-card-height: 64px;
-  --bracket-link-gap: 10px;
-  width:100%;
-  min-width:0;
+  --bracket-unit: 4px;
+  --bracket-card-height: 72px;
+  --bracket-link-gap: 14px;
+  width:max(100%, 1440px);
+  min-width:1440px;
   display:grid;
-  grid-template-columns:repeat(4,minmax(110px,1fr)) minmax(150px,1.15fr) repeat(4,minmax(110px,1fr));
-  gap:clamp(10px, 1vw, 18px);
+  grid-template-columns:repeat(4,minmax(150px,1fr)) minmax(190px,1.18fr) repeat(4,minmax(150px,1fr));
+  gap:clamp(18px, 1.5vw, 28px);
   align-items:start;
 }
 .bracket-round {
@@ -267,9 +270,9 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
 }
 .bracket-round-grid {
   display:grid;
-  grid-template-rows:repeat(15, var(--bracket-unit));
+  grid-template-rows:repeat(200, var(--bracket-unit));
   row-gap:0;
-  min-height:calc(var(--bracket-unit) * 16);
+  min-height:calc(var(--bracket-unit) * 200);
 }
 .bracket-pair {
   position:relative;
@@ -328,7 +331,7 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
   background:var(--card);
   border:1px solid var(--border);
   border-radius:8px;
-  padding:.48rem .58rem;
+  padding:.58rem .7rem;
   min-height:var(--bracket-card-height);
   width:100%;
   box-sizing:border-box;
@@ -346,14 +349,14 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:.35rem;
-  font-size:.75rem;
-  padding:.12rem 0;
+  gap:.4rem;
+  font-size:.8rem;
+  padding:.16rem 0;
 }
 .bracket-team-row + .bracket-team-row {
   border-top:1px solid rgba(255,255,255,.06);
-  margin-top:.08rem;
-  padding-top:.2rem;
+  margin-top:.12rem;
+  padding-top:.24rem;
 }
 .bracket-team-label {
   flex:1;
@@ -363,28 +366,30 @@ body:not(.light) .detail-match.exact { background:rgba(245,183,49,.28); }
 }
 .bracket-team-score {
   font-family:'Bebas Neue';
-  font-size:.95rem;
+  font-size:1rem;
   letter-spacing:.05em;
   color:var(--gold);
   flex-shrink:0;
 }
 .bracket-finals {
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  padding-top:9.5rem;
-  gap:3rem;
+  display:grid;
+  grid-template-rows:repeat(200, var(--bracket-unit));
+  min-height:calc(var(--bracket-unit) * 200);
 }
 .bracket-final-block,
 .bracket-third-block {
   display:flex;
   flex-direction:column;
 }
-.bracket-third-block { margin-top:4rem; }
+.bracket-final-block { grid-row:92 / span 18; }
+.bracket-third-block { grid-row:133 / span 18; }
 
-@media (max-width: 1280px) {
-  .bracket-scroller { overflow-x:auto; }
-  .bracket-layout { min-width:1140px; width:1140px; }
+@media (max-width: 900px) {
+  .container.wide-matchs { max-width:calc(100vw - 1rem); }
+  .bracket-layout {
+    width:1360px;
+    min-width:1360px;
+  }
 }
 
 /* ── Alertes ── */
@@ -835,6 +840,7 @@ function switchTab(id, el) {
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
+  document.querySelector('.container')?.classList.toggle('wide-matchs', id==='matchs');
   if (id==='pronostics') renderPronosticsList();
   if (id==='calendrier') renderCalendrier();
 }
@@ -1602,12 +1608,12 @@ function getResolvedElimTag(source, matchData, reels, explicitCode) {
 
 function getBracketPairGridPlacement(roundKey, pairIndex) {
   const placements = {
-    s16: [{ start: 1, span: 3 }, { start: 5, span: 3 }, { start: 9, span: 3 }, { start: 13, span: 3 }],
-    s8: [{ start: 2, span: 5 }, { start: 10, span: 5 }],
-    qf: [{ start: 4, span: 9 }],
-    sf: [{ start: 8, span: 1 }],
+    s16: [{ start: 1, span: 44 }, { start: 53, span: 44 }, { start: 105, span: 44 }, { start: 157, span: 44 }],
+    s8: [{ start: 14, span: 70 }, { start: 118, span: 70 }],
+    qf: [{ start: 40, span: 122 }],
+    sf: [{ start: 92, span: 18 }],
   };
-  return placements[roundKey]?.[pairIndex] || { start: 1, span: 1 };
+  return placements[roundKey]?.[pairIndex] || { start: 1, span: 18 };
 }
 
 function renderBracketMatchCard(matchData, reels, roundLabel) {
