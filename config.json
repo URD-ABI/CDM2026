@@ -1790,7 +1790,7 @@
       "date_verrou": null
     },
     "J_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "K_J1": {
@@ -1802,7 +1802,7 @@
       "date_verrou": null
     },
     "K_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "L_J1": {
@@ -1814,11 +1814,11 @@
       "date_verrou": null
     },
     "L_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J2": {
