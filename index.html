@@ -2060,6 +2060,24 @@ function normalizeCalendarVariableCode(code) {
   return code;
 }
 
+function buildResolvedCalendarTeams(reelsMap) {
+  const resolvedTeams = {};
+  const bracketMatches = Object.values(CONFIG.bracket_eliminatoire || {}).flat();
+
+  bracketMatches.forEach(matchData => {
+    [matchData.dom_source, matchData.ext_source].forEach(source => {
+      if (!source) return;
+      const resolvedCode = resolveRealElimSourceCode(source, matchData, reelsMap);
+      if (!resolvedCode) return;
+      const team = CONFIG.equipes?.find(entry => entry.code === resolvedCode);
+      if (!team) return;
+      resolvedTeams[source] = { name: team.nom, iso2: team.iso2 };
+    });
+  });
+
+  return resolvedTeams;
+}
+
 // Résout un nom d'équipe du JSON du calendrier
 function resolveCalTeam(name) {
   if (!name) return { display: 'À déterminer', iso2: null };
@@ -2116,41 +2134,8 @@ async function loadCalendrier() {
 // Résout les équipes des phases finales depuis matchs_reels (Supabase)
 async function loadCalendrierTeams() {
   if (!allMatchsReels.length) return;
-  RESOLVED_TEAMS = {};
-  allMatchsReels.forEach(r => {
-    if (r.equipe_dom && r.equipe_ext) {
-      // Chercher dans CONFIG l'équipe correspondante pour obtenir le nom et iso2
-      const tDom = CONFIG.equipes?.find(e=>e.code===r.equipe_dom);
-      const tExt = CONFIG.equipes?.find(e=>e.code===r.equipe_ext);
-      // Résoudre les codes de position (1A, 2B...) et vainqueurs (W_S16_1...)
-      // depuis le bracket_eliminatoire
-      const m = Object.values(CONFIG.bracket_eliminatoire||{}).flat().find(bm=>bm.id===r.match_id);
-      if (m) {
-        if (tDom && m.dom_source) RESOLVED_TEAMS[m.dom_source] = { name: tDom.nom, iso2: tDom.iso2 };
-        if (tExt && m.ext_source) RESOLVED_TEAMS[m.ext_source] = { name: tExt.nom, iso2: tExt.iso2 };
-      }
-      // Si le match est joué, résoudre aussi le vainqueur/perdant
-      if (r.joue) {
-        const winner = r.score_dom > r.score_ext ? r.equipe_dom : r.equipe_ext;
-        const loser  = r.score_dom > r.score_ext ? r.equipe_ext : r.equipe_dom;
-        const tW = CONFIG.equipes?.find(e=>e.code===winner);
-        const tL = CONFIG.equipes?.find(e=>e.code===loser);
-        if (tW) RESOLVED_TEAMS['W_' + r.match_id] = { name: tW.nom, iso2: tW.iso2 };
-        if (tL) RESOLVED_TEAMS['L_' + r.match_id] = { name: tL.nom, iso2: tL.iso2 };
-      }
-    }
-    // Group stage: resolve 1A, 2B etc. from qualified teams
-    const gMatch = Object.entries(CONFIG.matchs_groupes||{})
-      .filter(([g])=>!g.startsWith('_'))
-      .flatMap(([,ms])=>ms)
-      .find(m=>m.id===r.match_id);
-    if (gMatch && r.equipe_dom) {
-      const tDom = CONFIG.equipes?.find(e=>e.code===r.equipe_dom);
-      const tExt = CONFIG.equipes?.find(e=>e.code===r.equipe_ext);
-      if (tDom) RESOLVED_TEAMS[gMatch.dom] = { name: tDom.nom, iso2: tDom.iso2 };
-      if (tExt) RESOLVED_TEAMS[gMatch.ext] = { name: tExt.nom, iso2: tExt.iso2 };
-    }
-  });
+  const reelsMap = Object.fromEntries((allMatchsReels || []).map(match => [match.match_id, match]));
+  RESOLVED_TEAMS = buildResolvedCalendarTeams(reelsMap);
 }
 
 function renderCalendrier() {
