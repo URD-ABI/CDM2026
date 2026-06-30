@@ -1898,7 +1898,7 @@
     "date_verrou": "2026-06-11T21:30:00-06:00"
   },
   "exceptions_verrou": {
-    "pseudos": {"Matthieu"},
+    "pseudos": {},
     "participant_ids": {}
   },
   "admin_password": "PePeJ1Ns51"
