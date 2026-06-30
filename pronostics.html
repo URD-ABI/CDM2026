@@ -662,7 +662,9 @@ function isElimMatchLocked(matchId) {
 }
 
 function isBracketLocked() {
-  return !!CONFIG.phase_initiale_verrou?.verrouille;
+  if (CONFIG.phase_initiale_verrou?.verrouille) return true;
+  const groupJournees = Object.keys(CONFIG.journees || {}).filter(id => /^[A-L]_J[123]$/.test(id));
+  return groupJournees.length > 0 && groupJournees.every(id => !!CONFIG.journees?.[id]?.verrouille);
 }
 
 // ── Thème ─────────────────────────────────────────────────────
