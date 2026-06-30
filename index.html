@@ -1265,6 +1265,16 @@ async function loadParticipantDetail(pid, el) {
   // Résout les équipes prédites par le joueur dans les tours précédents
   // resolvePredictedTeam : résout src en équipe depuis les pronos du joueur
   // matchId optionnel = l'ID du match S16 concerné, pour résoudre les T3
+  function resolvePredictedBestThirdCodeForMatch(matchData, q32Snapshot, predictedBestThirdGroups) {
+    if (!matchData?.ext_source?.startsWith('T3_')) return null;
+    const comboKey = [...(predictedBestThirdGroups || [])].sort().join(',');
+    const combo = BEST_THIRDS?.[comboKey];
+    const source = combo?.[matchData.dom_source];
+    const groupId = typeof source === 'string' && source.startsWith('3') ? source.slice(1) : null;
+    if (!groupId) return null;
+    return q32Snapshot.find(entry => entry.source === `T3_${groupId}`)?.code || null;
+  }
+
   function resolvePredictedTeam(src, matchId) {
     if (!src) return null;
     if (/^1[A-L]$/.test(src)) {
@@ -1276,6 +1286,13 @@ async function loadParticipantDetail(pid, el) {
       return code ? CONFIG.equipes.find(e=>e.code===code) : null;
     }
     if (src.startsWith('T3_')) {
+      if (matchId) {
+        const s16m = CONFIG.bracket_eliminatoire.seizièmes?.find(m=>m.id===matchId);
+        const exactThirdCode = resolvePredictedBestThirdCodeForMatch(s16m, q32snap, pt.data?.groupes||[]);
+        if (exactThirdCode) {
+          return CONFIG.equipes.find(e=>e.code===exactThirdCode) || null;
+        }
+      }
       // Le joueur a sélectionné un vainqueur pour ce match S16 dans son bracket
       // On cherche l'équipe ext sélectionnée = la T3
       if (matchId) {
@@ -1325,6 +1342,10 @@ async function loadParticipantDetail(pid, el) {
   // → On utilise le vainqueur bracket + le 1X pour déduire la T3
   function resolveT3FromBracket(s16Match) {
     if (!s16Match.ext_source?.startsWith('T3_')) return null;
+    const exactThirdCode = resolvePredictedBestThirdCodeForMatch(s16Match, q32snap, pt.data?.groupes||[]);
+    if (exactThirdCode) {
+      return CONFIG.equipes.find(e=>e.code===exactThirdCode) || null;
+    }
     const bracketWinner = pronos_b[s16Match.id]?.equipe;
     if (!bracketWinner) return null;
     // Le 1X du match
@@ -1354,6 +1375,11 @@ async function loadParticipantDetail(pid, el) {
       if (matchData?.ext_source === src) {
         const exactThird = resolveT3FromBracket(matchData);
         if (exactThird) return formatResolvedTeamLabel(exactThird);
+        const exactThirdCode = resolvePredictedBestThirdCodeForMatch(matchData, q32snap, pt.data?.groupes||[]);
+        if (exactThirdCode) {
+          const exactTeam = CONFIG.equipes.find(e => e.code === exactThirdCode);
+          if (exactTeam) return formatResolvedTeamLabel(exactTeam);
+        }
       }
       const eligibleGroups = src.replace('T3_', '').split('');
       const predictedThird = q32snap.find(q =>
@@ -1392,10 +1418,11 @@ async function loadParticipantDetail(pid, el) {
         // la T3 est inconnue mais on peut montrer au moins le drapeau du groupe T3
         // depuis les pronostics q32 du joueur
         if (!predExt) {
-          // Chercher dans les pronostics bracket via buildQualified32
-          const q32snap = buildQ32Snapshot(pronos_q, pt.data?.groupes||[]);
-          const t3 = q32snap.find(q=>q.source.startsWith('T3_') && 
-            m.ext_source.replace('T3_','').includes(q.source.replace('T3_','')));
+          const exactThirdCode = resolvePredictedBestThirdCodeForMatch(m, q32snap, pt.data?.groupes||[]);
+          const t3 = exactThirdCode
+            ? { code: exactThirdCode }
+            : q32snap.find(q=>q.source.startsWith('T3_') && 
+              m.ext_source.replace('T3_','').includes(q.source.replace('T3_','')));
           if (t3) predExt = CONFIG.equipes.find(e=>e.code===t3.code);
         }
       }
