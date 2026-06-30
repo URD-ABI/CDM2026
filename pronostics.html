@@ -661,6 +661,10 @@ function isElimMatchLocked(matchId) {
   return !!(match?.journee && isJourneeLocked(match.journee));
 }
 
+function isBracketLocked() {
+  return !!CONFIG.phase_initiale_verrou?.verrouille;
+}
+
 // ── Thème ─────────────────────────────────────────────────────
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light');
@@ -1208,6 +1212,7 @@ function renderBracket() {
   const labels = { seizièmes:'Seizièmes de finale', huitièmes:'Huitièmes de finale', QF:'Quarts de finale', SF:'Demi-finales' };
   const q32 = buildQualified32();
   const allCodes = q32.map(q=>q.code);
+  const bracketLocked = isBracketLocked();
 
   let html = '';
   for (const round of rounds) {
@@ -1242,8 +1247,8 @@ function renderBracket() {
       const srcLabel = `${srcToLabel(m.dom_source)} vs ${srcToLabel(m.ext_source)}`;
       return `
       <div class="bracket-match">
-        <div class="bm-label">${round}_${i+1} · Vainqueur de ce match</div>
-        <select onchange="setBracket('${m.id}',this.value,'${round}')">
+        <div class="bm-label">${round}_${i+1} · Vainqueur de ce match${bracketLocked ? ' 🔒' : ''}</div>
+        <select ${bracketLocked?'disabled':''} onchange="setBracket('${m.id}',this.value,'${round}')">
           <option value="">— Choisir —</option>${opts}
         </select>
         <div class="bracket-teams" style="font-size:.7rem;color:var(--muted)">${srcLabel}</div>
@@ -1333,14 +1338,15 @@ function getBothTeamsR32(match, q32) {
 }
 
 function renderSimpleBracketSlot(m, allCodes) {
+  const bracketLocked = isBracketLocked();
   const opts = allCodes.map(code=>{
     const t = getTeamByCode(code);
     return `<option value="${code}" ${state.bracket[m.id]===code?'selected':''}>${t?t.nom:code}</option>`;
   }).join('');
   return `
   <div class="bracket-match">
-    <div class="bm-label">Vainqueur</div>
-    <select onchange="setBracket('${m.id}',this.value)">
+    <div class="bm-label">Vainqueur${bracketLocked ? ' 🔒' : ''}</div>
+    <select ${bracketLocked?'disabled':''} onchange="setBracket('${m.id}',this.value)">
       <option value="">— Choisir —</option>${opts}
     </select>
     <div class="bracket-teams">${m.dom_source} vs ${m.ext_source}</div>
@@ -1348,6 +1354,7 @@ function renderSimpleBracketSlot(m, allCodes) {
 }
 
 function setBracket(slotId, val, round) {
+  if (isBracketLocked()) return;
   state.bracket[slotId] = val;
   if (round && round !== 'F' && round !== 'P3') {
     renderBracket();
