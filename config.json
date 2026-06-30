@@ -1894,11 +1894,11 @@
     }
   },
   "phase_initiale_verrou": {
-    "verrouille": false,
+    "verrouille": true,
     "date_verrou": "2026-06-11T21:30:00-06:00"
   },
   "exceptions_verrou": {
-    "pseudos": {},
+    "pseudos": {"Matthieu"},
     "participant_ids": {}
   },
   "admin_password": "PePeJ1Ns51"
