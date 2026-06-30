@@ -1837,11 +1837,11 @@
       "date_verrou": null
     },
     "S16_J3": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J4": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S16_J5": {
