@@ -738,6 +738,42 @@ function compareClassementRows(a,b) {
   return (a.pseudo || '').localeCompare(b.pseudo || '', 'fr', { sensitivity:'base' });
 }
 
+function computeClassementStats(pronos_g, pronos_e, reelsMap) {
+  let nb_matchs_joues = 0;
+  let nb_resultats_ok = 0;
+  let nb_scores_exacts = 0;
+
+  Object.entries(CONFIG.matchs_groupes)
+    .filter(([g])=>!g.startsWith('_'))
+    .forEach(([,matchs])=>{
+      matchs.forEach(m=>{
+        const r = reelsMap[m.id];
+        const p = pronos_g[m.id];
+        if (!r?.joue) return;
+        nb_matchs_joues++;
+        if (!p) return;
+        const real_res = r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
+        if (p.resultat !== real_res) return;
+        nb_resultats_ok++;
+        if (p.score_dom===r.score_dom && p.score_ext===r.score_ext) nb_scores_exacts++;
+      });
+    });
+
+  Object.values(CONFIG.bracket_eliminatoire || {}).flat().forEach(m => {
+    const r = reelsMap[m.id];
+    const p = pronos_e[m.id];
+    if (!r?.joue) return;
+    nb_matchs_joues++;
+    if (!p) return;
+    const real_res = r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
+    if (p.resultat !== real_res) return;
+    nb_resultats_ok++;
+    if (p.score_dom===r.score_dom && p.score_ext===r.score_ext) nb_scores_exacts++;
+  });
+
+  return { nb_matchs_joues, nb_resultats_ok, nb_scores_exacts };
+}
+
 function scoreQualifiedPredictions(prediction, reality, pointsConfig) {
   const actualRemaining = [reality?.premier, reality?.deuxieme].filter(Boolean);
   const predicted = [prediction?.equipe_1er, prediction?.equipe_2eme];
@@ -953,22 +989,7 @@ async function runEngine() {
       const total = pts_g+pts_q+pts_br+pts_elim+pts_bo;
 
       // Stats pour l'affichage dans le classement
-      let nb_matchs_joues=0, nb_resultats_ok=0, nb_scores_exacts=0;
-      Object.entries(CONFIG.matchs_groupes)
-        .filter(([g])=>!g.startsWith('_'))
-        .forEach(([,matchs])=>{
-          matchs.forEach(m=>{
-            const r=reelsMap[m.id]; const p=pronos_g[m.id];
-            if(!r?.joue) return;
-            nb_matchs_joues++;
-            if(!p) return;
-            const real_res=r.score_dom>r.score_ext?'H':r.score_dom<r.score_ext?'A':'N';
-            if(p.resultat===real_res){
-              nb_resultats_ok++;
-              if(p.score_dom===r.score_dom&&p.score_ext===r.score_ext) nb_scores_exacts++;
-            }
-          });
-        });
+      const { nb_matchs_joues, nb_resultats_ok, nb_scores_exacts } = computeClassementStats(pronos_g, pronos_e, reelsMap);
 
       results.push({ participant_id:pid, pts_matchs_groupes:pts_g, pts_qualifies:pts_q,
         pts_bracket:pts_br, pts_matchs_elim:pts_elim, pts_bonus:pts_bo, total,
