@@ -1275,6 +1275,24 @@ async function loadParticipantDetail(pid, el) {
     return q32Snapshot.find(entry => entry.source === `T3_${groupId}`)?.code || null;
   }
 
+  function findBracketMatchById(matchId) {
+    for (const matchs of Object.values(CONFIG.bracket_eliminatoire || {})) {
+      if (!Array.isArray(matchs)) continue;
+      const match = matchs.find(entry => entry.id === matchId);
+      if (match) return match;
+    }
+    return null;
+  }
+
+  function getValidatedBracketWinnerCode(matchData) {
+    if (!matchData?.id) return null;
+    const storedWinnerCode = pronos_b[matchData.id]?.equipe;
+    if (!storedWinnerCode) return null;
+    const domCode = resolvePredictedTeam(matchData.dom_source, matchData.id)?.code || null;
+    const extCode = resolvePredictedTeam(matchData.ext_source, matchData.id)?.code || null;
+    return [domCode, extCode].includes(storedWinnerCode) ? storedWinnerCode : null;
+  }
+
   function resolvePredictedTeam(src, matchId) {
     if (!src) return null;
     if (/^1[A-L]$/.test(src)) {
@@ -1320,14 +1338,14 @@ async function loadParticipantDetail(pid, el) {
     }
     if (src.startsWith('W_')) {
       const prevId = src.slice(2);
-      const prevWinner = pronos_b[prevId]?.equipe;
+      const prevWinner = getValidatedBracketWinnerCode(findBracketMatchById(prevId));
       return prevWinner ? CONFIG.equipes.find(e=>e.code===prevWinner) : null;
     }
     if (src.startsWith('L_')) {
       const sfId = src.slice(2);
-      const sfMatch = CONFIG.bracket_eliminatoire.SF?.find(m=>m.id===sfId);
+      const sfMatch = findBracketMatchById(sfId);
       if (!sfMatch) return null;
-      const winner = pronos_b[sfId]?.equipe;
+      const winner = getValidatedBracketWinnerCode(sfMatch);
       const d = resolvePredictedTeam(sfMatch.dom_source);
       const e2 = resolvePredictedTeam(sfMatch.ext_source);
       if (winner && d && e2) return d.code===winner ? e2 : d;
@@ -1346,7 +1364,7 @@ async function loadParticipantDetail(pid, el) {
     if (exactThirdCode) {
       return CONFIG.equipes.find(e=>e.code===exactThirdCode) || null;
     }
-    const bracketWinner = pronos_b[s16Match.id]?.equipe;
+    const bracketWinner = getValidatedBracketWinnerCode(s16Match);
     if (!bracketWinner) return null;
     // Le 1X du match
     const dom1X = resolvePredictedTeam(s16Match.dom_source);
@@ -1407,7 +1425,8 @@ async function loadParticipantDetail(pid, el) {
         html += `<div class="detail-match"><span class="match-teams">${matchLabel} · ${translateSource(m.dom_source)} – ${translateSource(m.ext_source)}</span><span class="match-prono pending">—</span></div>`;
         return;
       }
-      const tWinner=CONFIG.equipes.find(e=>e.code===b.equipe);
+      const validatedWinnerCode = getValidatedBracketWinnerCode(m);
+      const tWinner=validatedWinnerCode ? CONFIG.equipes.find(e=>e.code===validatedWinnerCode) : null;
       // Équipes prédites du match (depuis bracket du joueur)
       const predDom = resolvePredictedTeam(m.dom_source, m.id);
       // Pour T3: utiliser resolveT3FromBracket si disponible
@@ -1440,7 +1459,7 @@ async function loadParticipantDetail(pid, el) {
       }
       html += `<div class="detail-match ${status}">
         <span class="match-teams">${matchLabel} · ${matchFlags}</span>
-        <span class="match-prono">${flag(tWinner)||b.equipe}</span>
+        <span class="match-prono">${flag(tWinner)||'—'}</span>
         ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
       </div>`;
     });
