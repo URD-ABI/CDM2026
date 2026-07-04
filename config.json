@@ -1861,11 +1861,11 @@
       "date_verrou": null
     },
     "S8_J1": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S8_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "S8_J3": {
