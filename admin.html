@@ -774,6 +774,26 @@ function computeClassementStats(pronos_g, pronos_e, reelsMap) {
   return { nb_matchs_joues, nb_resultats_ok, nb_scores_exacts };
 }
 
+function resolveOfficialBracketWinnerCode(matchData, reelsMap) {
+  if (!matchData?.id) return null;
+  const realMatch = reelsMap[matchData.id];
+  if (!realMatch?.joue) return null;
+  if (realMatch.score_dom > realMatch.score_ext) return realMatch.equipe_dom || null;
+  if (realMatch.score_dom < realMatch.score_ext) return realMatch.equipe_ext || null;
+
+  const winnerSource = `W_${matchData.id}`;
+  for (const matchs of Object.values(CONFIG.bracket_eliminatoire || {})) {
+    if (!Array.isArray(matchs)) continue;
+    for (const nextMatch of matchs) {
+      const nextReal = reelsMap[nextMatch.id];
+      if (nextMatch.dom_source === winnerSource && nextReal?.equipe_dom) return nextReal.equipe_dom;
+      if (nextMatch.ext_source === winnerSource && nextReal?.equipe_ext) return nextReal.equipe_ext;
+    }
+  }
+
+  return null;
+}
+
 function scoreQualifiedPredictions(prediction, reality, pointsConfig) {
   const actualRemaining = [reality?.premier, reality?.deuxieme].filter(Boolean);
   const predicted = [prediction?.equipe_1er, prediction?.equipe_2eme];
@@ -958,7 +978,8 @@ async function runEngine() {
           const r = reelsMap[m.id];
           const p = pronos_br[m.id];
           if (!r?.joue || !p) return;
-          const winner = r.score_dom>r.score_ext ? r.equipe_dom : r.equipe_ext;
+          const winner = resolveOfficialBracketWinnerCode(m, reelsMap);
+          if (!winner) return;
           if (p.equipe===winner) pts_br += tourPts;
         });
       });

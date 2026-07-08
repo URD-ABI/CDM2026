@@ -1284,6 +1284,26 @@ async function loadParticipantDetail(pid, el) {
     return null;
   }
 
+  function resolveOfficialBracketWinnerCode(matchData, reelsMap) {
+    if (!matchData?.id) return null;
+    const realMatch = reelsMap[matchData.id];
+    if (!realMatch?.joue) return null;
+    if (realMatch.score_dom > realMatch.score_ext) return realMatch.equipe_dom || null;
+    if (realMatch.score_dom < realMatch.score_ext) return realMatch.equipe_ext || null;
+
+    const winnerSource = `W_${matchData.id}`;
+    for (const matchs of Object.values(CONFIG.bracket_eliminatoire || {})) {
+      if (!Array.isArray(matchs)) continue;
+      for (const nextMatch of matchs) {
+        const nextReal = reelsMap[nextMatch.id];
+        if (nextMatch.dom_source === winnerSource && nextReal?.equipe_dom) return nextReal.equipe_dom;
+        if (nextMatch.ext_source === winnerSource && nextReal?.equipe_ext) return nextReal.equipe_ext;
+      }
+    }
+
+    return null;
+  }
+
   function getValidatedBracketWinnerCode(matchData) {
     if (!matchData?.id) return null;
     const storedWinnerCode = pronos_b[matchData.id]?.equipe;
@@ -1450,8 +1470,10 @@ async function loadParticipantDetail(pid, el) {
         : `${m.dom_source||'?'} – ${m.ext_source||'?'}`;
       let pts=0,status='pending';
       if(r?.joue){
-        const winner=r.score_dom>r.score_ext?r.equipe_dom:r.equipe_ext;
-        status=b.equipe===winner?'ok':'nok';
+        const winner = resolveOfficialBracketWinnerCode(m, reels_map);
+        if (winner) {
+          status=b.equipe===winner?'ok':'nok';
+        }
         if(status==='ok'){
           const key={'seizièmes':'S16','huitièmes':'S8','QF':'QF','SF':'SF','P3':'P3','F':'F'}[tour];
           pts=pts_conf.bracket[key+'_correct']||0;
@@ -1460,7 +1482,7 @@ async function loadParticipantDetail(pid, el) {
       html += `<div class="detail-match ${status}">
         <span class="match-teams">${matchLabel} · ${matchFlags}</span>
         <span class="match-prono">${flag(tWinner)||'—'}</span>
-        ${r?.joue?`<span class="pts-badge">+${pts}</span>`:''}
+        ${r?.joue && pts>0?`<span class="pts-badge">+${pts}</span>`:''}
       </div>`;
     });
   });
@@ -2313,7 +2335,7 @@ async function selectParticipant(pid) {
       }
 
       // Joué → afficher pronostic du participant
-      const winner = r.score_dom>r.score_ext ? r.equipe_dom : r.equipe_ext;
+      const winner = resolveOfficialBracketWinnerCode(m, reels_map);
       const domTeam = CONFIG.equipes.find(e=>e.code===r.equipe_dom);
       const extTeam = CONFIG.equipes.find(e=>e.code===r.equipe_ext);
       const domLabel = domTeam ? teamDisplay(domTeam) : (r.equipe_dom ? getTeamLabel(r.equipe_dom) : (m.dom_source||'?'));
@@ -2321,12 +2343,13 @@ async function selectParticipant(pid) {
 
       const pronoTeam = b ? CONFIG.equipes.find(e=>e.code===b.equipe) : null;
       const pronoLabel = pronoTeam ? `${pronoTeam.drapeau} ${pronoTeam.nom}` : (b?.equipe||'—');
-      const ok = b?.equipe === winner;
+      const ok = winner ? b?.equipe === winner : null;
+      const statusMark = ok === true ? '✅' : ok === false ? '❌' : '•';
       const tourKey = {'seizièmes':'S16','huitièmes':'S8','QF':'QF','SF':'SF','P3':'P3','F':'F'}[tour];
       const tourPts = pts_conf.bracket[tourKey+'_correct']||0;
 
       html += `<div class="match-card played">
-        <div class="group-label">${lbl} · ${ok?'✅':'❌'} ${pronoLabel}${ok?' +'+tourPts+' pts':''}</div>
+        <div class="group-label">${lbl} · ${statusMark} ${pronoLabel}${ok?' +'+tourPts+' pts':''}</div>
         <div class="teams">
           <div class="team">${domLabel}</div>
           <div class="score">${r.score_dom} – ${r.score_ext}</div>
