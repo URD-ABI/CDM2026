@@ -1881,7 +1881,7 @@
       "date_verrou": null
     },
     "QF_J2": {
-      "verrouille": false,
+      "verrouille": true,
       "date_verrou": null
     },
     "SF_J1": {
