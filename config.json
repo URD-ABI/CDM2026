@@ -1679,7 +1679,7 @@
         "dom_source": "W_SF_1",
         "ext_source": "W_SF_2",
         "date": "2026-07-19",
-        "journee": "F_J1"
+        "journee": "FINALE_J1"
       }
     ]
   },
@@ -1889,6 +1889,10 @@
       "date_verrou": null
     },
     "P3_J1": {
+      "verrouille": false,
+      "date_verrou": null
+    },
+    "FINALE_J1": {
       "verrouille": false,
       "date_verrou": null
     }
