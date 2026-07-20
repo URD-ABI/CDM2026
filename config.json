@@ -291,7 +291,8 @@
           "id": "autre",
           "nom": "Autre joueur"
         }
-      ]
+      ],
+      "reponse_correcte": "autre"
     },
     {
       "id": "b7",
@@ -450,7 +451,8 @@
           "id": "autre",
           "nom": "Autre joueur"
         }
-      ]
+      ],
+      "reponse_correcte": "autre"
     },
     {
       "id": "b8",
