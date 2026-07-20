@@ -77,7 +77,7 @@
       "type": "joueur",
       "points": 3,
       "active": true,
-      "verrouille": false,
+      "verrouille": true,
       "options": [
         {
           "id": "mbappe",
@@ -227,7 +227,8 @@
           "id": "autre",
           "nom": "Autre joueur"
         }
-      ]
+      ],
+      "reponse_correcte": "mbappe"
     },
     {
       "id": "b6",
@@ -236,7 +237,7 @@
       "type": "joueur",
       "points": 3,
       "active": true,
-      "verrouille": false,
+      "verrouille": true,
       "options": [
         {
           "id": "pickford",
@@ -299,7 +300,7 @@
       "type": "joueur",
       "points": 5,
       "active": true,
-      "verrouille": false,
+      "verrouille": true,
       "options": [
         {
           "id": "mbappe",
@@ -458,7 +459,8 @@
       "type": "entier",
       "points": 3,
       "active": true,
-      "verrouille": true
+      "verrouille": true,
+      "reponse_correcte": 15
     },
     {
       "id": "b9",
@@ -467,7 +469,8 @@
       "type": "entier",
       "points": 3,
       "active": true,
-      "verrouille": true
+      "verrouille": true,
+      "reponse_correcte": 11
     },
     {
       "id": "b10",
@@ -476,7 +479,8 @@
       "type": "entier",
       "points": 4,
       "active": true,
-      "verrouille": true
+      "verrouille": true,
+      "reponse_correcte": 308
     }
   ],
   "equipes": [
