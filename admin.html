@@ -349,11 +349,56 @@ function getBonusPlayerOptions(question) {
   if (question?.type !== 'joueur' || !Array.isArray(question.options)) return [];
   return question.options.filter(opt => opt?.id && opt?.nom);
 }
+function normalizeBonusAnswerValue(question, rawValue) {
+  if (rawValue == null || rawValue === '') return '';
+  const raw = String(rawValue).trim();
+  if (question?.type !== 'joueur') return raw;
+
+  const options = getBonusPlayerOptions(question);
+  if (!options.length) return raw;
+
+  const normalizeText = value => String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  const rawNorm = normalizeText(raw);
+  const matchedById = options.find(opt => String(opt.id) === raw);
+  if (matchedById) return String(matchedById.id);
+
+  const matchedByName = options.find(opt => normalizeText(opt.nom) === rawNorm);
+  if (matchedByName) return String(matchedByName.id);
+
+  const otherOption = options.find(opt => normalizeText(opt.id) === 'autre');
+  if (!otherOption) return raw;
+
+  if (rawNorm === 'autre' || rawNorm === normalizeText(otherOption.nom)) {
+    return String(otherOption.id);
+  }
+
+  const knownValues = new Set(
+    options
+      .filter(opt => String(opt.id) !== String(otherOption.id))
+      .flatMap(opt => [normalizeText(opt.id), normalizeText(opt.nom)])
+  );
+
+  return knownValues.has(rawNorm) ? raw : String(otherOption.id);
+}
 function getBonusAnswerLabel(question, rawValue) {
   if (rawValue == null || rawValue === '') return '—';
   if (question?.type === 'equipe') return getLabel(String(rawValue));
   if (question?.type === 'joueur') {
-    const option = getBonusPlayerOptions(question).find(opt => String(opt.id) === String(rawValue));
+    const raw = String(rawValue).trim();
+    const normalizeText = value => String(value ?? '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    const rawNorm = normalizeText(raw);
+    const option = getBonusPlayerOptions(question).find(opt =>
+      String(opt.id) === raw || normalizeText(opt.nom) === rawNorm
+    );
     return option?.nom || String(rawValue);
   }
   return String(rawValue);
@@ -379,7 +424,10 @@ function hasConfiguredBonusAnswer(question) {
 }
 function isBonusAnswerCorrect(question, rawValue) {
   if (rawValue == null || rawValue === '') return false;
-  return getBonusAcceptedAnswers(question).includes(String(rawValue));
+  const normalizedValue = normalizeBonusAnswerValue(question, rawValue);
+  return getBonusAcceptedAnswers(question)
+    .map(answer => normalizeBonusAnswerValue(question, answer))
+    .includes(normalizedValue);
 }
 function getBonusNearMissTolerance(question) {
   if (question?.type !== 'entier') return null;

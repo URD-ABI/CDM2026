@@ -592,7 +592,16 @@ function getBonusAnswerLabel(question, rawValue) {
     return team ? teamDisplay(team) : String(rawValue);
   }
   if (question?.type === 'joueur') {
-    const option = getBonusPlayerOptions(question).find(opt => String(opt.id) === String(rawValue));
+    const raw = String(rawValue).trim();
+    const normalizeText = value => String(value ?? '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    const rawNorm = normalizeText(raw);
+    const option = getBonusPlayerOptions(question).find(opt =>
+      String(opt.id) === raw || normalizeText(opt.nom) === rawNorm
+    );
     return option?.nom || String(rawValue);
   }
   return String(rawValue);
